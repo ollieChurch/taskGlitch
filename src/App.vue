@@ -8,6 +8,16 @@
   </div>
 </template>
 
+<script>
+const netlifyIdentity = require('netlify-identity-widget')
+
+export default {
+    created() {
+        netlifyIdentity.init()
+    }
+}
+</script>
+
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
