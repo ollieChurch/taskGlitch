@@ -10,10 +10,33 @@
 
 <script>
 const netlifyIdentity = require('netlify-identity-widget')
+import { onValue } from 'firebase/database'
 
 export default {
-    created() {
+    async created() {
         netlifyIdentity.init()
+        const response = await fetch(
+            '/.netlify/netlify/functions/setUpDatabase',
+            {
+                headers: {
+                    Authorization: `Bearer ${
+                        netlifyIdentity.currentUser().token.access_token
+                    }`
+                },
+                body: JSON.stringify({
+                    collection: 'completed'
+                }),
+                method: 'POST'
+            }
+        )
+
+        const data = await response.json()
+        console.log(data)
+
+        onValue(data, (snapshot) => {
+            console.log('snapshot', snapshot.val());
+            this.$store.commit('setCities', snapshot.val())
+        });
     }
 }
 </script>
