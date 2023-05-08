@@ -5,13 +5,16 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        cities: []
+        completed: [],
+        tasks: [],
+        user: {},
+        schedule: []
     },
     getters: {
     },
     mutations: {
-        setCities(state, payload) {
-            state.cities = payload
+        setCompleted(state, payload) {
+            state.completed = payload
         },
     },
     actions: {
