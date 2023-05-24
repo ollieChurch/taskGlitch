@@ -1,13 +1,16 @@
 <template>
-  <div id="app">
-    <nav>
-      <router-link to="/">Login</router-link> |
-      <router-link to="/home">Dashboard</router-link> |
-      <router-link to="/tasks">Tasks</router-link> |
-      <router-link to="/schedule">Glitch</router-link> |
-      <router-link to="/settings">Settings</router-link> |
-    </nav>    
-    <router-view></router-view>
+  <div id="app" class="d-flex flex-column justify-content-between">
+    <div>
+        <nav>
+        <router-link to="/">Login</router-link> |
+        <router-link to="/home">Dashboard</router-link> |
+        <router-link to="/tasks">Tasks</router-link> |
+        <router-link to="/schedule">Glitch</router-link> |
+        <router-link to="/settings">Settings</router-link> |
+        </nav>  
+        <router-view></router-view>
+    </div>
+    <page-footer />
   </div>
 </template>
 
@@ -15,8 +18,13 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getDatabase, ref, onValue } from 'firebase/database'
+import PageFooter from './components/PageFooter.vue'
 
 export default {
+    components: {
+        PageFooter
+    },
+
     async created() {
         const app = initializeApp(this.$store.state.firebaseConfig)
         const auth = getAuth(app)
@@ -52,16 +60,22 @@ export default {
 </script>
 
 <style>
+
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  background: #E7DFC6;
+  min-width: 100vw;
+  min-height: 100vh;
 }
 
 nav {
   padding: 30px;
+  background: white;
 }
 
 nav a {

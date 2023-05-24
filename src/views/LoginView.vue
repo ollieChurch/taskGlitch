@@ -1,15 +1,20 @@
 <template>
-    <div>
-        <b-btn @click="register()" variant="warning">Register</b-btn>
-        <b-btn @click="login()" variant="success">Login</b-btn>
-    </div>
+    <content-card>
+        <b-btn @click="register()" variant="warning" class="me-1">Register</b-btn>
+        <b-btn @click="login()" variant="success" class="ms-1">Login</b-btn>
+    </content-card>
 </template>
 
 <script>
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
+import ContentCard from '@/components/ContentCard.vue'
 
 export default {
     name: 'LoginView',
+
+    components: {
+        ContentCard
+    },
 
     data() {
         return {
