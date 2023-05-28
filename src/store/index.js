@@ -5,10 +5,10 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        completed: [],
-        tasks: [],
+        completed: {},
+        tasks: {},
         user: {},
-        schedule: [],
+        schedule: {},
         app: {},
         auth: {},
         firebaseConfig: {
@@ -20,13 +20,39 @@ export default new Vuex.Store({
             messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGING_SENDER_ID,
             appId: process.env.VUE_APP_FIREBASE_APP_ID,
             measurementId: process.env.VUE_APP_FIREBASE_MEASUREMENT_ID
+        },
+        settings: {
+            priorities: {
+                critical: 0,
+                high: 1,
+                medium: 2,
+                low: 3
+            },
+            sizes: {
+                short: 15,
+                mid: 30,
+                long: 60,
+                veryLong: 120
+            },
         }
     },
     getters: {
+        getCategories(state) {
+            const tasks = Object.values(state.tasks)
+            return tasks.map(x => x.category)
+        }
     },
     mutations: {
         setCompleted(state, payload) {
             state.completed = payload
+        },
+
+        setTasks(state, payload) {
+            state.tasks = payload
+        },
+
+        setSchedule(state, payload) {
+            state.schedule = payload
         },
 
         setApp(state, payload) {

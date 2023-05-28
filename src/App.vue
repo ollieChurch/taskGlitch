@@ -49,10 +49,22 @@ export default {
         linkToDatabase() {
             const db = getDatabase(this.$store.state.app)
             const completedRef = ref(db, `completed/${this.$store.state.user.uid}`);
+            const tasksRef = ref(db, `tasks/${this.$store.state.user.uid}`);
+            const scheduleRef = ref(db, `schedule/${this.$store.state.user.uid}`);
 
             onValue(completedRef, (snapshot) => {
                 console.log('snapshot', snapshot.val());
                 this.$store.commit('setCompleted', snapshot.val())
+            })
+
+            onValue(tasksRef, (snapshot) => {
+                console.log('snapshot', snapshot.val());
+                this.$store.commit('setTasks', snapshot.val())
+            })
+
+            onValue(scheduleRef, (snapshot) => {
+                console.log('snapshot', snapshot.val());
+                this.$store.commit('setSchedule', snapshot.val())
             })
         }
     }
@@ -60,8 +72,6 @@ export default {
 </script>
 
 <style>
-
-
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -85,5 +95,9 @@ nav a {
 
 nav a.router-link-exact-active {
   color: #42b983;
+}
+
+.debug {
+    outline: 2px solid red;
 }
 </style>
