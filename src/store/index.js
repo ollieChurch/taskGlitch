@@ -5,8 +5,9 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     state: {
-        completed: {},
-        tasks: {},
+        completed: [],
+        tasks: [],
+        taskToPatch: {},
         user: {},
         schedule: {},
         app: {},
@@ -28,6 +29,7 @@ export default new Vuex.Store({
                 medium: 2,
                 low: 3
             },
+            
             sizes: {
                 short: 15,
                 mid: 30,
@@ -38,8 +40,12 @@ export default new Vuex.Store({
     },
     getters: {
         getCategories(state) {
-            const tasks = Object.values(state.tasks)
-            return tasks.map(x => x.category)
+            if (state.tasks) {
+                const tasks = Object.values(state.tasks)
+                return tasks.map(x => x.category)
+            } else {
+                return []
+            }
         }
     },
     mutations: {
@@ -65,6 +71,10 @@ export default new Vuex.Store({
 
         setUser(state, payload) {
             state.user = payload
+        },
+
+        setTaskToPatch(state, payload) {
+            state.taskToPatch = payload
         }
     },
     actions: {

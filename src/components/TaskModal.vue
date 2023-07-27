@@ -75,111 +75,137 @@
                 ></b-form-input>
                 <datalist id="tags" autocomplete="false">
                     <option
-                        v-for="category, index in getCategories"
+                        v-for="(category, index) in getCategories"
                         :key="`${index}-${category}`"
                     >
                         {{ category }}
                     </option>
                 </datalist>
             </b-form-group>
-            <b-form-group
-                label="Target Date"
-                label-for="targetDate"
-                class="form-input"
-            >
-                <b-form-datepicker
-                    id="targetDate"
-                    v-model="task.targetDateTime"
-                    :min="new Date"
-                    reset-button
-                ></b-form-datepicker>
-            </b-form-group>
+            <div class="d-flex justify-content-between">
+                <b-form-group
+                    label="Target Date"
+                    label-for="targetDate"
+                    class="form-input col-7 pe-2"
+                >
+                    <b-form-datepicker
+                        id="targetDate"
+                        v-model="task.targetDateTime"
+                        :min="new Date()"
+                        reset-button
+                    ></b-form-datepicker>
+                </b-form-group>
+            </div>
         </b-form>
     </b-modal>
 </template>
 
 <script>
-import { getDatabase, ref, set } from "firebase/database";
-import { mapGetters } from "vuex";
+    import { getDatabase, ref, set } from 'firebase/database'
+    import { mapGetters } from 'vuex'
 
-export default {
-    props: ['taskToPatch'],
-    data() {
-        return {
-            task: {
-                name: null,
-                priority: null,
-                sizing: null,
-                category: null,
-                targetDateTime: null,
+    export default {        
+        data() {
+            return {
+                task: {
+                    name: null,
+                    priority: null,
+                    sizing: null,
+                    category: null,
+                    targetDateTime: null,
+                    deadline: null
+                },
+
+                valid: {
+                    task: null,
+                    priority: null,
+                    sizing: null,
+                    category: null
+                }
+            }
+        },
+
+        computed: {
+            ...mapGetters(['getCategories']),
+
+            priorities() {
+                return this.$store.state.settings.priorities
             },
 
-            valid: {
-                task: null,
-                priority: null,
-                sizing: null,
-                category: null
+            sizes() {
+                return this.$store.state.settings.sizes
             },
-        }
-    },
 
-    computed: {
-        ...mapGetters(['getCategories']),
+            priorityOptions() {
+                let options = []
+                for (let priority in this.priorities) {
+                    options.push({
+                        text: priority,
+                        value: this.priorities[priority]
+                    })
+                }
 
-        priorities() {
-            return this.$store.state.settings.priorities
+                return options
+            },
+
+            sizingOptions() {
+                let options = []
+                for (let size in this.sizes) {
+                    options.push({
+                        text: size,
+                        value: this.sizes[size]
+                    })
+                }
+
+                return options
+            },
+
+            taskToPatch() {
+                return this.$store.state.taskToPatch
+            }
         },
 
-        sizes() {
-            return this.$store.state.settings.sizes
-        },
+        methods: {
+            resetModal() {
+                console.log('resetModal() => taskToPatch: ', this.taskToPatch)
+                if (this.taskToPatch) {
+                    const task = this.taskToPatch
 
-        priorityOptions() {
-            let options = []
-            for (let priority in this.priorities) {
-                options.push({
-                    text: priority,
-                    value: this.priorities[priority]
+                    this.task.name = task.name
+                    this.task.priority = task.priority
+                    this.task.sizing = task.sizing
+                    this.task.category = task.category
+                    this.task.targetDateTime = task.targetDateTime ?? null
+                    this.task.id = task.id
+                    this.task.deadline = task.deadline ?? null
+                } else {
+                    this.task.name = null
+                    this.task.priority = this.priorities.critical
+                    this.task.sizing = this.sizes.short
+                    this.task.category = null
+                    this.task.targetDateTime = null
+                    this.task.id = this.createGuid()
+                    this.task.deadline = null
+                }
+            },
+
+            handleOk() {
+                const db = getDatabase(this.$store.state.app)
+                const tasksRef = ref(
+                    db,
+                    `tasks/${this.$store.state.user.uid}/${this.task.id}`
+                )
+
+                if (!this.taskToPatch) {
+                    this.task.createdDateTime = new Date().toLocaleString()
+                }
+                
+                set(tasksRef, this.task).then(() => {
+                    console.log('added task: ', this.task)
                 })
             }
-
-            return options
-        },
-
-        sizingOptions() {
-            let options = []
-            for (let size in this.sizes) {
-                options.push({
-                    text: size,
-                    value: this.sizes[size]
-                })
-            }
-
-            return options
         }
-    },
-
-    methods: {
-        resetModal() {
-            this.task.name = this.taskToPatch ? this.taskToPatch.name : null
-            this.task.priority = this.taskToPatch ? this.taskToPatch.priority : this.priorities.critical
-            this.task.sizing = this.taskToPatch ? this.taskToPatch.sizing : this.sizes.short
-            this.task.category = this.taskToPatch ? this.taskToPatch.category : null
-            this.task.targetDateTime = this.taskToPatch ? this.taskToPatch.targetDateTime : null
-            this.task.id = this.taskToPatch ? this.taskToPatch.id : this.createGuid()
-        },
-
-        handleOk() {
-            const db = getDatabase(this.$store.state.app)
-            const tasksRef = ref(db, `tasks/${this.$store.state.user.uid}/${this.task.id}`);
-
-            if (this.taskToPatch) this.task.createdDateTime = new Date().toLocaleString()
-            console.log('handleOk() => task: ', this.task)
-            
-            set(tasksRef, this.task);
-        },
     }
-}
 </script>
 
 <style scoped>
