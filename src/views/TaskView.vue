@@ -24,7 +24,10 @@
                 </b-dropdown>
                 <div class="row align-items-center">
                     <div class="col-auto pe-1">
-                        <b-btn class="complete-btn" @click="moveTask(task, 'completed')"></b-btn>
+                        <b-btn
+                            class="complete-btn"
+                            @click="moveTask(task, 'completed')"
+                        ></b-btn>
                     </div>
                     <div class="col">
                         <b-card-title class="text-start mb-1">{{
@@ -73,7 +76,10 @@
                 </b-dropdown>
                 <div class="row align-items-center">
                     <div class="col-auto pe-1">
-                        <b-btn class="complete-btn" @click="moveTask(task, 'tasks')"></b-btn>
+                        <b-btn
+                            class="complete-btn"
+                            @click="moveTask(task, 'tasks')"
+                        ></b-btn>
                     </div>
                     <div class="col">
                         <b-card-title class="text-start mb-1">{{
@@ -112,6 +118,10 @@
             TaskModal
         },
 
+        created() {
+            this.pageCheck()
+        },
+
         computed: {
             tasks() {
                 return this.$store.state.tasks
@@ -148,9 +158,11 @@
                     `${list}/${this.$store.state.user.uid}/${task.id}`
                 )
 
-                const removeFromList = list === 'completed' ? 'tasks' : 'completed'
-                task.completedDateTime = list === 'completed' ? new Date().toLocaleString() : null
-                
+                const removeFromList =
+                    list === 'completed' ? 'tasks' : 'completed'
+                task.completedDateTime =
+                    list === 'completed' ? new Date().toLocaleString() : null
+
                 set(listRef, task).then(() => {
                     this.removeTask(task, removeFromList)
                     console.log('moved task: ', task)

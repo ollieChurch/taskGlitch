@@ -8,7 +8,7 @@ export default new Vuex.Store({
         completed: [],
         tasks: [],
         taskToPatch: {},
-        user: {},
+        user: null,
         schedule: {},
         app: {},
         auth: {},

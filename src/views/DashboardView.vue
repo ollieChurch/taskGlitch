@@ -22,9 +22,14 @@
             TaskModal
         },
 
+        created() {
+            this.pageCheck()
+        },
+
         methods: {
             logout() {
                 signOut(this.$store.state.auth)
+                this.$router.push('/login')
             },
 
             addTask() {

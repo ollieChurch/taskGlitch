@@ -17,7 +17,15 @@ Vue.mixin({
                return (((1+Math.random())*0x10000)|0).toString(16).substring(1);  
             }  
             return (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();  
-         }             
+        },
+
+        pageCheck() {
+            console.log('checking page: ', this.$store.state.user)
+            if (!this.$store.state.user) {
+                console.log('no user found')
+                this.$router.push('/login')
+            }
+        }
     }
 })
 
