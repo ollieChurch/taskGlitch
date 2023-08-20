@@ -4,8 +4,9 @@
         title="Add a Task"
         @show="resetModal"
         @ok="handleOk"
+        @hide="clearTaskToPatch"
     >
-        <b-form>
+        <b-form ref="taskForm">
             <b-form-group
                 label="Task"
                 label-for="task"
@@ -19,21 +20,19 @@
                     :state="valid.task"
                     trim
                     autocomplete="off"
+                    required
                 ></b-form-input>
             </b-form-group>
             <div class="d-flex justify-content-between">
                 <b-form-group
                     label="Priority"
                     label-for="priority"
-                    invalid-feedback="this is invalid input"
-                    :state="valid.priority"
                     class="form-input col-6 pe-2"
                 >
                     <b-form-select
                         id="priority"
                         v-model="task.priority"
                         :options="priorityOptions"
-                        :state="valid.priority"
                         class="form-control"
                         size="lg"
                     >
@@ -42,15 +41,12 @@
                 <b-form-group
                     label="Size"
                     label-for="sizing"
-                    invalid-feedback="this is invalid input"
-                    :state="valid.sizing"
                     class="form-input col-6 ps-2"
                 >
                     <b-form-select
                         id="sizing"
                         v-model="task.sizing"
                         :options="sizingOptions"
-                        :state="valid.sizing"
                         class="form-control"
                         size="lg"
                     >
@@ -72,6 +68,7 @@
                     list="tags"
                     trim
                     autocomplete="off"
+                    required
                 ></b-form-input>
                 <datalist id="tags" autocomplete="false">
                     <option
@@ -104,22 +101,20 @@
     import { getDatabase, ref, set } from 'firebase/database'
     import { mapGetters } from 'vuex'
 
-    export default {        
+    export default {
         data() {
             return {
                 task: {
                     name: null,
-                    priority: null,
-                    sizing: null,
+                    priority: this.$store.state.settings.priorities.medium,
+                    sizing: this.$store.state.settings.sizes.short,
                     category: null,
                     targetDateTime: null,
-                    deadline: null
+                    deadline: null,
                 },
 
                 valid: {
                     task: null,
-                    priority: null,
-                    sizing: null,
                     category: null
                 }
             }
@@ -167,42 +162,53 @@
 
         methods: {
             resetModal() {
-                console.log('resetModal() => taskToPatch: ', this.taskToPatch)
-                if (this.taskToPatch) {
-                    const task = this.taskToPatch
-
-                    this.task.name = task.name
-                    this.task.priority = task.priority
-                    this.task.sizing = task.sizing
-                    this.task.category = task.category
-                    this.task.targetDateTime = task.targetDateTime ?? null
-                    this.task.id = task.id
-                    this.task.deadline = task.deadline ?? null
+                if (this.taskToPatch.id) {
+                    this.task = this.taskToPatch
                 } else {
-                    this.task.name = null
-                    this.task.priority = this.priorities.critical
-                    this.task.sizing = this.sizes.short
-                    this.task.category = null
-                    this.task.targetDateTime = null
                     this.task.id = this.createGuid()
-                    this.task.deadline = null
                 }
             },
 
-            handleOk() {
+            handleOk(bvModalEvent) {
+                bvModalEvent.preventDefault()
+                if (this.isFormValid()) {
+                    if (!this.task.createdDateTime) {
+                        this.task.createdDateTime = new Date().toLocaleString()
+                    }
+
+                    this.saveToDatabase()
+
+                    this.$nextTick(() => {
+                        this.$bvModal.hide('taskModal')
+                    })
+                }
+            },
+
+            clearTaskToPatch() {
+                this.$store.commit('setTaskToPatch', { taskToPatch: null })
+            },
+
+            saveToDatabase() {
                 const db = getDatabase(this.$store.state.app)
                 const tasksRef = ref(
                     db,
                     `tasks/${this.$store.state.user.uid}/${this.task.id}`
                 )
 
-                if (!this.taskToPatch) {
-                    this.task.createdDateTime = new Date().toLocaleString()
-                }
-                
                 set(tasksRef, this.task).then(() => {
                     console.log('added task: ', this.task)
                 })
+            },
+
+            isFormValid() {
+                const valid = this.$refs.taskForm.checkValidity()
+                
+                if (!valid) {
+                    this.valid.task = this.task.name ? null : false
+                    this.valid.category = this.task.category ? null : false
+                }
+
+                return valid
             }
         }
     }
