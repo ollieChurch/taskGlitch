@@ -5,7 +5,8 @@
             <b-card
                 v-for="task in tasks"
                 :key="`task-${task.id}`"
-                class="my-2 pt-2 task-card"
+                class="my-2 p-2 task-card"
+                no-body
             >
                 <b-dropdown
                     id="dropdown-dropleft"
@@ -18,7 +19,7 @@
                     <b-dropdown-item @click="editTask(task)">
                         Edit
                     </b-dropdown-item>
-                    <b-dropdown-item @click="deleteFromTasks(task)">
+                    <b-dropdown-item @click="removeTask(task, 'tasks')">
                         Delete
                     </b-dropdown-item>
                 </b-dropdown>
@@ -30,22 +31,22 @@
                         ></b-btn>
                     </div>
                     <div class="col">
-                        <b-card-title class="text-start mb-1">{{
-                            task.name
-                        }}</b-card-title>
+                        <b-card-title class="text-start mb-1">
+                            {{ task.name }}
+                        </b-card-title>
                         <div class="row task-details">
-                            <b-card-text class="col text-start mb-0">{{
-                                task.priority
-                            }}</b-card-text>
-                            <b-card-text class="col text-start mb-0">{{
-                                task.sizing
-                            }}</b-card-text>
-                            <b-card-text class="col-auto text-start mb-0">{{
-                                task.targetDateTime ?? 'no target'
-                            }}</b-card-text>
-                            <b-card-text class="col text-start mb-0">{{
-                                task.deadline
-                            }}</b-card-text>
+                            <b-card-text class="col text-start mb-0">
+                                {{ task.priority }}
+                            </b-card-text>
+                            <b-card-text class="col text-start mb-0">
+                                {{ task.sizing }}
+                            </b-card-text>
+                            <b-card-text class="col-auto text-start mb-0">
+                                {{ task.targetDateTime ?? 'no target' }}
+                            </b-card-text>
+                            <b-card-text class="col text-start mb-0">
+                                {{ task.deadline }}
+                            </b-card-text>
                         </div>
                     </div>
                 </div>
@@ -70,7 +71,7 @@
                     <b-dropdown-item @click="moveTask(task, 'tasks')">
                         Move to Backlog
                     </b-dropdown-item>
-                    <b-dropdown-item @click="removeTask(task)">
+                    <b-dropdown-item @click="removeTask(task, 'completed')">
                         Delete
                     </b-dropdown-item>
                 </b-dropdown>
@@ -82,22 +83,22 @@
                         ></b-btn>
                     </div>
                     <div class="col">
-                        <b-card-title class="text-start mb-1">{{
-                            task.name
-                        }}</b-card-title>
+                        <b-card-title class="text-start mb-1">
+                            {{ task.name }}
+                        </b-card-title>
                         <div class="row task-details">
-                            <b-card-text class="col text-start mb-0">{{
-                                task.priority
-                            }}</b-card-text>
-                            <b-card-text class="col text-start mb-0">{{
-                                task.sizing
-                            }}</b-card-text>
-                            <b-card-text class="col-auto text-start mb-0">{{
-                                task.targetDateTime ?? 'no target'
-                            }}</b-card-text>
-                            <b-card-text class="col text-start mb-0">{{
-                                task.deadline
-                            }}</b-card-text>
+                            <b-card-text class="col text-start mb-0">
+                                {{ task.priority }}
+                            </b-card-text>
+                            <b-card-text class="col text-start mb-0">
+                                {{ task.sizing }}
+                            </b-card-text>
+                            <b-card-text class="col-auto text-start mb-0">
+                                {{ task.targetDateTime ?? 'no target' }}
+                            </b-card-text>
+                            <b-card-text class="col text-start mb-0">
+                                {{ task.deadline }}
+                            </b-card-text>
                         </div>
                     </div>
                 </div>
