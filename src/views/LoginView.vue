@@ -1,8 +1,8 @@
 <template>
     <content-card>
-        <h1 class="mb-0 text-start">Say hi to Glitch...</h1>
         <b-row class="align-items-center mb-4">
-            <b-col class="col-12 order-2 order-sm-1 col-sm-9">
+            <h1 class="mb-0 text-start order-2 order-sm-1 text-sm-start text-center pt-3">Say hi to Glitch...</h1>
+            <b-col class="col-12 order-3 order-sm-2 col-sm-9">
                 <p class="mb-0 text-sm-start">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                     Nullam a tortor sed enim rutrum molestie in at metus. Proin
@@ -11,7 +11,7 @@
                 </p>
             </b-col>
             <b-col
-                class="col-12 px-5 py-3 py-sm-0 px-sm-0 order-1 order-sm-2 col-sm-3"
+                class="col-12 px-5 py-3 py-sm-0 px-sm-0 order-1 order-sm-3 col-sm-3"
             >
                 <b-img :src="glitchImg" fluid alt="a cartoon robot"></b-img>
             </b-col>
