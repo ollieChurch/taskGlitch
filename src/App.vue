@@ -1,16 +1,7 @@
 <template>
     <div id="app" class="d-flex flex-column justify-content-between">
         <div>
-            <nav>
-                <router-link v-if="!user" to="/login">Login</router-link> 
-                <div v-else>
-                    <router-link to="/">Dashboard</router-link> |
-                    <router-link to="/tasks">Tasks</router-link> |
-                    <router-link to="/schedule">Glitch</router-link> |
-                    <router-link to="/settings">Settings</router-link> 
-                </div>
-                
-            </nav>
+            <header-nav />
             <router-view></router-view>
         </div>
         <page-footer />
@@ -22,10 +13,12 @@
     import { getAuth, onAuthStateChanged } from 'firebase/auth'
     import { getDatabase, ref, onValue } from 'firebase/database'
     import PageFooter from './components/PageFooter.vue'
+    import HeaderNav from './components/HeaderNav.vue'
 
     export default {
         components: {
-            PageFooter
+            PageFooter,
+            HeaderNav
         },
 
         async created() {
@@ -51,12 +44,6 @@
                     console.log('user should be logged out')
                 }
             })
-        },
-
-        computed: {
-            user() {
-                return this.$store.state.user
-            }
         },
 
         methods: {
@@ -93,7 +80,6 @@
 
 <style>
     #app {
-        /* font-family: Avenir, Helvetica, Arial, sans-serif; */
         font-family: 'Rajdhani', sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
@@ -102,6 +88,11 @@
         background: #e7dfc6;
         min-width: 100vw;
         min-height: 100vh;
+    }
+
+    .glitchFont {
+        font-family: 'Wallpoet', cursive; 
+        font-style: italic;
     }
 
     nav {
