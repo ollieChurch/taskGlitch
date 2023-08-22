@@ -1,7 +1,11 @@
 <template>
     <content-card>
         <b-row class="align-items-center mb-4">
-            <h1 class="mb-0 text-start order-2 order-sm-1 text-sm-start text-center pt-3">Say hi to Glitch...</h1>
+            <h1
+                class="mb-0 text-start order-2 order-sm-1 text-sm-start text-center pt-3"
+            >
+                Say hi to Glitch...
+            </h1>
             <b-col class="col-12 order-3 order-sm-2 col-sm-9">
                 <p class="mb-0 text-sm-start">
                     Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -58,9 +62,9 @@
             <b-tab title="Sign Up">
                 <b-form @submit.prevent="() => register()">
                     <b-row class="align-items-center text-start mt-4">
-                        <label for="register-email" class="col-sm-3"
-                            >Email</label
-                        >
+                        <label for="register-email" class="col-sm-3">
+                            Email
+                        </label>
                         <b-col class="col-sm-9">
                             <b-form-input
                                 id="register-email"

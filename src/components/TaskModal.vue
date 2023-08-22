@@ -5,6 +5,7 @@
         @show="resetModal"
         @ok="handleOk"
         @hide="clearTaskToPatch"
+        hide-header-close
     >
         <b-form ref="taskForm">
             <b-form-group

@@ -60,17 +60,17 @@
                 )
 
                 onValue(completedRef, snapshot => {
-                    console.log('snapshot', snapshot.val())
+                    console.log('completed snapshot', snapshot.val())
                     this.$store.commit('setCompleted', snapshot.val())
                 })
 
                 onValue(tasksRef, snapshot => {
-                    console.log('snapshot', snapshot.val())
+                    console.log('tasks snapshot', snapshot.val())
                     this.$store.commit('setTasks', snapshot.val())
                 })
 
                 onValue(scheduleRef, snapshot => {
-                    console.log('snapshot', snapshot.val())
+                    console.log('schedule snapshot', snapshot.val())
                     this.$store.commit('setSchedule', snapshot.val())
                 })
             }
