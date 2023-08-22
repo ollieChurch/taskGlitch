@@ -162,7 +162,7 @@
                 const removeFromList =
                     list === 'completed' ? 'tasks' : 'completed'
                 task.completedDateTime =
-                    list === 'completed' ? new Date().toLocaleString() : null
+                    list === 'completed' ? new Date().toJSON() : null
 
                 set(listRef, task).then(() => {
                     this.removeTask(task, removeFromList)

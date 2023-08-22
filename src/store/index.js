@@ -50,12 +50,20 @@ export default new Vuex.Store({
     },
     mutations: {
         setCompleted(state, payload) {
-            state.completed = payload
+            if (payload) {
+                state.completed = Object.values(payload).sort((a, b) => {
+                    return new Date(b.completedDateTime) - new Date(a.completedDateTime)
+                })
+            }
         },
 
         setTasks(state, payload) {
-            state.tasks = payload
-        },
+            if (payload) {
+                state.tasks = Object.values(payload).sort((a, b) => {
+                    return new Date(a.targetDateTime) - new Date(b.targetDateTime) || a.priority - b.priority
+                })
+            }
+        },  
 
         setSchedule(state, payload) {
             state.schedule = payload
