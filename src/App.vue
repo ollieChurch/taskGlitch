@@ -109,7 +109,13 @@
         color: #42b983;
     }
 
+    .form-input {
+        margin-bottom: 1em;
+    }
+
     .debug {
         outline: 2px solid red;
     }
 </style>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

@@ -42,10 +42,10 @@
                                 {{ task.sizing }}
                             </b-card-text>
                             <b-card-text class="col-auto text-start mb-0">
-                                {{ task.targetDateTime ?? 'no target' }}
+                                {{ task.targetDateTime ? task.targetDateTime : 'no target' }}
                             </b-card-text>
                             <b-card-text class="col text-start mb-0">
-                                {{ task.deadline }}
+                                {{ task.deadline }} {{ task.isHardDeadline ? "!" : "" }}
                             </b-card-text>
                         </div>
                     </div>

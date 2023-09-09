@@ -9,7 +9,7 @@ export default new Vuex.Store({
         tasks: [],
         taskToPatch: {},
         user: null,
-        schedule: {},
+        schedule: [],
         app: {},
         auth: {},
         firebaseConfig: {
@@ -42,9 +42,41 @@ export default new Vuex.Store({
         getCategories(state) {
             if (state.tasks) {
                 const tasks = Object.values(state.tasks)
-                return tasks.map(x => x.category)
+                return Array.from(new Set(tasks.map(x => x.category)))
             } else {
                 return []
+            }
+        },
+
+        getPrioritisedTasks(state) {
+            if (state.tasks) {
+                const tasksArray = state.tasks ?? []
+                const todayDate = new Date()
+                const millisecsToDays = 1000 * 60 * 60 * 24
+
+                state.tasks.forEach(task => {
+                    let deadlineScore
+                    const priorityScore = task.priority * 10
+
+                    if (task.targetDateTime) {
+                        const deadlineDiffDays = Math.ceil((new Date(task.targetDateTime) - todayDate) / millisecsToDays)
+                        console.log('deadlineDiffDays: ', deadlineDiffDays)
+                        const deadlineModifier = task.isHardDeadline ? 0.25 : 1
+                        deadlineScore = deadlineDiffDays * deadlineModifier
+                        console.log('deadlineScore: ', deadlineScore)
+                    } else {
+                        deadlineScore = priorityScore
+                    }
+
+                    const createdDateDiffDays = Math.ceil((todayDate - new Date(task.createdDateTime)) / millisecsToDays)
+                    const createdDateModifier = task.priority == 0 ? 1 : task.priority
+
+                    task.score = priorityScore + deadlineScore - (createdDateDiffDays / createdDateModifier)
+                });
+
+                return Object.values(tasksArray).sort((a, b) => {
+                    return a.score - b.score
+                })
             }
         }
     },
@@ -63,7 +95,7 @@ export default new Vuex.Store({
                     return new Date(a.targetDateTime) - new Date(b.targetDateTime) || a.priority - b.priority
                 })
             }
-        },  
+        },
 
         setSchedule(state, payload) {
             state.schedule = payload

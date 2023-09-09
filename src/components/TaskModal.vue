@@ -28,7 +28,7 @@
                 <b-form-group
                     label="Priority"
                     label-for="priority"
-                    class="form-input col-6 pe-2"
+                    class="form-input col-6 pe-2 ps-0"
                 >
                     <b-form-select
                         id="priority"
@@ -42,7 +42,7 @@
                 <b-form-group
                     label="Size"
                     label-for="sizing"
-                    class="form-input col-6 ps-2"
+                    class="form-input col-6 ps-2 pe-0"
                 >
                     <b-form-select
                         id="sizing"
@@ -84,7 +84,7 @@
                 <b-form-group
                     label="Target Date"
                     label-for="targetDate"
-                    class="form-input col-7 pe-2"
+                    class="form-input col-6 pe-2 ps-0"
                 >
                     <b-form-datepicker
                         id="targetDate"
@@ -92,6 +92,19 @@
                         :min="new Date()"
                         reset-button
                     ></b-form-datepicker>
+                </b-form-group>
+                <b-form-group
+                    label="Hard Deadline?"
+                    label-for="hardDeadline"
+                    class="form-input col-6 ps-2 pe-0 align-items-center"
+                >
+                    <b-form-checkbox
+                        id="hardDeadline"
+                        v-model="task.isHardDeadline"
+                        switch
+                        size="lg"
+                        :disabled="!task.targetDateTime"
+                    ></b-form-checkbox>
                 </b-form-group>
             </div>
         </b-form>
@@ -112,8 +125,9 @@
                     category: null,
                     targetDateTime: null,
                     deadline: null,
+                    isHardDeadline: false
                 },
-
+                
                 valid: {
                     task: null,
                     category: null
@@ -177,6 +191,10 @@
                         this.task.createdDateTime = new Date().toLocaleString()
                     }
 
+                    if (!this.task.targetDateTime) {
+                        this.task.isHardDeadline = false
+                    }
+
                     this.saveToDatabase()
 
                     this.$nextTick(() => {
@@ -203,7 +221,7 @@
 
             isFormValid() {
                 const valid = this.$refs.taskForm.checkValidity()
-                
+
                 if (!valid) {
                     this.valid.task = this.task.name ? null : false
                     this.valid.category = this.task.category ? null : false
@@ -214,9 +232,3 @@
         }
     }
 </script>
-
-<style scoped>
-    .form-input {
-        margin-bottom: 1em;
-    }
-</style>
