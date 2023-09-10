@@ -9,7 +9,7 @@ export default new Vuex.Store({
         tasks: [],
         taskToPatch: {},
         user: null,
-        schedule: [],
+        schedule: {},
         app: {},
         auth: {},
         firebaseConfig: {
@@ -60,10 +60,8 @@ export default new Vuex.Store({
 
                     if (task.targetDateTime) {
                         const deadlineDiffDays = Math.ceil((new Date(task.targetDateTime) - todayDate) / millisecsToDays)
-                        console.log('deadlineDiffDays: ', deadlineDiffDays)
                         const deadlineModifier = task.isHardDeadline ? 0.25 : 1
                         deadlineScore = deadlineDiffDays * deadlineModifier
-                        console.log('deadlineScore: ', deadlineScore)
                     } else {
                         deadlineScore = priorityScore
                     }

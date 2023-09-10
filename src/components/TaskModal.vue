@@ -116,9 +116,15 @@
     import { mapGetters } from 'vuex'
 
     export default {
+        created() {
+            this.task = { ...this.taskDefaults }
+        },
+
         data() {
             return {
-                task: {
+                task: {},
+
+                taskDefaults: {
                     name: null,
                     priority: this.$store.state.settings.priorities.medium,
                     sizing: this.$store.state.settings.sizes.short,
@@ -127,7 +133,7 @@
                     deadline: null,
                     isHardDeadline: false
                 },
-                
+
                 valid: {
                     task: null,
                     category: null
@@ -177,6 +183,9 @@
 
         methods: {
             resetModal() {
+                this.task = {}
+                this.task = { ...this.taskDefaults }
+
                 if (this.taskToPatch.id) {
                     this.task = this.taskToPatch
                 } else {
