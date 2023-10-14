@@ -1,12 +1,23 @@
 <template>
     <b-modal
         id="taskModal"
-        title="Add a Task"
         @show="resetModal"
         @ok="handleOk"
         @hide="clearTaskToPatch"
         hide-header-close
     >
+        <template #modal-header>
+            <b-card-title
+                >{{ taskToPatch.id ? 'Edit' : 'Add' }} A Task</b-card-title
+            >
+            <b-btn
+                v-if="taskToPatch.id"
+                variant="danger"
+                @click="deleteTask(task, 'tasks')"
+            >
+                <i class="fas fa-trash-alt"></i>
+            </b-btn>
+        </template>
         <b-form ref="taskForm">
             <b-form-group
                 label="Task"
@@ -237,6 +248,13 @@
                 }
 
                 return valid
+            },
+
+            deleteTask(task) {
+                this.removeTask(task, 'tasks')
+                this.$nextTick(() => {
+                    this.$bvModal.hide('taskModal')
+                })
             }
         }
     }
