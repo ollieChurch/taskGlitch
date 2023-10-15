@@ -37,10 +37,27 @@ Vue.mixin({
                 `${list}/${this.$store.state.user.uid}/${task.id}`
             )
 
-            const removeFromList =
-                list === 'completed' ? 'tasks' : 'completed'
-            task.completedDateTime =
-                list === 'completed' ? new Date().toJSON() : null
+            let removeFromList
+
+            switch (list)
+            {
+                case 'completed':
+                    removeFromList = 'tasks'
+                    task.completedDateTime = new Date().toJSON()
+
+                    if (this.$store.state.tasks.length === 1) {
+                        this.$store.commit('setTasks', [])
+                    }
+                    break
+                case 'tasks':
+                    removeFromList = 'completed'
+                    task.completedDateTime = null
+
+                    if (this.$store.state.completed.length === 1) {
+                        this.$store.commit('setCompleted', [])
+                    }
+                    break
+            }
 
             set(listRef, task).then(() => {
                 this.removeTask(task, removeFromList)

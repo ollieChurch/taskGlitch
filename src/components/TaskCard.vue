@@ -63,7 +63,7 @@
                 <b-button
                     variant="light"
                     class="complete-btn border"
-                    @click="moveTask(task, 'completed')"
+                    @click="handleMainAction(task)"
                 >
                     <b-icon
                         :icon="
@@ -109,6 +109,11 @@
             editTask(task) {
                 this.$store.commit('setTaskToPatch', task)
                 this.$bvModal.show('taskModal')
+            },
+
+            handleMainAction(task) {
+                const moveTo = task.completedDateTime ? 'tasks' : 'completed'
+                this.moveTask(task, moveTo)
             }
         }
     }
