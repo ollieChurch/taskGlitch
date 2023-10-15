@@ -51,27 +51,6 @@ export default new Vuex.Store({
         getPrioritisedTasks(state) {
             if (state.tasks) {
                 const tasksArray = state.tasks ?? []
-                const todayDate = new Date()
-                const millisecsToDays = 1000 * 60 * 60 * 24
-
-                state.tasks.forEach(task => {
-                    let deadlineScore
-                    const priorityScore = task.priority * 10
-
-                    if (task.targetDateTime) {
-                        const deadlineDiffDays = Math.ceil((new Date(task.targetDateTime) - todayDate) / millisecsToDays)
-                        const deadlineModifier = task.isHardDeadline ? 0.25 : 1
-                        deadlineScore = deadlineDiffDays * deadlineModifier
-                    } else {
-                        deadlineScore = priorityScore
-                    }
-
-                    const createdDateDiffDays = Math.ceil((todayDate - new Date(task.createdDateTime)) / millisecsToDays)
-                    const createdDateModifier = task.priority == 0 ? 1 : task.priority
-
-                    task.score = priorityScore + deadlineScore - (createdDateDiffDays / createdDateModifier)
-                });
-
                 return Object.values(tasksArray).sort((a, b) => {
                     return a.score - b.score
                 })

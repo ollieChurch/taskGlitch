@@ -142,7 +142,8 @@
                     category: null,
                     targetDateTime: null,
                     deadline: null,
-                    isHardDeadline: false
+                    isHardDeadline: false,
+                    score: 0
                 },
 
                 valid: {
@@ -208,12 +209,14 @@
                 bvModalEvent.preventDefault()
                 if (this.isFormValid()) {
                     if (!this.task.createdDateTime) {
-                        this.task.createdDateTime = new Date().toLocaleString()
+                        this.task.createdDateTime = new Date().toString()
                     }
 
                     if (!this.task.targetDateTime) {
                         this.task.isHardDeadline = false
                     }
+
+                    this.task.score = this.scorePriority()
 
                     this.saveToDatabase()
 
@@ -255,6 +258,29 @@
                 this.$nextTick(() => {
                     this.$bvModal.hide('taskModal')
                 })
+            },
+
+            scorePriority() {
+                const todayDate = new Date()
+                const millisecsToDays = 1000 * 60 * 60 * 24
+                const priorityScore = this.task.priority * 10
+                let deadlineScore
+
+                if (this.task.targetDateTime) {
+                    const deadlineDiffDays = Math.ceil((new Date(this.task.targetDateTime) - todayDate) / millisecsToDays)
+                    const deadlineModifier = this.task.isHardDeadline ? 0.25 : 1
+                    deadlineScore = deadlineDiffDays * deadlineModifier
+                } else {
+                    deadlineScore = priorityScore
+                }
+
+                const createdDateTime = new Date(this.task.createdDateTime)
+                const createdDateDiffDays = Math.ceil((todayDate - createdDateTime) / millisecsToDays)
+                const createdDateModifier = this.task.priority == 0 ? 1 : this.task.priority
+                const createdDateScore = createdDateDiffDays / createdDateModifier
+
+                const score = priorityScore + deadlineScore - createdDateScore
+                return score
             }
         }
     }
