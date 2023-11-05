@@ -77,6 +77,84 @@ Vue.mixin({
 			remove(listRef).then(() => {
 				console.log(`removed from ${list}: `, task)
 			})
+		},
+
+		saveScheduleToDatabase(schedule) {
+			const db = getDatabase(this.$store.state.app)
+			const scheduleRef = ref(
+				db,
+				`schedule/${this.$store.state.user.uid}`
+			)
+
+			set(scheduleRef, schedule).then(() => {
+				console.log('updated schedule: ', schedule)
+			})
+		},
+
+		getScheduleTasks(tasks, sessionInMins) {
+			const schedule = []
+			let totalTaskTime = 0
+			let currentTaskIndex = 0
+
+			while (
+				totalTaskTime < sessionInMins &&
+				currentTaskIndex < tasks.length
+			) {
+				const task = tasks[currentTaskIndex]
+				const taskLength = task.sizing
+
+				if (totalTaskTime + taskLength <= sessionInMins) {
+					schedule.push(task)
+					totalTaskTime += taskLength
+				}
+
+				currentTaskIndex++
+			}
+
+			console.log('schedule length in mins: ', totalTaskTime)
+
+			return {
+				tasks: schedule,
+				totalTaskTime: totalTaskTime
+			}
+		},
+
+		getScheduleTimes(date, fromTime, toTime, finishDate = null) {
+			console.log('getScheduleTimes: ', date, fromTime, toTime)
+			const sessionFromDate = new Date(date)
+			const sessionToDate = finishDate ? new Date(finishDate) : new Date(date)
+
+			if (
+				!toTime ||
+				(toTime.substring(0, 2) < fromTime.substring(0, 2) && !finishDate)
+			) {
+				sessionToDate.setDate(sessionToDate.getDate() + 1)
+			}
+
+			console.log(sessionFromDate.toDateString(), sessionToDate.toDateString())
+
+			let start = new Date(
+				`${sessionFromDate.toDateString()} ${fromTime}`
+			)
+			let finish = new Date(
+				`${sessionToDate.toDateString()} ${
+					toTime ?? fromTime
+				}`
+			)
+
+			console.log(start, finish)
+
+			var sessionInMins = Math.floor(
+				(finish.getTime() - start.getTime()) / 1000 / 60
+			)
+
+			console.log('session length in mins: ', sessionInMins)
+
+			return {
+				start: start,
+				finish: finish,
+				sessionInMins: sessionInMins
+			}
 		}
 	}
 })

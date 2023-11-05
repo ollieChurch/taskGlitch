@@ -36,6 +36,8 @@ export default new Vuex.Store({
 				long: 60,
 				veryLong: 120
 			},
+
+			maintainFinishTimeWhenRescheduling: true
 		},
 		debug: false
 	},
@@ -82,9 +84,7 @@ export default new Vuex.Store({
 		setScheduleTaskCompleted(state, payload) {
 			const newSchedule = state.schedule
 			newSchedule.tasks[payload.taskIndex].completed = payload.isTaskCompleted
-			console.log('setScheduleTaskCompleted() => newSchedule: ', newSchedule)
 			state.schedule = newSchedule
-			console.log('setScheduleTaskCompleted() => state.schedule: ', state.schedule)
 		},
 
 		setApp(state, payload) {

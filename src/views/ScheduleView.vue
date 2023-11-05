@@ -1,80 +1,28 @@
 <template>
     <div>
         <content-card>
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <b-card-title>Schedule</b-card-title>
-                <b-btn @click="openScheduleSetUp()">New Schedule</b-btn>
-            </div>
-            <div
-                v-for="task in scheduleDetails.tasks"
-                :key="`schedule-${task.id}`"
-                class="row align-items-center px-0 mx-0"
-            >
-                <h1 class="col-3 mb-0 px-0 text-left">{{ task.time }}</h1>
-                <b-card class="my-2 p-2 task-card col" no-body>
-                    <div class="row align-items-center mx-0">
-                        <b-card-title
-                            class="text-start mb-0 ps-0 pe-2 col-10"
-                            :class="task.completed ? 'completed-task' : ''"
-                        >
-                            {{ task.name }}
-                        </b-card-title>
-                        <div class="col-2">
-                            <b-button
-                                :variant="
-                                    task.completed ? 'warning' : 'success'
-                                "
-                                @click="toggleCompleted(task)"
-                            >
-                                <b-icon
-                                    :icon="
-                                        task.completed
-                                            ? 'arrow-counterclockwise'
-                                            : 'check-circle'
-                                    "
-                                ></b-icon>
-                            </b-button>
-                        </div>
-                    </div>
-                </b-card>
-            </div>
-        </content-card>
-
-        <content-card v-if="$store.state.debug">
-            <b-card-title>All Backlog</b-card-title>
-            <b-card
-                v-for="task in getPrioritisedTasks"
-                :key="`task-${task.id}`"
-                class="my-2 p-2 task-card"
-                no-body
-            >
-                <div class="row align-items-center">
-                    <div class="col">
-                        <b-card-title class="text-start mb-1">
-                            {{ task.name }} - score: {{ task.score }}
-                        </b-card-title>
-                        <div class="row task-details">
-                            <b-card-text class="col text-start mb-0">
-                                {{ task.priority }}
-                            </b-card-text>
-                            <b-card-text class="col text-start mb-0">
-                                {{ task.sizing }}
-                            </b-card-text>
-                            <b-card-text class="col-auto text-start mb-0">
-                                {{
-                                    task.targetDateTime
-                                        ? task.targetDateTime
-                                        : 'no target'
-                                }}
-                            </b-card-text>
-                            <b-card-text class="col text-start mb-0">
-                                {{ task.deadline }}
-                                {{ task.isHardDeadline ? '!' : '' }}
-                            </b-card-text>
-                        </div>
-                    </div>
+            <glitch-explained
+                v-if="!schedule"
+                @createSchedule="openScheduleSetUp()"
+            />
+            <div v-else>
+                <div class="d-flex mb-4">
+                    <b-btn @click="openScheduleSetUp()" variant="primary">
+                        New
+                    </b-btn>
+                    <b-btn
+                        @click="deleteSchedule()"
+                        variant="danger"
+                        class="mx-2"
+                    >
+                        Remove
+                    </b-btn>
+                    <b-btn @click="reschedule()" variant="warning">
+                        Reschedule
+                    </b-btn>
                 </div>
-            </b-card>
+                <task-schedule />
+            </div>
         </content-card>
         <schedule-set-up-modal />
     </div>
@@ -82,64 +30,67 @@
 
 <script>
     import ScheduleSetUpModal from '@/components/ScheduleSetUpModal.vue'
+    import GlitchExplained from '@/components/GlitchExplained.vue'
+    import TaskSchedule from '@/components/TaskSchedule.vue'
     import ContentCard from '@/components/ContentCard.vue'
-    import { mapGetters } from 'vuex'
 
     export default {
         name: 'ScheduleView',
 
-        components: { ContentCard, ScheduleSetUpModal },
+        components: {
+            ContentCard,
+            ScheduleSetUpModal,
+            GlitchExplained,
+            TaskSchedule
+        },
 
         created() {
             this.pageCheck()
         },
 
         computed: {
-            ...mapGetters(['getPrioritisedTasks']),
+            schedule() {
+                return this.$store.state.schedule
+			},
 
-            scheduleDetails() {
-                const schedule = this.$store.state.schedule
-
-                if (schedule.tasks) {
-                    const startDateTime = new Date(schedule.start)
-                    let taskTime = new Date(startDateTime)
-
-                    schedule.tasks.forEach(task => {
-                        task.time = taskTime.toLocaleTimeString([], {
-                            timeStyle: 'short'
-                        })
-                        task.date = taskTime.toLocaleDateString()
-                        taskTime = new Date(
-                            taskTime.setMinutes(
-                                taskTime.getMinutes() + task.sizing
-                            )
-                        )
-                        task.completed = !this.getPrioritisedTasks.find(
-                            x => x.id === task.id
-                        )
-                    })
-                }
-
-                return schedule
-            }
+			maintainFinish() {
+				return this.$store.state.settings.maintainFinishTimeWhenRescheduling
+			}
         },
 
         methods: {
-            toggleCompleted(task) {
-                const list = task.completed ? 'tasks' : 'completed'
-                this.moveTask(task, list)
-            },
-
             openScheduleSetUp() {
                 this.$bvModal.show('scheduleSetUpModal')
+            },
+
+            deleteSchedule() {
+                this.saveScheduleToDatabase({})
+            },
+
+            reschedule() {
+                const remainingTasks = this.schedule.tasks.filter(
+                    x => x.completed === false
+				)
+
+                const calculatedTimes = this.getScheduleTimes(
+                    this.schedule.start,
+                    new Date().toLocaleTimeString(),
+					this.maintainFinish ? new Date(this.schedule.finish).toLocaleTimeString() : null,
+					this.maintainFinish ? this.schedule.finish : null
+                )
+
+                const scheduleDetails = {
+                    categoriesToInclude: this.schedule.categoriesToInclude,
+                    tasks: this.getScheduleTasks(
+                        remainingTasks,
+                        calculatedTimes.sessionInMins
+                    ).tasks,
+                    start: calculatedTimes.start.toString(),
+                    finish: calculatedTimes.finish.toString()
+                }
+
+                this.saveScheduleToDatabase(scheduleDetails)
             }
         }
     }
 </script>
-
-<style scoped>
-    .completed-task {
-        text-decoration: line-through;
-        opacity: 0.5;
-    }
-</style>

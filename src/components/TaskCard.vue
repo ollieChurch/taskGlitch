@@ -5,21 +5,40 @@
                         priority-icon 
                         text-center
                         text-white
-                        bg-${task.completedDateTime ? 'success' : priorityIcons[task.priority].color}
+                        bg-${
+                            task.completedDateTime
+                                ? 'success'
+                                : priorityIcons[task.priority].color
+                        }
                     `"
         >
             <i
                 :class="`
                             fas
                             fa-lg 
-                            ${task.completedDateTime ? 'fa-check-circle' : priorityIcons[task.priority].icon}
+                            ${
+                                task.completedDateTime
+                                    ? 'fa-check-circle'
+                                    : priorityIcons[task.priority].icon
+                            }
                         `"
             ></i>
         </div>
-        <div :class="`row align-items-center ${task.completedDateTime ? 'opacity-75' : ''}`">
+        <div
+            :class="`row align-items-center ${
+                task.completedDateTime ? 'opacity-75' : ''
+            }`"
+        >
             <div class="col-10 pe-4">
-                <b-card-title :class="`text-start mb-1 ${task.completedDateTime ? 'text-decoration-line-through' : ''}`">
+                <b-card-title
+                    :class="`text-start mb-1 ${
+                        task.completedDateTime
+                            ? 'text-decoration-line-through'
+                            : ''
+                    }`"
+                >
                     {{ task.name }}
+                    <span v-if="debug"> - {{ task.score }}</span>
                 </b-card-title>
                 <div v-if="task.completedDateTime" class="row task-details">
                     <b-link
@@ -30,7 +49,16 @@
                     </b-link>
                     <b-card-text class="col-sm-auto text-start mb-0">
                         <i class="fas fa-check-circle"></i>
-                        {{ new Date(task.completedDateTime).toLocaleDateString('en-uk', { day: 'numeric', year:'numeric', month:'short'}) }}
+                        {{
+                            new Date(task.completedDateTime).toLocaleDateString(
+                                'en-uk',
+                                {
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    month: 'short'
+                                }
+                            )
+                        }}
                     </b-card-text>
                 </div>
                 <div v-else class="row task-details">
@@ -55,7 +83,16 @@
                                     : 'fa-bullseye'
                             }`"
                         ></i>
-                        {{ new Date(task.targetDateTime).toLocaleDateString('en-uk', { day: 'numeric', year:'numeric', month:'short'}) }}
+                        {{
+                            new Date(task.targetDateTime).toLocaleDateString(
+                                'en-uk',
+                                {
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                    month: 'short'
+                                }
+                            )
+                        }}
                     </b-card-text>
                 </div>
             </div>
@@ -102,6 +139,12 @@
                         color: 'info'
                     }
                 ]
+            }
+        },
+
+        computed: {
+            debug() {
+                return this.$store.state.debug
             }
         },
 
