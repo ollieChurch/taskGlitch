@@ -5,7 +5,6 @@ import store from './store'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import { getDatabase, ref, set, remove } from 'firebase/database'
 
-
 // Import Bootstrap and BootstrapVue CSS files (order is important)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
@@ -13,70 +12,73 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 Vue.config.productionTip = false
 
 Vue.mixin({
-    methods: {
-        createGuid() {  
-            function S4() {  
-               return (((1+Math.random())*0x10000)|0).toString(16).substring(1);  
-            }  
-            return (S4() + S4() + "-" + S4() + "-4" + S4().substr(0,3) + "-" + S4() + "-" + S4() + S4() + S4()).toLowerCase();  
-        },
+	methods: {
+		createGuid() {
+			function S4() {
+				return (((1 + Math.random()) * 0x10000) | 0)
+					.toString(16)
+					.substring(1)
+			}
+			return (
+				S4() + S4() + '-' + S4() + '-4' + S4().substr(0, 3) + '-' + S4() + '-' + S4() + S4() + S4()
+			).toLowerCase()
+		},
 
-        pageCheck() {
-            console.log('checking page: ', this.$store.state.user)
-            if (!this.$store.state.user) {
-                console.log('no user found')
-                this.$router.push('/login')
-            }
-        },
+		pageCheck() {
+			console.log('checking page: ', this.$store.state.user)
+			if (!this.$store.state.user) {
+				console.log('no user found')
+				this.$router.push('/login')
+			}
+		},
 
-        moveTask(task, list) {
-            const db = getDatabase(this.$store.state.app)
+		moveTask(task, list) {
+			const db = getDatabase(this.$store.state.app)
 
-            const listRef = ref(
-                db,
-                `${list}/${this.$store.state.user.uid}/${task.id}`
-            )
+			const listRef = ref(
+				db,
+				`${list}/${this.$store.state.user.uid}/${task.id}`
+			)
 
-            let removeFromList
+			let removeFromList
 
-            switch (list)
-            {
-                case 'completed':
-                    removeFromList = 'tasks'
-                    task.completedDateTime = new Date().toJSON()
+			switch (list) {
+				case 'completed':
+					removeFromList = 'tasks'
+					task.completedDateTime = new Date().toJSON()
 
-                    if (this.$store.state.tasks.length === 1) {
-                        this.$store.commit('setTasks', [])
-                    }
-                    break
-                case 'tasks':
-                    removeFromList = 'completed'
-                    task.completedDateTime = null
+					if (this.$store.state.tasks.length === 1) {
+						this.$store.commit('setTasks', [])
+					}
+					break
+				case 'tasks':
+					removeFromList = 'completed'
+					task.completedDateTime = null
 
-                    if (this.$store.state.completed.length === 1) {
-                        this.$store.commit('setCompleted', [])
-                    }
-                    break
-            }
+					if (this.$store.state.completed.length === 1) {
+						this.$store.commit('setCompleted', [])
+					}
+					break
+			}
 
-            set(listRef, task).then(() => {
-                this.removeTask(task, removeFromList)
-                console.log('moved task: ', task)
-            })
-        },
+			set(listRef, task).then(() => {
+				this.removeTask(task, removeFromList)
+				console.log('moved task: ', task)
+			})
+		},
 
-        removeTask(task, list) {
-            const db = getDatabase(this.$store.state.app)
-            const listRef = ref(
-                db,
-                `${list}/${this.$store.state.user.uid}/${task.id}`
-            )
+		removeTask(task, list) {
+			const db = getDatabase(this.$store.state.app)
+			const listRef = ref(
+				db,
+				`${list}/${this.$store.state.user.uid}/${task.id}`
+			)
 
-            remove(listRef).then(() => {
-                console.log(`removed from ${list}: `, task)
-            })
-        },
-    }
+			remove(listRef).then(() => {
+				console.log(`removed from ${list}: `, task)
+			})
+		}
+	}
 })
 
 // Make BootstrapVue available throughout your project
@@ -85,9 +87,7 @@ Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 
 new Vue({
-  router,
-  store,
-  render: h => h(App)
+	router,
+	store,
+	render: h => h(App)
 }).$mount('#app')
-
-
