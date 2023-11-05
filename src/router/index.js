@@ -10,7 +10,7 @@ Vue.use(VueRouter)
 
 const routes = [
     {
-        path: '/',
+        path: '/dashboard',
         name: 'dashboard',
         component: DashboardView
     },
@@ -20,7 +20,7 @@ const routes = [
         component: LoginView
     },
     {
-        path: '/tasks',
+        path: '/',
         name: 'tasks',
         component: TaskView
     },
