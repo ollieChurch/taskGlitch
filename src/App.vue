@@ -1,121 +1,121 @@
 <template>
-    <div id="app" class="d-flex flex-column justify-content-between">
-        <div>
-            <header-nav />
-            <router-view></router-view>
-        </div>
-        <page-footer />
-    </div>
+	<div id="app" class="d-flex flex-column justify-content-between">
+		<div>
+			<header-nav />
+			<router-view></router-view>
+		</div>
+		<page-footer />
+	</div>
 </template>
 
 <script>
-    import { initializeApp } from 'firebase/app'
-    import { getAuth, onAuthStateChanged } from 'firebase/auth'
-    import { getDatabase, ref, onValue } from 'firebase/database'
-    import PageFooter from './components/PageFooter.vue'
-    import HeaderNav from './components/HeaderNav.vue'
+	import { initializeApp } from 'firebase/app'
+	import { getAuth, onAuthStateChanged } from 'firebase/auth'
+	import { getDatabase, ref, onValue } from 'firebase/database'
+	import PageFooter from './components/PageFooter.vue'
+	import HeaderNav from './components/HeaderNav.vue'
 
-    export default {
-        components: {
-            PageFooter,
-            HeaderNav
-        },
+	export default {
+		components: {
+			PageFooter,
+			HeaderNav
+		},
 
-        async created() {
-            const app = initializeApp(this.$store.state.firebaseConfig)
-            const auth = getAuth(app)
-            this.$store.commit('setApp', app)
-            this.$store.commit('setAuth', auth)
+		async created() {
+			const app = initializeApp(this.$store.state.firebaseConfig)
+			const auth = getAuth(app)
+			this.$store.commit('setApp', app)
+			this.$store.commit('setAuth', auth)
 
-            onAuthStateChanged(auth, user => {
-                console.log('auth state changed')
-                if (
-                    user &&
-                    (!this.$store.state.user ||
-                        user.uid != this.$store.state.user.uid)
-                ) {
-                    console.log('updating user')
-                    this.$store.commit('setUser', user)
-                    this.$router.push('/')
-                    this.linkToDatabase()
-                } else if (!user) {
-                    this.$store.commit('setCompleted', [])
-                    this.$store.commit('setUser', null)
-                    console.log('user should be logged out')
-                }
-            })
-        },
+			onAuthStateChanged(auth, user => {
+				console.log('auth state changed')
+				if (
+					user &&
+					(!this.$store.state.user ||
+						user.uid != this.$store.state.user.uid)
+				) {
+					console.log('updating user')
+					this.$store.commit('setUser', user)
+					this.$router.push('/')
+					this.linkToDatabase()
+				} else if (!user) {
+					this.$store.commit('setCompleted', [])
+					this.$store.commit('setUser', null)
+					console.log('user should be logged out')
+				}
+			})
+		},
 
-        methods: {
-            linkToDatabase() {
-                const db = getDatabase(this.$store.state.app)
-                const completedRef = ref(
-                    db,
-                    `completed/${this.$store.state.user.uid}`
-                )
-                const tasksRef = ref(db, `tasks/${this.$store.state.user.uid}`)
-                const scheduleRef = ref(
-                    db,
-                    `schedule/${this.$store.state.user.uid}`
-                )
+		methods: {
+			linkToDatabase() {
+				const db = getDatabase(this.$store.state.app)
+				const completedRef = ref(
+					db,
+					`completed/${this.$store.state.user.uid}`
+				)
+				const tasksRef = ref(db, `tasks/${this.$store.state.user.uid}`)
+				const scheduleRef = ref(
+					db,
+					`schedule/${this.$store.state.user.uid}`
+				)
 
-                onValue(completedRef, snapshot => {
-                    console.log('completed snapshot', snapshot.val())
-                    this.$store.commit('setCompleted', snapshot.val())
-                })
+				onValue(completedRef, snapshot => {
+					console.log('completed snapshot', snapshot.val())
+					this.$store.commit('setCompleted', snapshot.val())
+				})
 
-                onValue(tasksRef, snapshot => {
-                    console.log('tasks snapshot', snapshot.val())
-                    this.$store.commit('setTasks', snapshot.val())
-                })
+				onValue(tasksRef, snapshot => {
+					console.log('tasks snapshot', snapshot.val())
+					this.$store.commit('setTasks', snapshot.val())
+				})
 
-                onValue(scheduleRef, snapshot => {
-                    console.log('schedule snapshot', snapshot.val())
-                    this.$store.commit('setSchedule', snapshot.val())
-                })
-            }
-        }
-    }
+				onValue(scheduleRef, snapshot => {
+					console.log('schedule snapshot', snapshot.val())
+					this.$store.commit('setSchedule', snapshot.val())
+				})
+			}
+		}
+	}
 </script>
 
 <style>
-    #app {
-        font-family: 'Rajdhani', sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        text-align: center;
-        color: #2c3e50;
-        background: #e7dfc6;
-        min-width: 100vw;
-        min-height: 100vh;
-    }
+	#app {
+		font-family: 'Rajdhani', sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-align: center;
+		color: #2c3e50;
+		background: #d5e7eb;
+		min-width: 100vw;
+		min-height: 100vh;
+	}
 
-    .glitchFont {
-        font-family: 'Wallpoet', cursive; 
-        font-style: italic;
-    }
+	.glitchFont {
+		font-family: 'Wallpoet', cursive; 
+		font-style: italic;
+	}
 
-    nav {
-        padding: 30px;
-        background: white;
-    }
+	nav {
+		padding: 30px;
+		background: white;
+	}
 
-    nav a {
-        font-weight: bold;
-        color: #2c3e50;
-    }
+	nav a {
+		font-weight: bold;
+		color: #2c3e50;
+	}
 
-    nav a.router-link-exact-active {
-        color: #42b983;
-    }
+	nav a.router-link-exact-active {
+		color: #42b983;
+	}
 
-    .form-input {
-        margin-bottom: 1em;
-    }
+	.form-input {
+		margin-bottom: 1em;
+	}
 
-    .debug {
-        outline: 2px solid red;
-    }
+	.debug {
+		outline: 2px solid red;
+	}
 </style>
 
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
