@@ -10,6 +10,7 @@ export default new Vuex.Store({
 		taskToPatch: {},
 		user: null,
 		schedule: {},
+		updateScheduleStatus: false,
 		app: {},
 		auth: {},
 		firebaseConfig: {
@@ -58,6 +59,14 @@ export default new Vuex.Store({
 					return a.score - b.score
 				})
 			}
+		},
+
+		getUpdateScheduleStatus(state) {
+			return state.updateScheduleStatus
+		},
+
+		getPriorityNames(state) {
+			return Object.keys(state.settings.priorities)
 		}
 	},
 	mutations: {
@@ -79,6 +88,7 @@ export default new Vuex.Store({
 
 		setSchedule(state, payload) {
 			state.schedule = payload
+			state.updateScheduleStatus = true
 		},
 		
 		setScheduleTaskCompleted(state, payload) {
@@ -101,6 +111,10 @@ export default new Vuex.Store({
 
 		setTaskToPatch(state, payload) {
 			state.taskToPatch = payload
+		},
+
+		setUpdateScheduleStatus(state, payload) {
+			state.updateScheduleStatus = payload
 		}
 	},
 	actions: {

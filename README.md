@@ -28,3 +28,7 @@ npm run lint
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
 # taskGlitch
+
+### Version
+0.2.0 - improvements to scheduling & start of dashboard stats
+0.1.0 - Initial working prototype

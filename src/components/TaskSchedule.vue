@@ -1,8 +1,22 @@
 <template>
 	<div>
+		<div class="d-flex justify-content-between">
+			<b-card-title>Glitch Status: </b-card-title>
+			<b-card-title :class="`font-weight-bold text-${status.color}`">
+				{{ status.text }}
+			</b-card-title>
+		</div>
+		<hr class="my-4" />
 		<div class="d-flex align-items-center justify-content-between">
 			<b-card-title class="text-left mb-3">Schedule</b-card-title>
-			<b-form-checkbox v-model="isEditMode" switch size="lg" inline class="text-right mr-0 mb-3">
+			<b-form-checkbox
+				v-if="!isSimpleSchedule"
+				v-model="isEditMode"
+				switch
+				size="lg"
+				inline
+				class="text-right mr-0 mb-3"
+			>
 				edit
 			</b-form-checkbox>
 		</div>
@@ -17,10 +31,14 @@
 				:key="`schedule-${task.id}`"
 				class="row align-items-center px-0 mx-0 schedule-item"
 			>
-				<h1 v-if="!isEditMode" class="col-3 text-left px-0 mb-0">
+				<p
+					v-if="!isEditMode"
+					class="col-3 text-left px-0 mb-0"
+					:class="isSimpleSchedule ? 'h3' : 'h1'"
+				>
 					{{ task.time }}
-				</h1>
-				<b-card class="my-2 p-2 task-card col" no-body>
+				</p>
+				<b-card class="my-2 p-2 task-card col-9" no-body>
 					<div
 						class="row align-items-center justify-content-between mx-0"
 					>
@@ -36,7 +54,7 @@
 						>
 							{{ task.name }}
 						</b-card-title>
-						<div class="col-2">
+						<div class="col-2" v-if="!isSimpleSchedule">
 							<b-button
 								:variant="
 									task.completed ? 'warning' : 'success'
@@ -68,14 +86,28 @@
 			draggable
 		},
 
+		props: ['isSimpleSchedule'],
+
 		data() {
 			return {
-				isEditMode: false
+				isEditMode: false,
+				status: {
+					text: 'calculating...',
+					color: 'black'
+				}
 			}
+		},
+
+		mounted() {
+			this.status = this.setStatus()
 		},
 
 		computed: {
 			...mapGetters(['getPrioritisedTasks']),
+
+			debug() {
+				return this.$store.state.debug
+			},
 
 			scheduleDetails() {
 				const schedule = this.$store.state.schedule
@@ -109,12 +141,81 @@
 			toggleCompleted(task) {
 				const list = task.completed ? 'tasks' : 'completed'
 				this.moveTask(task, list)
+				this.status = this.setStatus()
 			},
 
 			updateSchedule(newSchedule) {
 				console.log('new schedule: ', newSchedule)
 				this.saveScheduleToDatabase(newSchedule)
 				this.$store.commit('setSchedule', newSchedule)
+				this.status = this.setStatus()
+			},
+
+			getTaskDateTime(task) {
+				const year = task.date.substring(6)
+				const month = Number(task.date.substring(3, 5)) - 1
+				const day = task.date.substring(0, 2)
+				const hour = task.time.substring(0, 2)
+				const minute = task.time.substring(3)
+
+				return new Date(year, month, day, hour, minute)
+			},
+
+			setStatus() {
+				const currentDateTime = new Date()
+				const tasks = this.scheduleDetails.tasks
+				const nextTaskIndex = tasks.findIndex(x => !x.completedDateTime)
+				const secondTaskIndex = tasks.findIndex(
+					x =>
+						!x.completedDateTime && x.id !== tasks[nextTaskIndex].id
+				)
+
+				const nextTaskDateTime =
+					nextTaskIndex !== -1 && !tasks[nextTaskIndex].completed
+						? this.getTaskDateTime(tasks[nextTaskIndex])
+						: null
+
+				let secondTaskDateTime =
+					secondTaskIndex !== -1 && !tasks[secondTaskIndex].completed
+						? this.getTaskDateTime(tasks[secondTaskIndex])
+						: this.scheduleDetails.endDateTime
+
+				if (nextTaskDateTime && !secondTaskDateTime) {
+					const lastTask = tasks[tasks.length - 1]
+					const lastTaskDateTime = this.getTaskDateTime(lastTask)
+					lastTaskDateTime.setMinutes(
+						lastTaskDateTime.getMinutes() + lastTask.sizing
+					)
+					secondTaskDateTime = lastTaskDateTime
+				}
+
+				if (nextTaskIndex === -1) {
+					return {
+						text: 'All Done',
+						color: 'primary'
+					}
+				} else if (
+					secondTaskIndex !== -1 &&
+					secondTaskDateTime < currentDateTime
+				) {
+					return {
+						text: 'Late',
+						color: 'danger'
+					}
+				} else if (
+					nextTaskDateTime < currentDateTime &&
+					secondTaskDateTime > currentDateTime
+				) {
+					return {
+						text: 'On Time',
+						color: 'warning'
+					}
+				} else {
+					return {
+						text: 'Ahead',
+						color: 'success'
+					}
+				}
 			}
 		}
 	}

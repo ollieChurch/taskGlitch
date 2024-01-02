@@ -7,7 +7,12 @@
 			/>
 			<div v-else>
 				<div class="row mb-3 gap-3">
-					<b-btn @click="openScheduleSetUp()" variant="success" block class="col font-weight-bold">
+					<b-btn
+						@click="openScheduleSetUp()"
+						variant="success"
+						block
+						class="col font-weight-bold"
+					>
 						New Schedule
 					</b-btn>
 					<b-btn
@@ -20,10 +25,19 @@
 					</b-btn>
 				</div>
 				<div class="row gap-3">
-					<b-btn @click="reschedule()" variant="warning" class="col font-weight-bold">
+					<b-btn
+						@click="reschedule()"
+						variant="warning"
+						class="col font-weight-bold"
+					>
 						Reschedule
 					</b-btn>
-					<b-btn @click="()=> console.log('export clicked')" variant="primary" class="col font-weight-bold">
+					<b-btn
+						@click="() => console.log('export clicked')"
+						variant="primary"
+						class="col font-weight-bold"
+						disabled
+					>
 						Export
 					</b-btn>
 				</div>
@@ -48,7 +62,7 @@
 			ContentCard,
 			ScheduleSetUpModal,
 			GlitchExplained,
-			TaskSchedule
+			TaskSchedule,
 		},
 
 		created() {
@@ -61,7 +75,8 @@
 			},
 
 			maintainFinish() {
-				return this.$store.state.settings.maintainFinishTimeWhenRescheduling
+				return this.$store.state.settings
+					.maintainFinishTimeWhenRescheduling
 			}
 		},
 
@@ -82,7 +97,9 @@
 				const calculatedTimes = this.getScheduleTimes(
 					this.schedule.start,
 					new Date().toLocaleTimeString(),
-					this.maintainFinish ? new Date(this.schedule.finish).toLocaleTimeString() : null,
+					this.maintainFinish
+						? new Date(this.schedule.finish).toLocaleTimeString()
+						: null,
 					this.maintainFinish ? this.schedule.finish : null
 				)
 

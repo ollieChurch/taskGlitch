@@ -1,9 +1,7 @@
 <template>
-	<div id="app" class="d-flex flex-column justify-content-between">
-		<div>
-			<header-nav />
-			<router-view></router-view>
-		</div>
+	<div id="app" class="d-flex flex-column justify-content-sm-between">
+		<header-nav />
+		<router-view></router-view>
 		<page-footer />
 	</div>
 </template>
@@ -88,10 +86,11 @@
 		background: #d5e7eb;
 		min-width: 100vw;
 		min-height: 100vh;
+		position: relative;
 	}
 
 	.glitchFont {
-		font-family: 'Wallpoet', cursive; 
+		font-family: 'Wallpoet', cursive;
 		font-style: italic;
 	}
 
@@ -115,6 +114,13 @@
 
 	.debug {
 		outline: 2px solid red;
+	}
+
+	.schedule-sidebar-toggle {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		max-width: 300px;
 	}
 </style>
 
