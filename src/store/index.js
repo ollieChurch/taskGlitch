@@ -67,6 +67,10 @@ export default new Vuex.Store({
 
 		getPriorityNames(state) {
 			return Object.keys(state.settings.priorities)
+		},
+
+		getAllTasks(state) {
+			return [...state.completed, ...state.tasks]
 		}
 	},
 	mutations: {

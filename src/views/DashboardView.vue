@@ -91,6 +91,7 @@
 			return {
 				timeRangeInDays: 90,
 				completedTasksInRange: {},
+				createdTasksInRange: {},
 
 				categoryBreakdownData: {
 					labels: [],
@@ -121,14 +122,21 @@
 
 				chartOptions: {
 					responsive: false,
-					maintainAspectRatio: true,
+					maintainAspectRatio: true
 				}
 			}
 		},
 
 		created() {
 			this.pageCheck()
-			this.completedTasksInRange = this.getCompletedTasksInRange()
+			this.completedTasksInRange = this.getTasksInRange(
+				this.completed,
+				'completedDateTime'
+			)
+			this.createdTasksInRange = this.getTasksInRange(
+				this.getAllTasks,
+				'createdDateTime'
+			)
 			this.setUpCategoryBreakdown()
 			this.setUpPriorityBreakdown()
 			this.setUpAverageTimeToResolve()
@@ -139,7 +147,8 @@
 			...mapGetters([
 				'getCategories',
 				'getPrioritisedTasks',
-				'getPriorityNames'
+				'getPriorityNames',
+				'getAllTasks'
 			]),
 
 			completed() {
@@ -157,22 +166,22 @@
 				this.$bvModal.show('taskModal')
 			},
 
-			getCompletedTasksInRange() {
+			getTasksInRange(tasksArray, dateToUse) {
 				const timeRangeInMiliseconds =
 					this.timeRangeInDays * 86400 * 1000
 				const earliestUnix = Date.now() - timeRangeInMiliseconds
 
-				const completedTasksInRange = this.completed.filter(
-					x => new Date(x.completedDateTime).getTime() >= earliestUnix
+				const tasksInRange = tasksArray.filter(
+					x => new Date(x[dateToUse]).getTime() >= earliestUnix
 				)
 
 				const tasksSplitByMonthCompleted = this.splitTasksByMonth(
-					completedTasksInRange,
-					'completedDateTime'
+					tasksInRange,
+					dateToUse
 				)
 				const tasksSplitByMonthCreated = this.splitTasksByMonth(
-					completedTasksInRange,
-					'createdDateTime'
+					tasksInRange,
+					dateToUse
 				)
 
 				return {
@@ -280,17 +289,21 @@
 			},
 
 			setUpCreatedRateData() {
+				console.log('createdTasksInRange: ', this.getAllTasks)
+
 				const monthlyCreatedRate =
-					this.completedTasksInRange.byMonthCreated.map(month => {
+					this.createdTasksInRange.byMonthCreated.map(month => {
 						return {
 							label: new Date(
 								month[0].createdDateTime
 							).toLocaleString('default', { month: 'long' }),
-							value: month.length,
+							value: month.length
 						}
 					})
-				
-				this.createdRateData.labels = monthlyCreatedRate.map(month => month.label)
+
+				this.createdRateData.labels = monthlyCreatedRate.map(
+					month => month.label
+				)
 				this.createdRateData.datasets.push({
 					label: 'created rate',
 					data: monthlyCreatedRate.map(month => month.value),
