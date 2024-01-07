@@ -42,6 +42,17 @@
 				:options="chartOptions"
 				style="width: 100%"
 			/>
+			<b-card-title class="text-start mt-4 mb-0">
+				Tasks Created vs Resolved
+			</b-card-title>
+			<b-card-sub-title class="text-start mb-2">
+				Data for the last {{ timeRangeInDays }} days
+			</b-card-sub-title>
+			<line-chart
+				:data="createdVsResolvedData"
+				:options="chartOptions"
+				style="width: 100%"
+			/>
 		</content-card>
 		<task-modal />
 	</div>
@@ -93,32 +104,11 @@
 				completedTasksInRange: {},
 				createdTasksInRange: {},
 
-				categoryBreakdownData: {
-					labels: [],
-					datasets: []
-				},
-
-				priorityBreakdownData: {
-					labels: [],
-					datasets: []
-				},
-
-				averageTimeToResolveData: {
-					labels: [],
-					datasets: [
-						{
-							label: 'Time To Resolve (hrs)',
-							data: [],
-							borderColor: this.getRandomColor(),
-							tension: 0
-						}
-					]
-				},
-
-				createdRateData: {
-					labels: [],
-					datasets: []
-				},
+				categoryBreakdownData: { datasets: [] },
+				priorityBreakdownData: { datasets: [] },
+				averageTimeToResolveData: { datasets: [] },
+				createdRateData: { datasets: [] },
+				createdVsResolvedData: { datasets: [] },
 
 				chartOptions: {
 					responsive: false,
@@ -139,7 +129,7 @@
 			)
 			this.setUpCategoryBreakdown()
 			this.setUpPriorityBreakdown()
-			this.setUpAverageTimeToResolve()
+			this.setUpTimeToResolveData()
 			this.setUpCreatedRateData()
 		},
 
@@ -177,17 +167,39 @@
 
 				const tasksSplitByMonthCompleted = this.splitTasksByMonth(
 					tasksInRange,
-					dateToUse
+					'completedDateTime'
 				)
+
 				const tasksSplitByMonthCreated = this.splitTasksByMonth(
 					tasksInRange,
-					dateToUse
+					'createdDateTime'
 				)
 
 				return {
 					byMonthCompleted: tasksSplitByMonthCompleted,
-					byMonthCreated: tasksSplitByMonthCreated
+					byMonthCreated: tasksSplitByMonthCreated,
+					numberByMonthCreated: this.getNumberByMonth(
+						tasksSplitByMonthCreated,
+						'createdDateTime'
+					),
+					numberByMonthCompleted: this.getNumberByMonth(
+						tasksSplitByMonthCompleted,
+						'completedDateTime'
+					),
+					totalNumberOfTasks: tasksInRange.length
 				}
+			},
+
+			getNumberByMonth(arrayOfTasks, dateToUse) {
+				return arrayOfTasks.map(month => {
+					return {
+						label: new Date(month[0][dateToUse]).toLocaleString(
+							'default',
+							{ month: 'long' }
+						),
+						value: month.length
+					}
+				})
 			},
 
 			splitTasksByMonth(tasks, dateToUse) {
@@ -258,7 +270,7 @@
 				})
 			},
 
-			setUpAverageTimeToResolve() {
+			setUpTimeToResolveData() {
 				const averageHoursToResolve =
 					this.completedTasksInRange.byMonthCompleted.map(month => {
 						let monthResolutionTimes = []
@@ -284,30 +296,44 @@
 				this.averageTimeToResolveData.labels =
 					averageHoursToResolve.map(month => month.label)
 
-				this.averageTimeToResolveData.datasets[0].data =
-					averageHoursToResolve.map(month => month.value)
+				this.averageTimeToResolveData.datasets.push({
+					label: 'Time To Resolve (hrs)',
+					data: averageHoursToResolve.map(month => month.value),
+					borderColor: this.getRandomColor()
+				})
 			},
 
 			setUpCreatedRateData() {
-				console.log('createdTasksInRange: ', this.getAllTasks)
+				const labels =
+					this.createdTasksInRange.numberByMonthCreated.map(
+						month => month.label
+					)
 
-				const monthlyCreatedRate =
-					this.createdTasksInRange.byMonthCreated.map(month => {
-						return {
-							label: new Date(
-								month[0].createdDateTime
-							).toLocaleString('default', { month: 'long' }),
-							value: month.length
-						}
-					})
+				const dataset = {
+					label: `created (${this.createdTasksInRange.totalNumberOfTasks})`,
+					data: this.createdTasksInRange.numberByMonthCreated.map(
+						month => month.value
+					)
+				}
 
-				this.createdRateData.labels = monthlyCreatedRate.map(
-					month => month.label
-				)
+				this.createdRateData.labels = labels
 				this.createdRateData.datasets.push({
-					label: 'created rate',
-					data: monthlyCreatedRate.map(month => month.value),
+					...dataset,
 					backgroundColor: this.getRandomColor()
+				})
+
+				this.createdVsResolvedData.labels = labels
+				this.createdVsResolvedData.datasets.push({
+					...dataset,
+					borderColor: this.getRandomColor()
+				})
+
+				this.createdVsResolvedData.datasets.push({
+					label: `resolved (${this.completedTasksInRange.totalNumberOfTasks})`,
+					data: this.completedTasksInRange.numberByMonthCompleted.map(
+						month => month.value
+					),
+					borderColor: this.getRandomColor()
 				})
 			},
 

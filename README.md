@@ -30,6 +30,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 # taskGlitch
 
 ### Version
+0.2.2 - Adds created vs resolved graph and minor data calculation fixes
 0.2.1 - Fixes created rate data to include all tasks
 0.2.0 - Improvements to scheduling & start of dashboard stats
 0.1.0 - Initial working prototype
