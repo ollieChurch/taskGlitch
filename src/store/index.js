@@ -23,14 +23,29 @@ export default new Vuex.Store({
 			appId: process.env.VUE_APP_FIREBASE_APP_ID,
 			measurementId: process.env.VUE_APP_FIREBASE_MEASUREMENT_ID
 		},
-		settings: {
-			priorities: {
-				critical: 0,
-				high: 1,
-				medium: 2,
-				low: 3
+		priorities: {
+			critical: {
+				value: 0,
+				icon: 'fa-fire',
+				color: '#dc3546'
 			},
-			
+			high: {
+				value: 1,
+				icon: 'fa-thermometer-three-quarters',
+				color: '#ffc107'
+			},
+			medium: {
+				value: 2,
+				icon: 'fa-thermometer-half',
+				color: '#1a8754'
+			},
+			low: {
+				value: 3,
+				icon: 'fa-thermometer-quarter',
+				color: '#10caf0'
+			}
+		},
+		settings: {	
 			sizes: {
 				short: 15,
 				mid: 30,
@@ -66,7 +81,7 @@ export default new Vuex.Store({
 		},
 
 		getPriorityNames(state) {
-			return Object.keys(state.settings.priorities)
+			return Object.keys(state.priorities)
 		},
 
 		getAllTasks(state) {

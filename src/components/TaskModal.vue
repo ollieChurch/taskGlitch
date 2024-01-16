@@ -137,7 +137,7 @@
 
 				taskDefaults: {
 					name: null,
-					priority: this.$store.state.settings.priorities.medium,
+					priority: this.$store.state.priorities.medium.value,
 					sizing: this.$store.state.settings.sizes.short,
 					category: null,
 					targetDateTime: null,
@@ -157,7 +157,7 @@
 			...mapGetters(['getCategories']),
 
 			priorities() {
-				return this.$store.state.settings.priorities
+				return this.$store.state.priorities
 			},
 
 			sizes() {
@@ -169,7 +169,7 @@
 				for (let priority in this.priorities) {
 					options.push({
 						text: priority,
-						value: this.priorities[priority]
+						value: this.priorities[priority].value
 					})
 				}
 

@@ -23,31 +23,22 @@
 			<b-card-title class="text-start mt-4 mb-0">
 				Average time to resolve (hours)
 			</b-card-title>
-			<b-card-sub-title class="text-start mb-2">
-				Data for the last {{ timeRangeInDays }} days
-			</b-card-sub-title>
 			<line-chart
 				:data="averageTimeToResolveData"
 				:options="chartOptions"
 				style="width: 100%"
 			/>
 			<b-card-title class="text-start mt-4 mb-0">
-				Tasks Created
+				Tasks Resolved
 			</b-card-title>
-			<b-card-sub-title class="text-start mb-2">
-				Data for the last {{ timeRangeInDays }} days
-			</b-card-sub-title>
 			<bar
-				:data="createdRateData"
+				:data="resolvedRateData"
 				:options="chartOptions"
 				style="width: 100%"
 			/>
 			<b-card-title class="text-start mt-4 mb-0">
 				Tasks Created vs Resolved
 			</b-card-title>
-			<b-card-sub-title class="text-start mb-2">
-				Data for the last {{ timeRangeInDays }} days
-			</b-card-sub-title>
 			<line-chart
 				:data="createdVsResolvedData"
 				:options="chartOptions"
@@ -100,14 +91,14 @@
 
 		data() {
 			return {
-				timeRangeInDays: 90,
+				timeRangeInMonths: 3,
 				completedTasksInRange: {},
 				createdTasksInRange: {},
 
 				categoryBreakdownData: { datasets: [] },
 				priorityBreakdownData: { datasets: [] },
 				averageTimeToResolveData: { datasets: [] },
-				createdRateData: { datasets: [] },
+				resolvedRateData: { datasets: [] },
 				createdVsResolvedData: { datasets: [] },
 
 				chartOptions: {
@@ -130,7 +121,7 @@
 			this.setUpCategoryBreakdown()
 			this.setUpPriorityBreakdown()
 			this.setUpTimeToResolveData()
-			this.setUpCreatedRateData()
+			this.setUpResolvedRateData()
 		},
 
 		computed: {
@@ -143,6 +134,10 @@
 
 			completed() {
 				return this.$store.state.completed
+			},
+
+			priorities() {
+				return this.$store.state.priorities
 			}
 		},
 
@@ -157,9 +152,13 @@
 			},
 
 			getTasksInRange(tasksArray, dateToUse) {
-				const timeRangeInMiliseconds =
-					this.timeRangeInDays * 86400 * 1000
-				const earliestUnix = Date.now() - timeRangeInMiliseconds
+				const today = new Date()
+				let startMonth = today.getMonth() - this.timeRangeInMonths
+				if (startMonth < 0) startMonth = 0 + startMonth
+
+				let earliestDate = new Date(today.getFullYear(), startMonth, 1)
+
+				const earliestUnix = earliestDate.getTime()
 
 				const tasksInRange = tasksArray.filter(
 					x => new Date(x[dateToUse]).getTime() >= earliestUnix
@@ -257,10 +256,10 @@
 					const tasksInPriority = this.getPrioritisedTasks.filter(
 						x =>
 							x.priority ==
-							this.$store.state.settings.priorities[priority]
+							this.priorities[priority].value
 					)
 					data.push(tasksInPriority.length)
-					backgroundColor.push(this.getRandomColor())
+					backgroundColor.push(this.priorities[priority].color)
 				})
 
 				this.priorityBreakdownData.labels = labels
@@ -303,37 +302,37 @@
 				})
 			},
 
-			setUpCreatedRateData() {
+			setUpResolvedRateData() {
 				const labels =
 					this.createdTasksInRange.numberByMonthCreated.map(
 						month => month.label
 					)
 
 				const dataset = {
-					label: `created (${this.createdTasksInRange.totalNumberOfTasks})`,
-					data: this.createdTasksInRange.numberByMonthCreated.map(
+					label: `resolved (${this.completedTasksInRange.totalNumberOfTasks})`,
+					data: this.completedTasksInRange.numberByMonthCompleted.map(
 						month => month.value
 					)
 				}
 
-				this.createdRateData.labels = labels
-				this.createdRateData.datasets.push({
+				this.resolvedRateData.labels = labels
+				this.resolvedRateData.datasets.push({
 					...dataset,
-					backgroundColor: this.getRandomColor()
+					backgroundColor: '#0edb07'
 				})
 
 				this.createdVsResolvedData.labels = labels
 				this.createdVsResolvedData.datasets.push({
-					...dataset,
-					borderColor: this.getRandomColor()
+					label: `created (${this.createdTasksInRange.totalNumberOfTasks})`,
+					data: this.createdTasksInRange.numberByMonthCreated.map(
+						month => month.value
+					),
+					borderColor: '#fc036f'
 				})
 
 				this.createdVsResolvedData.datasets.push({
-					label: `resolved (${this.completedTasksInRange.totalNumberOfTasks})`,
-					data: this.completedTasksInRange.numberByMonthCompleted.map(
-						month => month.value
-					),
-					borderColor: this.getRandomColor()
+					...dataset,
+					borderColor: '#0edb07'
 				})
 			},
 

@@ -87,6 +87,7 @@
 		min-width: 100vw;
 		min-height: 100vh;
 		position: relative;
+		user-select: none;
 	}
 
 	.glitchFont {

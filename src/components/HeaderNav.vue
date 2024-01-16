@@ -1,7 +1,7 @@
 <template>
     <div>
         <b-navbar toggleable="lg" class="px-3 py-3">
-            <b-navbar-brand href="/" class="glitchFont">TaskGlitch</b-navbar-brand>
+            <b-navbar-brand href="/" class="glitchFont">Task Glitch</b-navbar-brand>
 
             <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
