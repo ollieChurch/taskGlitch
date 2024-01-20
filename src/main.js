@@ -91,10 +91,15 @@ Vue.mixin({
 			})
 		},
 
-		getScheduleTasks(tasks, sessionInMins) {
+		getScheduleTasks(tasks, sessionInMins, includeBreaks) {
+			const breakFrequency = this.$store.state.settings.breaks.frequency
+			const breakLength = this.$store.state.settings.breaks.length
+			const taskType = this.$store.state.taskType
+
 			const schedule = []
 			let totalTaskTime = 0
 			let currentTaskIndex = 0
+			let timeSinceLastBreak = 0
 
 			while (
 				totalTaskTime < sessionInMins &&
@@ -103,12 +108,30 @@ Vue.mixin({
 				const task = tasks[currentTaskIndex]
 				const taskLength = task.sizing
 
+				console.log()
+
 				if (totalTaskTime + taskLength <= sessionInMins) {
 					schedule.push(task)
 					totalTaskTime += taskLength
+					timeSinceLastBreak += taskLength
+				}
+
+				if (includeBreaks && timeSinceLastBreak >= breakFrequency) {
+					schedule.push({
+						id: this.createGuid(),
+						name: 'Take a break',
+						sizing: breakLength,
+						type: taskType.systemBreak
+					})
+					totalTaskTime += breakLength
+					timeSinceLastBreak = 0
 				}
 
 				currentTaskIndex++
+			}
+
+			if (schedule[schedule.length - 1].type === taskType.systemBreak) {
+				schedule.pop();
 			}
 
 			console.log('schedule length in mins: ', totalTaskTime)

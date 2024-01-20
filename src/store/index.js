@@ -45,6 +45,10 @@ export default new Vuex.Store({
 				color: '#10caf0'
 			}
 		},
+		taskType: Object.freeze({
+			userTask: 'userTask',
+			systemBreak: 'systemBreak'
+		}),
 		settings: {	
 			sizes: {
 				short: 15,
@@ -53,7 +57,12 @@ export default new Vuex.Store({
 				veryLong: 120
 			},
 
-			maintainFinishTimeWhenRescheduling: true
+			maintainFinishTimeWhenRescheduling: true,
+
+			breaks: {
+				frequency: 120,
+				length: 10
+			}
 		},
 		debug: false
 	},

@@ -77,6 +77,10 @@
 			maintainFinish() {
 				return this.$store.state.settings
 					.maintainFinishTimeWhenRescheduling
+			},
+
+			taskType() {
+				return this.$store.state.taskType
 			}
 		},
 
@@ -91,7 +95,7 @@
 
 			reschedule() {
 				const remainingTasks = this.schedule.tasks.filter(
-					x => x.completed === false
+					x => x.completed !== true && x.type !== this.taskType.systemBreak
 				)
 
 				const calculatedTimes = this.getScheduleTimes(
@@ -107,10 +111,12 @@
 					categoriesToInclude: this.schedule.categoriesToInclude,
 					tasks: this.getScheduleTasks(
 						remainingTasks,
-						calculatedTimes.sessionInMins
+						calculatedTimes.sessionInMins,
+						this.schedule.includeBreaks
 					).tasks,
 					start: calculatedTimes.start.toString(),
-					finish: calculatedTimes.finish.toString()
+					finish: calculatedTimes.finish.toString(),
+					includeBreaks: this.schedule.includeBreaks
 				}
 
 				this.saveScheduleToDatabase(scheduleDetails)

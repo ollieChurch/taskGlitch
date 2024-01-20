@@ -1,12 +1,5 @@
 <template>
 	<div>
-		<div class="d-flex justify-content-between">
-			<b-card-title>Glitch Status: </b-card-title>
-			<b-card-title :class="`font-weight-bold text-${status.color}`">
-				{{ status.text }}
-			</b-card-title>
-		</div>
-		<hr class="my-4" />
 		<div class="d-flex align-items-center justify-content-between">
 			<b-card-title class="text-left mb-3">Schedule</b-card-title>
 			<b-form-checkbox
@@ -32,7 +25,6 @@
 				class="row align-items-center px-0 mx-0 schedule-item"
 			>
 				<p
-					v-if="!isEditMode"
 					class="col-3 text-left px-0 mb-0"
 					:class="isSimpleSchedule ? 'h3' : 'h1'"
 				>
@@ -56,6 +48,14 @@
 						</b-card-title>
 						<div class="col-2" v-if="!isSimpleSchedule">
 							<b-button
+								v-if="isEditMode && !task.completed"
+								variant="info"
+								@click="removeFromSchedule(task)"
+							>
+								<b-icon icon="x"></b-icon>
+							</b-button>
+							<b-button
+								v-else
 								:variant="
 									task.completed ? 'warning' : 'success'
 								"
@@ -90,16 +90,8 @@
 
 		data() {
 			return {
-				isEditMode: false,
-				status: {
-					text: 'calculating...',
-					color: 'black'
-				}
+				isEditMode: false
 			}
-		},
-
-		mounted() {
-			this.status = this.setStatus()
 		},
 
 		computed: {
@@ -126,29 +118,61 @@
 								taskTime.getMinutes() + task.sizing
 							)
 						)
-						task.completed = !this.getPrioritisedTasks.find(
-							x => x.id === task.id
-						)
+
+						if (
+							task.type === null ||
+							task.type === this.taskType.userTask
+						) {
+							task.completed = !this.getPrioritisedTasks.find(
+								x => x.id === task.id
+							)
+						}
 					})
 				}
 
 				console.log('scheduleDetails: ', schedule)
 				return schedule
+			},
+
+			taskType() {
+				return this.$store.state.taskType
 			}
 		},
 
 		methods: {
 			toggleCompleted(task) {
-				const list = task.completed ? 'tasks' : 'completed'
-				this.moveTask(task, list)
-				this.status = this.setStatus()
+				if (
+					task.type === null ||
+					task.type === this.taskType.userTask
+				) {
+					const list = task.completed ? 'tasks' : 'completed'
+					this.moveTask(task, list)
+				}
+
+				if (task.type === this.taskType.systemBreak) {
+					let newSchedule = this.scheduleDetails
+					newSchedule.tasks.find(x => x.id === task.id).completed =
+						!task.completed
+					this.updateSchedule(newSchedule)
+				}
+			},
+
+			removeFromSchedule(task) {
+				let newSchedule = this.scheduleDetails
+				const taskToRemoveIndex = newSchedule.tasks.findIndex(
+					x => x.id === task.id
+				)
+
+				if (taskToRemoveIndex > -1) {
+					newSchedule.tasks.splice(taskToRemoveIndex, 1)
+					this.updateSchedule(newSchedule)
+				}
 			},
 
 			updateSchedule(newSchedule) {
 				console.log('new schedule: ', newSchedule)
 				this.saveScheduleToDatabase(newSchedule)
 				this.$store.commit('setSchedule', newSchedule)
-				this.status = this.setStatus()
 			},
 
 			getTaskDateTime(task) {
@@ -159,63 +183,6 @@
 				const minute = task.time.substring(3)
 
 				return new Date(year, month, day, hour, minute)
-			},
-
-			setStatus() {
-				const currentDateTime = new Date()
-				const tasks = this.scheduleDetails.tasks
-				const nextTaskIndex = tasks.findIndex(x => !x.completedDateTime)
-				const secondTaskIndex = tasks.findIndex(
-					x =>
-						!x.completedDateTime && x.id !== tasks[nextTaskIndex].id
-				)
-
-				const nextTaskDateTime =
-					nextTaskIndex !== -1 && !tasks[nextTaskIndex].completed
-						? this.getTaskDateTime(tasks[nextTaskIndex])
-						: null
-
-				let secondTaskDateTime =
-					secondTaskIndex !== -1 && !tasks[secondTaskIndex].completed
-						? this.getTaskDateTime(tasks[secondTaskIndex])
-						: this.scheduleDetails.endDateTime
-
-				if (nextTaskDateTime && !secondTaskDateTime) {
-					const lastTask = tasks[tasks.length - 1]
-					const lastTaskDateTime = this.getTaskDateTime(lastTask)
-					lastTaskDateTime.setMinutes(
-						lastTaskDateTime.getMinutes() + lastTask.sizing
-					)
-					secondTaskDateTime = lastTaskDateTime
-				}
-
-				if (nextTaskIndex === -1) {
-					return {
-						text: 'All Done',
-						color: 'primary'
-					}
-				} else if (
-					secondTaskIndex !== -1 &&
-					secondTaskDateTime < currentDateTime
-				) {
-					return {
-						text: 'Late',
-						color: 'danger'
-					}
-				} else if (
-					nextTaskDateTime < currentDateTime &&
-					secondTaskDateTime > currentDateTime
-				) {
-					return {
-						text: 'On Time',
-						color: 'warning'
-					}
-				} else {
-					return {
-						text: 'Ahead',
-						color: 'success'
-					}
-				}
 			}
 		}
 	}
