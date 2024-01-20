@@ -120,7 +120,7 @@
 						)
 
 						if (
-							task.type === null ||
+							task.type == null ||
 							task.type === this.taskType.userTask
 						) {
 							task.completed = !this.getPrioritisedTasks.find(
@@ -142,7 +142,7 @@
 		methods: {
 			toggleCompleted(task) {
 				if (
-					task.type === null ||
+					task.type == null ||
 					task.type === this.taskType.userTask
 				) {
 					const list = task.completed ? 'tasks' : 'completed'
