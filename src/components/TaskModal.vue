@@ -91,11 +91,11 @@
 					</option>
 				</datalist>
 			</b-form-group>
-			<div class="d-flex justify-content-between">
+			<div class="d-flex flex-wrap align-items-end justify-content-between gap-2">
 				<b-form-group
 					label="Target Date"
 					label-for="targetDate"
-					class="form-input col-6 pe-2 ps-0"
+					class="form-input col-sm-8 col-12 px-0"
 				>
 					<b-form-datepicker
 						id="targetDate"
@@ -104,19 +104,21 @@
 						reset-button
 					></b-form-datepicker>
 				</b-form-group>
-				<b-form-group
-					label="Hard Deadline?"
-					label-for="hardDeadline"
-					class="form-input col-6 ps-2 pe-0 align-items-center"
-				>
-					<b-form-checkbox
-						id="hardDeadline"
+				<div>
+					<input
+						type="checkbox"
+						class="btn-check"
+						id="hardDeadlineToggle"
+						autocomplete="off"
 						v-model="task.isHardDeadline"
-						switch
-						size="lg"
-						:disabled="!task.targetDateTime"
-					></b-form-checkbox>
-				</b-form-group>
+					/>
+					<label
+						class="btn btn-outline-danger form-input"
+						for="hardDeadlineToggle"
+					>
+						Hard Deadline
+					</label>
+				</div>
 			</div>
 		</b-form>
 	</b-modal>
@@ -143,7 +145,8 @@
 					targetDateTime: null,
 					deadline: null,
 					isHardDeadline: false,
-					score: 0
+					score: 0,
+					type: this.$store.state.taskType.userTask
 				},
 
 				valid: {
@@ -267,7 +270,10 @@
 				let deadlineScore
 
 				if (this.task.targetDateTime) {
-					const deadlineDiffDays = Math.ceil((new Date(this.task.targetDateTime) - todayDate) / millisecsToDays)
+					const deadlineDiffDays = Math.ceil(
+						(new Date(this.task.targetDateTime) - todayDate) /
+							millisecsToDays
+					)
 					const deadlineModifier = this.task.isHardDeadline ? 0.25 : 1
 					deadlineScore = deadlineDiffDays * deadlineModifier
 				} else {
@@ -275,9 +281,13 @@
 				}
 
 				const createdDateTime = new Date(this.task.createdDateTime)
-				const createdDateDiffDays = Math.ceil((todayDate - createdDateTime) / millisecsToDays)
-				const createdDateModifier = this.task.priority == 0 ? 1 : this.task.priority
-				const createdDateScore = createdDateDiffDays / createdDateModifier
+				const createdDateDiffDays = Math.ceil(
+					(todayDate - createdDateTime) / millisecsToDays
+				)
+				const createdDateModifier =
+					this.task.priority == 0 ? 1 : this.task.priority
+				const createdDateScore =
+					createdDateDiffDays / createdDateModifier
 
 				const score = priorityScore + deadlineScore - createdDateScore
 				return score
