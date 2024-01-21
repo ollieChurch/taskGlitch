@@ -74,6 +74,12 @@
 				</b-card>
 			</div>
 		</draggable>
+		<b-card class="mt-3">
+			<b-card-title class="mb-0">
+				Estimated Finish Time
+				{{ scheduleDetails.estimatedFinishTime }}
+			</b-card-title>
+		</b-card>
 	</div>
 </template>
 
@@ -128,6 +134,13 @@
 							)
 						}
 					})
+
+					schedule.estimatedFinishTime = taskTime.toLocaleTimeString(
+						[],
+						{
+							timeStyle: 'short'
+						}
+					)
 				}
 
 				console.log('scheduleDetails: ', schedule)
@@ -141,10 +154,7 @@
 
 		methods: {
 			toggleCompleted(task) {
-				if (
-					task.type == null ||
-					task.type === this.taskType.userTask
-				) {
+				if (task.type == null || task.type === this.taskType.userTask) {
 					const list = task.completed ? 'tasks' : 'completed'
 					this.moveTask(task, list)
 				}
