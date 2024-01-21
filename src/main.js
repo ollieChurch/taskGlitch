@@ -154,11 +154,10 @@ Vue.mixin({
 				sessionToDate.setDate(sessionToDate.getDate() + 1)
 			}
 
-			console.log(sessionFromDate.toDateString(), sessionToDate.toDateString())
-
 			let start = new Date(
 				`${sessionFromDate.toDateString()} ${fromTime}`
 			)
+			
 			let finish = new Date(
 				`${sessionToDate.toDateString()} ${
 					toTime ?? fromTime

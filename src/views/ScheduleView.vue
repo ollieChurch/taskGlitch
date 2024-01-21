@@ -98,9 +98,15 @@
 					x => x.completed !== true && x.type !== this.taskType.systemBreak
 				)
 
+				const now = new Date()
+				const startDateTime = new Date(this.schedule.start)
+				const isStartTimeInPast = now > startDateTime
+
+				console.log('start time is in past: ', isStartTimeInPast)
+
 				const calculatedTimes = this.getScheduleTimes(
 					this.schedule.start,
-					new Date().toLocaleTimeString(),
+					isStartTimeInPast ? now.toLocaleTimeString() : startDateTime.toLocaleTimeString(),
 					this.maintainFinish
 						? new Date(this.schedule.finish).toLocaleTimeString()
 						: null,

@@ -19,11 +19,18 @@
 			@change="updateSchedule(scheduleDetails)"
 			handle=".grab-handle"
 		>
+			<!-- <div> -->
+
 			<div
 				v-for="task in scheduleDetails.tasks"
 				:key="`schedule-${task.id}`"
 				class="row align-items-center px-0 mx-0 schedule-item"
 			>
+				<div v-if="!isEditMode && shouldDisplayDate(task)" class="row px-0 mx-0">
+					<b-card-title class="px-0 mt-3 mb-1 text-left">{{
+						task.date
+					}}</b-card-title>
+				</div>
 				<p
 					class="col-3 text-left px-0 mb-0"
 					:class="isSimpleSchedule ? 'h3' : 'h1'"
@@ -73,6 +80,7 @@
 					</div>
 				</b-card>
 			</div>
+			<!-- </div> -->
 		</draggable>
 		<b-card class="mt-3">
 			<b-card-title class="mb-0">
@@ -118,7 +126,7 @@
 						task.time = taskTime.toLocaleTimeString([], {
 							timeStyle: 'short'
 						})
-						task.date = taskTime.toLocaleDateString()
+						task.date = taskTime.toDateString()
 						taskTime = new Date(
 							taskTime.setMinutes(
 								taskTime.getMinutes() + task.sizing
@@ -185,14 +193,12 @@
 				this.$store.commit('setSchedule', newSchedule)
 			},
 
-			getTaskDateTime(task) {
-				const year = task.date.substring(6)
-				const month = Number(task.date.substring(3, 5)) - 1
-				const day = task.date.substring(0, 2)
-				const hour = task.time.substring(0, 2)
-				const minute = task.time.substring(3)
-
-				return new Date(year, month, day, hour, minute)
+			shouldDisplayDate(task) {
+				const schedule = this.scheduleDetails
+				const taskIndex = schedule.tasks.findIndex(x => x.id == task.id)
+				return taskIndex > 0
+					? schedule.tasks[taskIndex - 1].date != task.date
+					: true
 			}
 		}
 	}
