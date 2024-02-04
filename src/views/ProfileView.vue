@@ -117,13 +117,19 @@
 				</b-row>
 			</div>
 		</div>
-		<b-btn
+		<hr />
+		<h3 class="mb-4">Danger Zone</h3>
+		<div class="d-flex justify-content-between align-items-baseline">
+			<b-card-title class="text-danger">Restore Default Settings</b-card-title>
+			<b-btn
 			variant="danger"
 			class="font-weight-bold"
 			@click="restoreDefaultSettings()"
 		>
-			Restore Defaults
+			Restore
 		</b-btn>
+		</div>
+		
 	</content-card>
 </template>
 
