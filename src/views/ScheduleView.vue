@@ -54,6 +54,7 @@
 	import GlitchExplained from '@/components/GlitchExplained.vue'
 	import TaskSchedule from '@/components/TaskSchedule.vue'
 	import ContentCard from '@/components/ContentCard.vue'
+	import { mapGetters } from 'vuex'
 
 	export default {
 		name: 'ScheduleView',
@@ -62,7 +63,7 @@
 			ContentCard,
 			ScheduleSetUpModal,
 			GlitchExplained,
-			TaskSchedule,
+			TaskSchedule
 		},
 
 		created() {
@@ -70,13 +71,16 @@
 		},
 
 		computed: {
+			...mapGetters(['getAccountSettings']),
+
 			schedule() {
 				return this.$store.state.schedule
 			},
 
 			maintainFinish() {
-				return this.$store.state.settings
-					.maintainFinishTimeWhenRescheduling
+				return (
+					this.getAccountSettings.maintainFinishTimeWhenRescheduling
+				)
 			},
 
 			taskType() {
@@ -95,7 +99,9 @@
 
 			reschedule() {
 				const remainingTasks = this.schedule.tasks.filter(
-					x => x.completed !== true && x.type !== this.taskType.systemBreak
+					x =>
+						x.completed !== true &&
+						x.type !== this.taskType.systemBreak
 				)
 
 				const now = new Date()
@@ -106,7 +112,9 @@
 
 				const calculatedTimes = this.getScheduleTimes(
 					this.schedule.start,
-					isStartTimeInPast ? now.toLocaleTimeString() : startDateTime.toLocaleTimeString(),
+					isStartTimeInPast
+						? now.toLocaleTimeString()
+						: startDateTime.toLocaleTimeString(),
 					this.maintainFinish
 						? new Date(this.schedule.finish).toLocaleTimeString()
 						: null,

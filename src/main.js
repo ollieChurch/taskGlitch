@@ -92,8 +92,8 @@ Vue.mixin({
 		},
 
 		getScheduleTasks(tasks, sessionInMins, includeBreaks) {
-			const breakFrequency = this.$store.state.settings.breaks.frequency
-			const breakLength = this.$store.state.settings.breaks.length
+			const breakFrequency = this.$store.state.account.settings?.breaks?.frequency ?? this.$store.state.defaultSettings.breaks.frequency
+			const breakLength = this.$store.state.account.settings?.breaks?.length ?? this.$store.state.defaultSettings.breaks.length
 			const taskType = this.$store.state.taskType
 
 			const schedule = []
@@ -177,6 +177,22 @@ Vue.mixin({
 				finish: finish,
 				sessionInMins: sessionInMins
 			}
+		},
+
+		saveAccountToDatabase(account) {
+			const db = getDatabase(this.$store.state.app)
+			const accountRef = ref(
+				db,
+				`account/${this.$store.state.user.uid}`
+			)
+
+			if (account.settings == null) {
+				account.settings = this.$store.state.defaultSettings
+			}
+
+			set(accountRef, account).then(() => {
+				console.log('updated account: ', account)
+			})
 		}
 	}
 })

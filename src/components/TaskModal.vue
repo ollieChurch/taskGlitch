@@ -131,6 +131,7 @@
 	export default {
 		created() {
 			this.task = { ...this.taskDefaults }
+			this.taskDefaults.sizing = this.getAccountSettings.sizes.short
 		},
 
 		data() {
@@ -140,7 +141,7 @@
 				taskDefaults: {
 					name: null,
 					priority: this.$store.state.priorities.medium.value,
-					sizing: this.$store.state.settings.sizes.short,
+					sizing: this.$store.state.defaultSettings.sizes.short,
 					category: null,
 					targetDateTime: null,
 					deadline: null,
@@ -157,14 +158,14 @@
 		},
 
 		computed: {
-			...mapGetters(['getCategories']),
+			...mapGetters(['getCategories', 'getAccountSettings']),
 
 			priorities() {
 				return this.$store.state.priorities
 			},
 
 			sizes() {
-				return this.$store.state.settings.sizes
+				return this.getAccountSettings.sizes
 			},
 
 			priorityOptions() {

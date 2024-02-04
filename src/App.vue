@@ -56,6 +56,31 @@
 					db,
 					`schedule/${this.$store.state.user.uid}`
 				)
+				const accountRef = ref(
+					db,
+					`account/${this.$store.state.user.uid}`
+				)
+
+				onValue(accountRef, snapshot => {
+					const currentAccount = snapshot.val()
+					console.log('account snapshot', currentAccount)
+					this.$store.commit('setAccount', currentAccount)
+
+					const currentAppVersion = this.$store.state.appVersion
+					
+					if (currentAppVersion == currentAccount.lastLoginVersion) {
+						return
+					}
+
+					// TODO: logic here for triggering patch notes to user
+
+					const newAccount = {
+						...currentAccount,
+						lastLoginVersion: currentAppVersion
+					}
+
+					this.saveAccountToDatabase(newAccount)
+				})
 
 				onValue(completedRef, snapshot => {
 					console.log('completed snapshot', snapshot.val())
