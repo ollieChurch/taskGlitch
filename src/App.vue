@@ -68,7 +68,7 @@
 
 					const currentAppVersion = this.$store.state.appVersion
 					
-					if (currentAppVersion == currentAccount.lastLoginVersion) {
+					if (currentAppVersion == currentAccount?.lastLoginVersion) {
 						return
 					}
 
