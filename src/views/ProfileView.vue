@@ -36,100 +36,39 @@
 					<i class="fas fa-edit"></i>
 				</b-link>
 			</div>
-
-			<b-card-title>Task Length</b-card-title>
-			<div class="mb-4">
-				<b-row>
-					<b-col class="col-6 col-sm-5 ps-4">
-						<b-card-text>short</b-card-text>
-					</b-col>
-					<b-col>
-						<b-card-text
-							>{{ settings.sizes.short }} mins</b-card-text
-						>
-					</b-col>
-				</b-row>
-				<b-row>
-					<b-col class="col-6 col-sm-5 ps-4">
-						<b-card-text>mid</b-card-text>
-					</b-col>
-					<b-col>
-						<b-card-text>{{ settings.sizes.mid }} mins</b-card-text>
-					</b-col>
-				</b-row>
-				<b-row>
-					<b-col class="col-6 col-sm-5 ps-4">
-						<b-card-text>long</b-card-text>
-					</b-col>
-					<b-col>
-						<b-card-text
-							>{{ settings.sizes.long }} mins</b-card-text
-						>
-					</b-col>
-				</b-row>
-				<b-row>
-					<b-col class="col-6 col-sm-5 ps-4">
-						<b-card-text>very long</b-card-text>
-					</b-col>
-					<b-col>
-						<b-card-text
-							>{{ settings.sizes.veryLong }} mins</b-card-text
-						>
-					</b-col>
-				</b-row>
-			</div>
-
-			<b-card-title>Breaks</b-card-title>
-			<div class="mb-4">
-				<b-row>
-					<b-col class="col-6 col-sm-5 ps-4">
-						<b-card-text>break length</b-card-text>
-					</b-col>
-					<b-col>
-						<b-card-text
-							>{{ settings.breaks.length }} mins</b-card-text
-						>
-					</b-col>
-				</b-row>
-				<b-row>
-					<b-col class="col-6 col-sm-5 ps-4">
-						<b-card-text>target frequency</b-card-text>
-					</b-col>
-					<b-col>
-						<b-card-text
-							>{{ settings.breaks.frequency }} mins</b-card-text
-						>
-					</b-col>
-				</b-row>
-			</div>
-
-			<b-card-title>Rescheduling</b-card-title>
-			<div class="mb-4">
-				<b-row>
-					<b-col class="col-6 col-sm-5 ps-4">
-						<b-card-text>Maintain finish time</b-card-text>
-					</b-col>
-					<b-col>
-						<b-card-text>{{
-							settings.maintainFinishTimeWhenRescheduling
-						}}</b-card-text>
-					</b-col>
-				</b-row>
+			<div
+				v-for="(settingsGroup, index) in Object.keys(settings)"
+				:key="`${settingsGroup}-settingDisplay-${index}`"
+			>
+				<b-card-title>{{ settingsGroup }}</b-card-title>
+				<div class="mb-4">
+					<b-row v-for="setting in Object.keys(settings[settingsGroup])" :key="`${setting}-${settingsGroup}-settingDisplay`">
+						<b-col class="col-6 col-sm-5 ps-4">
+							<b-card-text>{{ setting }}</b-card-text>
+						</b-col>
+						<b-col>
+							<b-card-text>
+								{{ createSettingString(settings[settingsGroup][setting]) }}
+							</b-card-text>
+						</b-col>
+					</b-row>
+				</div>
 			</div>
 		</div>
 		<hr />
 		<h3 class="mb-4">Danger Zone</h3>
-		<div class="d-flex justify-content-between align-items-baseline">
-			<b-card-title class="text-danger">Restore Default Settings</b-card-title>
+		<div class="d-flex justify-content-between align-items-center">
+			<b-card-title class="text-danger"
+				>Restore Default Settings</b-card-title
+			>
 			<b-btn
-			variant="danger"
-			class="font-weight-bold"
-			@click="restoreDefaultSettings()"
-		>
-			Restore
-		</b-btn>
+				variant="danger"
+				class="font-weight-bold"
+				@click="restoreDefaultSettings()"
+			>
+				Restore
+			</b-btn>
 		</div>
-		
 	</content-card>
 </template>
 
@@ -175,6 +114,10 @@
 				)
 				this.saveAccountToDatabase(this.$store.state.account)
 				this.settings = this.getAccountSettings
+			},
+
+			createSettingString(settingValue) {
+				return typeof(settingValue) == 'number' ? `${settingValue} mins` : settingValue
 			}
 		}
 	}

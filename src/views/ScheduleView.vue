@@ -79,7 +79,7 @@
 
 			maintainFinish() {
 				return (
-					this.getAccountSettings.maintainFinishTimeWhenRescheduling
+					this.getAccountSettings.rescheduling.maintainFinishTime
 				)
 			},
 

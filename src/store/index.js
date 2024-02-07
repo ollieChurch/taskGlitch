@@ -52,17 +52,19 @@ export default new Vuex.Store({
 			systemBreak: 'systemBreak'
 		}),
 		defaultSettings: {
-			sizes: {
+			taskLength: {
 				short: 15,
 				mid: 30,
 				long: 60,
 				veryLong: 120
 			},
 
-			maintainFinishTimeWhenRescheduling: true,
+			rescheduling: {
+				maintainFinishTime: true
+			},
 
 			breaks: {
-				frequency: 120,
+				targetFrequency: 120,
 				length: 10
 			}
 		},

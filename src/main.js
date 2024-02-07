@@ -92,7 +92,7 @@ Vue.mixin({
 		},
 
 		getScheduleTasks(tasks, sessionInMins, includeBreaks) {
-			const breakFrequency = this.$store.state.account.settings?.breaks?.frequency ?? this.$store.state.defaultSettings.breaks.frequency
+			const breakFrequency = this.$store.state.account.settings?.breaks?.targetFrequency ?? this.$store.state.defaultSettings.breaks.targetFrequency
 			const breakLength = this.$store.state.account.settings?.breaks?.length ?? this.$store.state.defaultSettings.breaks.length
 			const taskType = this.$store.state.taskType
 
