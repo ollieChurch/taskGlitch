@@ -1,6 +1,7 @@
 # taskGlitch
 
 ### Version
+0.5.0 - Adds ability to customise account settings\
 0.4.1 - Reschedule only changes startTime if it is in the past\
 0.4.0 - Adds breaks option to scheduling\
 0.3.0 - Adds web manifest and icons\

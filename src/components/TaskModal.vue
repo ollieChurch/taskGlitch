@@ -130,6 +130,7 @@
 
 	export default {
 		created() {
+			this.taskDefaults.sizing = this.sizes.short
 			this.task = { ...this.taskDefaults }
 		},
 
@@ -140,7 +141,7 @@
 				taskDefaults: {
 					name: null,
 					priority: this.$store.state.priorities.medium.value,
-					sizing: this.$store.state.settings.sizes.short,
+					sizing: null,
 					category: null,
 					targetDateTime: null,
 					deadline: null,
@@ -157,14 +158,14 @@
 		},
 
 		computed: {
-			...mapGetters(['getCategories']),
+			...mapGetters(['getCategories', 'getAccountSettings']),
 
 			priorities() {
 				return this.$store.state.priorities
 			},
 
 			sizes() {
-				return this.$store.state.settings.sizes
+				return this.getAccountSettings.taskLength
 			},
 
 			priorityOptions() {
@@ -233,14 +234,14 @@
 				this.$store.commit('setTaskToPatch', { taskToPatch: null })
 			},
 
-			saveToDatabase() {
+			async saveToDatabase() {
 				const db = getDatabase(this.$store.state.app)
 				const tasksRef = ref(
 					db,
 					`tasks/${this.$store.state.user.uid}/${this.task.id}`
 				)
 
-				set(tasksRef, this.task).then(() => {
+				await set(tasksRef, this.task).then(() => {
 					console.log('added task: ', this.task)
 				})
 			},
@@ -258,6 +259,7 @@
 
 			deleteTask(task) {
 				this.removeTask(task, 'tasks')
+
 				this.$nextTick(() => {
 					this.$bvModal.hide('taskModal')
 				})

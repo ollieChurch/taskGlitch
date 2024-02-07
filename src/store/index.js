@@ -5,10 +5,12 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
 	state: {
+		appVersion: '0.5.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
 		user: null,
+		account: {},
 		schedule: {},
 		updateScheduleStatus: false,
 		app: {},
@@ -49,18 +51,20 @@ export default new Vuex.Store({
 			userTask: 'userTask',
 			systemBreak: 'systemBreak'
 		}),
-		settings: {	
-			sizes: {
+		defaultSettings: {
+			taskLength: {
 				short: 15,
 				mid: 30,
 				long: 60,
 				veryLong: 120
 			},
 
-			maintainFinishTimeWhenRescheduling: true,
+			rescheduling: {
+				maintainFinishTime: true
+			},
 
 			breaks: {
-				frequency: 120,
+				targetFrequency: 120,
 				length: 10
 			}
 		},
@@ -95,13 +99,20 @@ export default new Vuex.Store({
 
 		getAllTasks(state) {
 			return [...state.completed, ...state.tasks]
+		},
+
+		getAccountSettings(state) {
+			return state.account.settings ?? state.defaultSettings
 		}
 	},
 	mutations: {
 		setCompleted(state, payload) {
 			if (payload) {
 				state.completed = Object.values(payload).sort((a, b) => {
-					return new Date(b.completedDateTime) - new Date(a.completedDateTime)
+					return (
+						new Date(b.completedDateTime) -
+						new Date(a.completedDateTime)
+					)
 				})
 			}
 		},
@@ -109,7 +120,11 @@ export default new Vuex.Store({
 		setTasks(state, payload) {
 			if (payload) {
 				state.tasks = Object.values(payload).sort((a, b) => {
-					return new Date(a.targetDateTime) - new Date(b.targetDateTime) || a.priority - b.priority
+					return (
+						new Date(a.targetDateTime) -
+							new Date(b.targetDateTime) ||
+						a.priority - b.priority
+					)
 				})
 			}
 		},
@@ -118,10 +133,11 @@ export default new Vuex.Store({
 			state.schedule = payload
 			state.updateScheduleStatus = true
 		},
-		
+
 		setScheduleTaskCompleted(state, payload) {
 			const newSchedule = state.schedule
-			newSchedule.tasks[payload.taskIndex].completed = payload.isTaskCompleted
+			newSchedule.tasks[payload.taskIndex].completed =
+				payload.isTaskCompleted
 			state.schedule = newSchedule
 		},
 
@@ -143,10 +159,16 @@ export default new Vuex.Store({
 
 		setUpdateScheduleStatus(state, payload) {
 			state.updateScheduleStatus = payload
+		},
+
+		setAccount(state, payload) {
+			state.account = payload
+		},
+
+		setAccountSettings(state, payload) {
+			state.account.settings = payload
 		}
 	},
-	actions: {
-	},
-	modules: {
-	}
+	actions: {},
+	modules: {}
 })

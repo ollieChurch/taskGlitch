@@ -12,7 +12,7 @@
                         <router-link to="/dashboard" class="pe-lg-4 pb-0 mb-0 h4 text-decoration-none">Dashboard</router-link>
                         <router-link to="/" class="pe-lg-4 pb-0 mb-0 h4 text-decoration-none">Tasks</router-link>
                         <router-link to="/schedule" class="pe-lg-4 pb-0 mb-0 h4 text-decoration-none">Glitch</router-link>
-                        <router-link to="/settings" class="pb-0 mb-0 h4 text-decoration-none">Settings</router-link>
+						<router-link to="/profile" class="pb-0 mb-0 h4 text-decoration-none">Profile</router-link>
                     </template>
                 </b-navbar-nav>
             </b-collapse>

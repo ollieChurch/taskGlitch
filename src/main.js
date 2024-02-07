@@ -32,7 +32,7 @@ Vue.mixin({
 			}
 		},
 
-		moveTask(task, list) {
+		async moveTask(task, list) {
 			const db = getDatabase(this.$store.state.app)
 
 			const listRef = ref(
@@ -61,39 +61,39 @@ Vue.mixin({
 					break
 			}
 
-			set(listRef, task).then(() => {
+			await set(listRef, task).then(() => {
 				this.removeTask(task, removeFromList)
 				console.log('moved task: ', task)
 			})
 		},
 
-		removeTask(task, list) {
+		async removeTask(task, list) {
 			const db = getDatabase(this.$store.state.app)
 			const listRef = ref(
 				db,
 				`${list}/${this.$store.state.user.uid}/${task.id}`
 			)
 
-			remove(listRef).then(() => {
+			await remove(listRef).then(() => {
 				console.log(`removed from ${list}: `, task)
 			})
 		},
 
-		saveScheduleToDatabase(schedule) {
+		async saveScheduleToDatabase(schedule) {
 			const db = getDatabase(this.$store.state.app)
 			const scheduleRef = ref(
 				db,
 				`schedule/${this.$store.state.user.uid}`
 			)
 
-			set(scheduleRef, schedule).then(() => {
+			await set(scheduleRef, schedule).then(() => {
 				console.log('updated schedule: ', schedule)
 			})
 		},
 
 		getScheduleTasks(tasks, sessionInMins, includeBreaks) {
-			const breakFrequency = this.$store.state.settings.breaks.frequency
-			const breakLength = this.$store.state.settings.breaks.length
+			const breakFrequency = this.$store.state.account.settings?.breaks?.targetFrequency ?? this.$store.state.defaultSettings.breaks.targetFrequency
+			const breakLength = this.$store.state.account.settings?.breaks?.length ?? this.$store.state.defaultSettings.breaks.length
 			const taskType = this.$store.state.taskType
 
 			const schedule = []
@@ -177,6 +177,22 @@ Vue.mixin({
 				finish: finish,
 				sessionInMins: sessionInMins
 			}
+		},
+
+		async saveAccountToDatabase(account) {
+			const db = getDatabase(this.$store.state.app)
+			const accountRef = ref(
+				db,
+				`account/${this.$store.state.user.uid}`
+			)
+
+			if (account.settings == null) {
+				account.settings = this.$store.state.defaultSettings
+			}
+
+			await set(accountRef, account).then(() => {
+				console.log('updated account: ', account)
+			})
 		}
 	}
 })
