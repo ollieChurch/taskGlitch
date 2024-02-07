@@ -234,14 +234,14 @@
 				this.$store.commit('setTaskToPatch', { taskToPatch: null })
 			},
 
-			saveToDatabase() {
+			async saveToDatabase() {
 				const db = getDatabase(this.$store.state.app)
 				const tasksRef = ref(
 					db,
 					`tasks/${this.$store.state.user.uid}/${this.task.id}`
 				)
 
-				set(tasksRef, this.task).then(() => {
+				await set(tasksRef, this.task).then(() => {
 					console.log('added task: ', this.task)
 				})
 			},
@@ -259,6 +259,7 @@
 
 			deleteTask(task) {
 				this.removeTask(task, 'tasks')
+
 				this.$nextTick(() => {
 					this.$bvModal.hide('taskModal')
 				})

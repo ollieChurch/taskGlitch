@@ -32,7 +32,7 @@ Vue.mixin({
 			}
 		},
 
-		moveTask(task, list) {
+		async moveTask(task, list) {
 			const db = getDatabase(this.$store.state.app)
 
 			const listRef = ref(
@@ -61,32 +61,32 @@ Vue.mixin({
 					break
 			}
 
-			set(listRef, task).then(() => {
+			await set(listRef, task).then(() => {
 				this.removeTask(task, removeFromList)
 				console.log('moved task: ', task)
 			})
 		},
 
-		removeTask(task, list) {
+		async removeTask(task, list) {
 			const db = getDatabase(this.$store.state.app)
 			const listRef = ref(
 				db,
 				`${list}/${this.$store.state.user.uid}/${task.id}`
 			)
 
-			remove(listRef).then(() => {
+			await remove(listRef).then(() => {
 				console.log(`removed from ${list}: `, task)
 			})
 		},
 
-		saveScheduleToDatabase(schedule) {
+		async saveScheduleToDatabase(schedule) {
 			const db = getDatabase(this.$store.state.app)
 			const scheduleRef = ref(
 				db,
 				`schedule/${this.$store.state.user.uid}`
 			)
 
-			set(scheduleRef, schedule).then(() => {
+			await set(scheduleRef, schedule).then(() => {
 				console.log('updated schedule: ', schedule)
 			})
 		},
@@ -179,7 +179,7 @@ Vue.mixin({
 			}
 		},
 
-		saveAccountToDatabase(account) {
+		async saveAccountToDatabase(account) {
 			const db = getDatabase(this.$store.state.app)
 			const accountRef = ref(
 				db,
@@ -190,7 +190,7 @@ Vue.mixin({
 				account.settings = this.$store.state.defaultSettings
 			}
 
-			set(accountRef, account).then(() => {
+			await set(accountRef, account).then(() => {
 				console.log('updated account: ', account)
 			})
 		}
