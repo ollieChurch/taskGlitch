@@ -34,10 +34,17 @@
 				) {
 					console.log('updating user')
 					this.$store.commit('setUser', user)
-					this.$router.push('/')
 					this.linkToDatabase()
+					if (this.$route.query.mode) {
+						const newPath = this.$route.fullPath.replace('/login', '/user')
+						this.$router.push(newPath)
+					} else {
+						this.$router.push('/')
+					}
 				} else if (!user) {
 					this.$store.commit('setCompleted', [])
+					this.$store.commit('setTasks', [])
+					this.$store.commit('setAccount', {})
 					this.$store.commit('setUser', null)
 					console.log('user should be logged out')
 				}
@@ -67,7 +74,6 @@
 					this.$store.commit('setAccount', currentAccount)
 
 					const currentAppVersion = this.$store.state.appVersion
-					
 					if (currentAppVersion == currentAccount?.lastLoginVersion) {
 						return
 					}
