@@ -120,7 +120,8 @@
 <script>
 	import {
 		signInWithEmailAndPassword,
-		createUserWithEmailAndPassword
+		createUserWithEmailAndPassword,
+		sendEmailVerification
 	} from 'firebase/auth'
 	import ContentCard from '@/components/ContentCard.vue'
 	import glitch from '@/assets/glitch.png'
@@ -171,9 +172,12 @@
 							this.email,
 							this.password
 						)
-						console.log(response)
-					} catch {
+						await sendEmailVerification(response.user)
+						console.log('sent email verification')
+					} catch (ex) {
+						console.error(ex)
 						window.alert('something went wrong')
+						// TODO: Better unhappy path handling of register
 					}
 				} else {
 					const message = this.validEmail
@@ -185,14 +189,14 @@
 
 			async login() {
 				try {
-					const response = await signInWithEmailAndPassword(
+					await signInWithEmailAndPassword(
 						this.auth,
 						this.email,
 						this.password
 					)
-					console.log(response)
 				} catch {
-					window.alert('something went wrong')
+					window.alert('The credentials entered do not match to an account. Please try again.')
+					// TODO: Better unhappy path handling of register
 				}
 			}
 		}

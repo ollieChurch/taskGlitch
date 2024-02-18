@@ -5,6 +5,7 @@ import LoginView from '../views/LoginView.vue'
 import TaskView from '../views/TaskView.vue'
 import ScheduleView from '../views/ScheduleView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import UserManagementView from '../views/UserManagementView.vue'
 
 Vue.use(VueRouter)
 
@@ -33,7 +34,12 @@ const routes = [
         path: '/',
         name: 'tasks',
         component: TaskView
-    },
+	},
+	{
+		path: '/user',
+		name: 'user',
+		component: UserManagementView
+	}
 ]
 
 const router = new VueRouter({
