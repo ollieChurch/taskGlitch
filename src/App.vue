@@ -35,18 +35,14 @@
 					console.log('updating user')
 					this.$store.commit('setUser', user)
 					this.linkToDatabase()
-					if (this.$route.query.mode) {
-						const newPath = this.$route.fullPath.replace('/login', '/user')
-						this.$router.push(newPath)
-					} else {
-						this.$router.push('/')
-					}
+					this.redirectToFirstPage()
 				} else if (!user) {
 					this.$store.commit('setCompleted', [])
 					this.$store.commit('setTasks', [])
 					this.$store.commit('setAccount', {})
 					this.$store.commit('setUser', null)
 					console.log('user should be logged out')
+					this.redirectToFirstPage()
 				}
 			})
 		},
@@ -102,6 +98,11 @@
 					console.log('schedule snapshot', snapshot.val())
 					this.$store.commit('setSchedule', snapshot.val())
 				})
+			},
+
+			redirectToFirstPage() {
+				const newPath = this.$route.fullPath.replace('/login', '/user')
+				this.$route.query.mode ? this.$router.push(newPath) : this.$router.push('/')
 			}
 		}
 	}
