@@ -1,7 +1,8 @@
 # taskGlitch
 
 ### Version
-0.6.0 - Adds email validation journey
+0.7.0 - Adds reset password journey\
+0.6.0 - Adds email validation journey\
 0.5.0 - Adds ability to customise account settings\
 0.4.1 - Reschedule only changes startTime if it is in the past\
 0.4.0 - Adds breaks option to scheduling\
