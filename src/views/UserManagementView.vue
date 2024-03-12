@@ -51,7 +51,7 @@
 		},
 
 		mounted() {
-			this.auth.currentUser ? this.handleUserManagement() : this.displayError()
+			this.handleUserManagement()
 		},
 
 		methods: {
@@ -84,7 +84,7 @@
 			},
 
 			async handleVerifyEmail(actionCode) {
-				if (!this.auth.currentUser.emailVerified) {
+				if (!this.auth.currentUser?.emailVerified) {
 					try {
 						await applyActionCode(this.auth, actionCode)
 
@@ -100,7 +100,7 @@
 							'Please try verifying your email again later'
 						)
 					}
-				} else if (this.auth.currentUser.emailVerified) {
+				} else if (this.auth.currentUser?.emailVerified) {
 					console.log('user email is already verified')
 					this.displayTaskSuccess(
 						'Thanks for verifying your email address'
