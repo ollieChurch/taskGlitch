@@ -220,9 +220,10 @@
 						this.task.isHardDeadline = false
 					}
 
-					this.task.score = this.scorePriority()
+					this.task.score = this.scorePriority(this.task)
 
 					this.saveToDatabase()
+					this.rescoreActiveBacklog()
 
 					this.$nextTick(() => {
 						this.$bvModal.hide('taskModal')
@@ -241,9 +242,8 @@
 					`tasks/${this.$store.state.user.uid}/${this.task.id}`
 				)
 
-				await set(tasksRef, this.task).then(() => {
-					console.log('added task: ', this.task)
-				})
+				await set(tasksRef, this.task)
+				console.log('added task: ', this.task)
 			},
 
 			isFormValid() {
@@ -263,36 +263,6 @@
 				this.$nextTick(() => {
 					this.$bvModal.hide('taskModal')
 				})
-			},
-
-			scorePriority() {
-				const todayDate = new Date()
-				const millisecsToDays = 1000 * 60 * 60 * 24
-				const priorityScore = this.task.priority * 10
-				let deadlineScore
-
-				if (this.task.targetDateTime) {
-					const deadlineDiffDays = Math.ceil(
-						(new Date(this.task.targetDateTime) - todayDate) /
-							millisecsToDays
-					)
-					const deadlineModifier = this.task.isHardDeadline ? 0.25 : 1
-					deadlineScore = deadlineDiffDays * deadlineModifier
-				} else {
-					deadlineScore = priorityScore
-				}
-
-				const createdDateTime = new Date(this.task.createdDateTime)
-				const createdDateDiffDays = Math.ceil(
-					(todayDate - createdDateTime) / millisecsToDays
-				)
-				const createdDateModifier =
-					this.task.priority == 0 ? 1 : this.task.priority
-				const createdDateScore =
-					createdDateDiffDays / createdDateModifier
-
-				const score = priorityScore + deadlineScore - createdDateScore
-				return score
 			}
 		}
 	}

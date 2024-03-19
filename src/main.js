@@ -61,10 +61,10 @@ Vue.mixin({
 					break
 			}
 
-			await set(listRef, task).then(() => {
-				this.removeTask(task, removeFromList)
-				console.log('moved task: ', task)
-			})
+			await set(listRef, task)
+			this.removeTask(task, removeFromList)
+			console.log('moved task: ', task)
+			this.rescoreActiveBacklog()
 		},
 
 		async removeTask(task, list) {
@@ -74,9 +74,8 @@ Vue.mixin({
 				`${list}/${this.$store.state.user.uid}/${task.id}`
 			)
 
-			await remove(listRef).then(() => {
-				console.log(`removed from ${list}: `, task)
-			})
+			await remove(listRef)
+			console.log(`removed from ${list}: `, task)
 		},
 
 		async saveScheduleToDatabase(schedule) {
@@ -86,9 +85,8 @@ Vue.mixin({
 				`schedule/${this.$store.state.user.uid}`
 			)
 
-			await set(scheduleRef, schedule).then(() => {
-				console.log('updated schedule: ', schedule)
-			})
+			await set(scheduleRef, schedule)
+			console.log('updated schedule: ', schedule)
 		},
 
 		getScheduleTasks(tasks, sessionInMins, includeBreaks) {
@@ -190,9 +188,60 @@ Vue.mixin({
 				account.settings = this.$store.state.defaultSettings
 			}
 
-			await set(accountRef, account).then(() => {
-				console.log('updated account: ', account)
+			await set(accountRef, account)
+			console.log('updated account: ', account)
+		},
+
+		rescoreActiveBacklog() {
+			const db = getDatabase(this.$store.state.app)
+
+			const backlog = this.$store.state.tasks
+
+			backlog.forEach(async task => {
+				console.log(`${task.name} current score: ${task.score}`)
+				const listRef = ref(
+					db,
+					`tasks/${this.$store.state.user.uid}/${task.id}`
+				)
+
+				const newScore = this.scorePriority(task)
+
+				if (task.score != newScore) {
+					task.score = newScore
+					await set(listRef, task)
+					console.log(`updated ${task.name} score: ${task.score}`)
+				}
 			})
+		},
+
+		scorePriority(task) {
+			const todayDate = new Date()
+			const millisecsToDays = (1000 * 60 * 60 * 24)
+			const priorityScore = this.task.priority * 10
+			let deadlineScore
+
+			if (task.targetDateTime) {
+				const deadlineDiffDays = Math.ceil(
+					(new Date(task.targetDateTime) - todayDate) /
+					millisecsToDays
+				)
+				const deadlineModifier = task.isHardDeadline ? 0.25 : 1
+				deadlineScore = deadlineDiffDays * deadlineModifier
+			} else {
+				deadlineScore = priorityScore
+			}
+
+			const createdDateTime = new Date(task.createdDateTime)
+			const createdDateDiffDays = Math.ceil(
+				(todayDate - createdDateTime) / millisecsToDays
+			)
+			const createdDateModifier =
+				task.priority == 0 ? 1 : task.priority
+			const createdDateScore =
+				createdDateDiffDays / createdDateModifier
+
+			const score = priorityScore + deadlineScore - createdDateScore
+			return score
 		}
 	}
 })
