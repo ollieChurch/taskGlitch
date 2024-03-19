@@ -1,6 +1,8 @@
-# taskGlitch
+# TaskGlitch
 
 ### Version
+0.8.0 - Redesigns Dashboard\
+0.7.1 - Introduces rescoring of priority over time\
 0.7.0 - Adds reset password journey\
 0.6.0 - Adds email validation journey\
 0.5.0 - Adds ability to customise account settings\

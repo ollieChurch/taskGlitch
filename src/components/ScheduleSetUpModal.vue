@@ -140,6 +140,9 @@
 
 				this.$nextTick(() => {
 					this.$bvModal.hide('scheduleSetUpModal')
+					if (this.$route.path != '/schedule') {
+						this.$router.push('/schedule')
+					}
 				})
 			}
 		}
