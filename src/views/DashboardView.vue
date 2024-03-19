@@ -15,13 +15,13 @@
 					>
 						<b-icon icon="stars"></b-icon>
 					</b-btn>
-					<b-card-title class="text-start">
-						Schedule with Glitch
+					<b-card-title>
+						Glitch it
 					</b-card-title>
 				</div>
 
 				<div
-					class="col d-flex flex-column justify-content-between align-items-center mb-3 gap-3"
+					class="col d-flex flex-column justify-content-start align-items-center mb-3 gap-3"
 				>
 					<b-btn
 						@click="addTask()"
@@ -31,8 +31,8 @@
 					>
 						<b-icon icon="plus-lg"></b-icon>
 					</b-btn>
-					<b-card-title class="text-start">
-						Add a new task
+					<b-card-title>
+						Add task
 					</b-card-title>
 				</div>
 			</div>
