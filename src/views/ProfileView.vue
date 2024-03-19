@@ -1,6 +1,9 @@
 <template>
 	<content-card class="text-left">
-		<h1>Profile</h1>
+		<div class="d-flex align-items-center justify-content-between mb-3">
+				<h1 class="text-left mb-0">Profile</h1>
+				<b-btn @click="logout()" variant="warning">Logout</b-btn>
+			</div>
 		<hr />
 		<div v-if="user?.email">
 			<div class="d-flex align-items-center justify-content-between mb-3">
@@ -79,6 +82,7 @@
 </template>
 
 <script>
+	import { signOut } from 'firebase/auth'
 	import ContentCard from '@/components/ContentCard.vue'
 	import SettingsModal from '@/components/SettingsModal.vue'
 	import { mapGetters } from 'vuex'
@@ -104,6 +108,10 @@
 		},
 
 		methods: {
+			logout() {
+				signOut(this.$store.state.auth)
+			},
+
 			restoreDefaultSettings() {
 				this.$store.commit(
 					'setAccountSettings',
