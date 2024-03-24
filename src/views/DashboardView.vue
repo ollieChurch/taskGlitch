@@ -41,11 +41,11 @@
 				<b-card-title class="text-start font-weight-bold">
 					Highest Priority Task
 				</b-card-title>
-				<task-card :task="highestPriorityTask" class="mt-3" />
+				<task-card :task="getPrioritisedTasks[0]" class="mt-3" />
 			</div>
 			<div class="mb-4">
 				<b-card-title class="text-start font-weight-bold">Oldest Task</b-card-title>
-				<task-card :task="oldestTask" class="mt-3" />
+				<task-card :task="getTasksInCreatedOrder[0]" class="mt-3" />
 			</div>
 			<div>
 				<b-card-title class="text-start mb-2 font-weight-bold">
@@ -120,45 +120,13 @@
 			...mapGetters([
 				'getCategories',
 				'getPrioritisedTasks',
-				'getPriorityNames'
+				'getPriorityNames',
+				'getTasksInCreatedOrder'
 			]),
 
 			priorities() {
 				return this.$store.state.priorities
 			},
-
-			oldestTask() {
-				const tasks = this.getPrioritisedTasks
-
-				if (tasks && tasks.length > 0) {
-					const tasksSortedByCreatedDate = tasks.sort((a, b) =>
-						a.createdDateTime > b.createdDateTime
-							? 1
-							: b.createdDateTime > a.createdDateTime
-								? -1
-								: 0
-					)
-					return tasksSortedByCreatedDate[0]
-				} else {
-					return null
-				}
-			},
-
-			highestPriorityTask() {
-				const tasks = this.getPrioritisedTasks
-				if (tasks && tasks.length > 0) {
-					const tasksSortedByPriority = tasks.sort((a, b) =>
-						a.score > b.score
-							? 1
-							: b.score > a.score
-								? -1
-								: 0
-					)
-					return tasksSortedByPriority[0]
-				} else {
-					return null
-				}
-			}
 		},
 
 		methods: {

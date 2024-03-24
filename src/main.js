@@ -217,7 +217,7 @@ Vue.mixin({
 		scorePriority(task) {
 			const todayDate = new Date()
 			const millisecsToDays = (1000 * 60 * 60 * 24)
-			const priorityScore = this.task.priority * 10
+			const priorityScore = task.priority * 10
 			let deadlineScore
 
 			if (task.targetDateTime) {

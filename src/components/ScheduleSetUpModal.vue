@@ -103,8 +103,9 @@
 		},
 
 		methods: {
-			onSubmit(event) {
+			async onSubmit(event) {
 				event.preventDefault()
+				await this.rescoreActiveBacklog()
 				const filteredTasks = this.getPrioritisedTasks.filter(x =>
 					this.categoriesToInclude.includes(x.category)
 				)
