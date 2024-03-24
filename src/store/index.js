@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
 	state: {
-		appVersion: '0.8.0',
+		appVersion: '0.8.1',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -85,6 +85,15 @@ export default new Vuex.Store({
 				const tasksArray = state.tasks ?? []
 				return Object.values(tasksArray).sort((a, b) => {
 					return a.score - b.score
+				})
+			}
+		},
+
+		getTasksInCreatedOrder(state) {
+			if (state.tasks) {
+				const tasksArray = state.tasks ?? []
+				return Object.values(tasksArray).sort((a, b) => {
+					return new Date(a.createdDateTime) - new Date(b.createdDateTime)
 				})
 			}
 		},

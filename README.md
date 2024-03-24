@@ -1,6 +1,7 @@
 # TaskGlitch
 
 ### Version
+0.8.1 - Fixes bugs in priority scoring and dashboard\
 0.8.0 - Redesigns Dashboard\
 0.7.1 - Introduces rescoring of priority over time\
 0.7.0 - Adds reset password journey\
