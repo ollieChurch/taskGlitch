@@ -2,51 +2,31 @@
 	<div>
 		<content-card>
 			<h1 class="text-left mb-2">Dashboard</h1>
-			<hr class="pb-4"/>
+			<hr class="pb-4" />
 			<div class="row">
-				<div
-					class="col d-flex flex-column justify-content-between align-items-center mb-3 gap-3"
-				>
-					<b-btn
-						@click="openScheduleSetUp()"
-						variant="primary"
-						class="font-weight-bold py-2 px-4"
-						style="font-size: 1.75rem;"
-					>
-						<b-icon icon="stars"></b-icon>
-					</b-btn>
-					<b-card-title>
-						Glitch it
-					</b-card-title>
-				</div>
+				<icon-button
+					@buttonClicked="() => openScheduleSetUp()"
+					variant="primary"
+					icon="stars"
+					label="Glitch it"
+				/>
 
-				<div
-					class="col d-flex flex-column justify-content-start align-items-center mb-3 gap-3"
-				>
-					<b-btn
-						@click="addTask()"
-						variant="success"
-						class="font-weight-bold py-2 px-4"
-						style="font-size: 1.75rem;"
-					>
-						<b-icon icon="plus-lg"></b-icon>
-					</b-btn>
-					<b-card-title>
-						Add task
-					</b-card-title>
-				</div>
+				<icon-button
+					@buttonClicked="() => addTask()"
+					variant="success"
+					icon="plus-lg"
+					label="Add task"
+				/>
 			</div>
 			<hr class="pb-4" />
-			<div class="mb-4">
-				<b-card-title class="text-start font-weight-bold">
-					Highest Priority Task
-				</b-card-title>
-				<task-card :task="getPrioritisedTasks[0]" class="mt-3" />
-			</div>
-			<div class="mb-4">
-				<b-card-title class="text-start font-weight-bold">Oldest Task</b-card-title>
-				<task-card :task="getTasksInCreatedOrder[0]" class="mt-3" />
-			</div>
+			<filter-widget
+				title="Highest Priority Task"
+				:tasks="[getPrioritisedTasks[0]]"
+			/>
+			<filter-widget
+				title="Oldest Task"
+				:tasks="[getTasksInCreatedOrder[0]]"
+			/>
 			<div>
 				<b-card-title class="text-start mb-2 font-weight-bold">
 					Backlog Breakdown
@@ -78,9 +58,10 @@
 
 <script>
 	import ContentCard from '../components/ContentCard.vue'
-	import TaskCard from '../components/TaskCard.vue'
 	import TaskModal from '../components/TaskModal.vue'
 	import ScheduleSetUpModal from '../components/ScheduleSetUpModal.vue'
+	import IconButton from '../components/IconButton.vue'
+	import FilterWidget from '../components/FilterWidget.vue'
 	import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 	import { Doughnut } from 'vue-chartjs'
 	import { mapGetters } from 'vuex'
@@ -94,8 +75,9 @@
 			ContentCard,
 			TaskModal,
 			Doughnut,
-			TaskCard,
-			ScheduleSetUpModal
+			ScheduleSetUpModal,
+			IconButton,
+			FilterWidget
 		},
 
 		data() {
@@ -126,7 +108,7 @@
 
 			priorities() {
 				return this.$store.state.priorities
-			},
+			}
 		},
 
 		methods: {
@@ -135,7 +117,11 @@
 			},
 
 			openScheduleSetUp() {
-				this.$bvModal.show('scheduleSetUpModal')
+				if (this.$store.state.schedule) {
+					this.$router.push('/schedule')
+				} else {
+					this.$bvModal.show('scheduleSetUpModal')
+				}
 			},
 
 			setUpCategoryBreakdown() {
