@@ -3,6 +3,7 @@
 		<header-nav />
 		<router-view></router-view>
 		<page-footer />
+		<patch-notes-modal v-if="lastVersion" :lastVersion="lastVersion" />
 	</div>
 </template>
 
@@ -12,11 +13,19 @@
 	import { getDatabase, ref, onValue } from 'firebase/database'
 	import PageFooter from './components/PageFooter.vue'
 	import HeaderNav from './components/HeaderNav.vue'
+	import PatchNotesModal from './components/PatchNotesModal.vue'
 
 	export default {
 		components: {
 			PageFooter,
-			HeaderNav
+			HeaderNav,
+			PatchNotesModal
+		},
+
+		data() {
+			return {
+				lastVersion: null
+			}
 		},
 
 		async created() {
@@ -74,7 +83,11 @@
 						return
 					}
 
-					// TODO: logic here for triggering patch notes to user
+					this.lastVersion = currentAccount?.lastLoginVersion
+
+					this.$nextTick(() => {
+						this.$bvModal.show('patchNotesModal')
+					})
 
 					const newAccount = {
 						...currentAccount,
@@ -102,7 +115,9 @@
 
 			redirectToFirstPage() {
 				const newPath = this.$route.fullPath.replace('/login', '/user')
-				this.$route.query.mode ? this.$router.push(newPath) : this.$router.push('/')
+				this.$route.query.mode
+					? this.$router.push(newPath)
+					: this.$router.push('/')
 			}
 		}
 	}

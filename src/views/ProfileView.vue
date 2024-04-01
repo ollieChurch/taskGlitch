@@ -1,9 +1,9 @@
 <template>
 	<content-card class="text-left">
 		<div class="d-flex align-items-center justify-content-between mb-3">
-				<h1 class="text-left mb-0">Profile</h1>
-				<b-btn @click="logout()" variant="warning">Logout</b-btn>
-			</div>
+			<h1 class="text-left mb-0">Profile</h1>
+			<b-btn @click="logout()" variant="warning">Logout</b-btn>
+		</div>
 		<hr />
 		<div v-if="user?.email">
 			<div class="d-flex align-items-center justify-content-between mb-3">

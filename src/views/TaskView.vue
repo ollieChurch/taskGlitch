@@ -9,7 +9,7 @@
 				<b-tab title="Backlog">
 					<div class="pt-2">
 						<TaskCard
-							v-for="task in tasks"
+							v-for="task in getPrioritisedTasks"
 							:key="`task-${task.id}`"
 							:task="task"
 						/>
@@ -34,6 +34,7 @@
 	import ContentCard from '@/components/ContentCard.vue'
 	import TaskModal from '@/components/TaskModal.vue'
 	import TaskCard from '@/components/TaskCard.vue'
+import { mapGetters } from 'vuex'
 
 	export default {
 		name: 'TaskView',
@@ -49,9 +50,7 @@
 		},
 
 		computed: {
-			tasks() {
-				return this.$store.state.tasks
-			},
+			...mapGetters(['getPrioritisedTasks']),
 
 			completed() {
 				return this.$store.state.completed
