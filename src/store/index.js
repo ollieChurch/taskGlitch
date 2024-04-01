@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
 	state: {
-		appVersion: '0.8.1',
+		appVersion: '0.9.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},

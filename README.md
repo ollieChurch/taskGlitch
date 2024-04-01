@@ -1,6 +1,7 @@
 # TaskGlitch
 
 ### Version
+0.9.0 - Adds patch notes modal to communicate changes to users\
 0.8.2 - Refactors dashboard\
 0.8.1 - Fixes bugs in priority scoring and dashboard\
 0.8.0 - Redesigns Dashboard\
