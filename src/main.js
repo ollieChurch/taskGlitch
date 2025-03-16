@@ -155,7 +155,7 @@ Vue.mixin({
 			let start = new Date(
 				`${sessionFromDate.toDateString()} ${fromTime}`
 			)
-			
+
 			let finish = new Date(
 				`${sessionToDate.toDateString()} ${
 					toTime ?? fromTime
@@ -214,34 +214,58 @@ Vue.mixin({
 			})
 		},
 
+		// scorePriority(task) {
+		// 	const todayDate = new Date();
+		// 	const millisecsToDays = 1000 * 60 * 60 * 24;
+		// 	let score = 0;
+		// 	let priorityScore = task.priority * 10;
+		// 	let deadlineScore;
+		
+		// 	const createdDateTime = new Date(task.createdDateTime);
+		// 	const createdDateDiffDays = Math.ceil(
+		// 		(todayDate - createdDateTime) / millisecsToDays
+		// 	);
+		// 	const createdDateModifier = task.priority + 0.5;
+		// 	const createdDateScore = (createdDateDiffDays / createdDateModifier) * 0.1; // Increase the weight of createdDateScore
+		
+		// 	if (task.targetDateTime) {
+		// 		const deadlineDiffDays = Math.ceil(
+		// 			(new Date(task.targetDateTime) - todayDate) / millisecsToDays
+		// 		);
+		// 		let deadlineModifier = task.isHardDeadline ? 0.25 : 0.5; // Increase the impact of hard deadlines
+		
+		// 		if (deadlineDiffDays > 60) {
+		// 			deadlineScore = priorityScore + 30 - createdDateScore; // Adjust the impact for deadlines more than 30 days away
+		// 		} else {
+		// 			deadlineScore = (deadlineDiffDays * deadlineModifier) - (createdDateDiffDays * 0.0001); // Increase the impact of the deadline
+		// 		}
+		// 		score = deadlineScore; // Adjust the final score calculation
+		// 	} else {
+		// 		score = priorityScore + 30 - createdDateScore;
+		// 	}
+		
+		// 	return score;
+		// }
+
 		scorePriority(task) {
-			const todayDate = new Date()
-			const millisecsToDays = (1000 * 60 * 60 * 24)
-			const priorityScore = task.priority * 10
-			let deadlineScore
-
+			const todayDate = new Date();
+			const millisecsToDays = 1000 * 60 * 60 * 24;
+			const priorityScore = task.priority * 10;
+			const createdDateDiffDays = Math.ceil((todayDate - new Date(task.createdDateTime)) / millisecsToDays);
+			const createdDateScore = (createdDateDiffDays / (task.priority + 0.5)) * 0.1;
+		
 			if (task.targetDateTime) {
-				const deadlineDiffDays = Math.ceil(
-					(new Date(task.targetDateTime) - todayDate) /
-					millisecsToDays
-				)
-				const deadlineModifier = task.isHardDeadline ? 0.25 : 1
-				deadlineScore = deadlineDiffDays * deadlineModifier
+				const deadlineDiffDays = Math.ceil((new Date(task.targetDateTime) - todayDate) / millisecsToDays);
+				const deadlineModifier = task.isHardDeadline ? 0.25 : 0.5;
+		
+				if (deadlineDiffDays > 60) {
+					return priorityScore + 30 - createdDateScore;
+				} else {
+					return (deadlineDiffDays * deadlineModifier) + (task.priority * 0.3) - (createdDateDiffDays * 0.0001);
+				}
 			} else {
-				deadlineScore = priorityScore
+				return priorityScore + 30 - createdDateScore;
 			}
-
-			const createdDateTime = new Date(task.createdDateTime)
-			const createdDateDiffDays = Math.ceil(
-				(todayDate - createdDateTime) / millisecsToDays
-			)
-			const createdDateModifier =
-				task.priority == 0 ? 1 : task.priority
-			const createdDateScore =
-				createdDateDiffDays / createdDateModifier
-
-			const score = priorityScore + deadlineScore - createdDateScore
-			return score
 		}
 	}
 })
