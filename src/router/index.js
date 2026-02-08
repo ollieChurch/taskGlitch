@@ -1,5 +1,4 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import DashboardView from '../views/DashboardView.vue'
 import LoginView from '../views/LoginView.vue'
 import TaskView from '../views/TaskView.vue'
@@ -7,19 +6,17 @@ import ScheduleView from '../views/ScheduleView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import UserManagementView from '../views/UserManagementView.vue'
 
-Vue.use(VueRouter)
-
 const routes = [
     {
         path: '/dashboard',
         name: 'dashboard',
         component: DashboardView
-	},
-	{
-		path: '/profile',
-		name: 'profile',
-		component: ProfileView
-	},
+    },
+    {
+        path: '/profile',
+        name: 'profile',
+        component: ProfileView
+    },
     {
         path: '/login',
         name: 'login',
@@ -30,20 +27,20 @@ const routes = [
         name: 'schedule',
         component: ScheduleView
     },
-	{
+    {
         path: '/',
         name: 'tasks',
         component: TaskView
-	},
-	{
-		path: '/user',
-		name: 'user',
-		component: UserManagementView
-	}
+    },
+    {
+        path: '/user',
+        name: 'user',
+        component: UserManagementView
+    }
 ]
 
-const router = new VueRouter({
-    mode: 'history',
+const router = createRouter({
+    history: createWebHistory(),
     routes: routes
 })
 
