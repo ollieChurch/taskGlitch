@@ -57,50 +57,51 @@
 			</div>
 		</VueDraggable>
 		<div v-else>
-			<div
+			<template
 				v-for="task in scheduleDetails?.tasks"
 				:key="`schedule-${task.id}`"
-				class="flex items-center schedule-item"
 			>
-				<div v-if="shouldDisplayDate(task)" class="w-full">
+				<div v-if="shouldDisplayDate(task)">
 					<h5 class="mt-3 mb-1 text-left font-rajdhani font-semibold">
 						{{ task.date }}
 					</h5>
 				</div>
-				<p
-					class="w-3/12 text-left mb-0"
-					:class="isSimpleSchedule ? 'text-lg' : 'text-2xl'"
-				>
-					{{ task.time }}
-				</p>
-				<div class="my-2 p-2 bg-white rounded-lg shadow-sm border w-9/12">
-					<div class="flex items-center justify-between">
-						<h5
-							class="text-left mb-0 pl-0 pr-2 w-9/12 font-rajdhani font-semibold"
-							:class="task.completed ? 'completed-task' : ''"
-						>
-							{{ task.name }}
-						</h5>
-						<div class="w-2/12" v-if="!isSimpleSchedule">
-							<button
-								:class="task.completed
-									? 'bg-yellow-400 text-black hover:bg-yellow-500'
-									: 'bg-green-600 text-white hover:bg-green-700'"
-								class="px-2 py-1 rounded"
-								@click="toggleCompleted(task)"
+				<div class="flex items-center schedule-item">
+					<p
+						class="w-3/12 text-left mb-0 shrink-0"
+						:class="isSimpleSchedule ? 'text-lg' : 'text-2xl'"
+					>
+						{{ task.time }}
+					</p>
+					<div class="my-2 p-2 bg-white rounded-lg shadow-sm border w-9/12">
+						<div class="flex items-center justify-between">
+							<h5
+								class="text-left mb-0 pl-0 pr-2 flex-1 font-rajdhani font-semibold"
+								:class="task.completed ? 'completed-task' : ''"
 							>
-								<i
-									:class="`fas ${
-										task.completed
-											? 'fa-undo'
-											: 'fa-check-circle'
-									}`"
-								></i>
-							</button>
+								{{ task.name }}
+							</h5>
+							<div class="shrink-0" v-if="!isSimpleSchedule">
+								<button
+									:class="task.completed
+										? 'bg-yellow-400 text-black hover:bg-yellow-500'
+										: 'bg-green-600 text-white hover:bg-green-700'"
+									class="px-2 py-1 rounded"
+									@click="toggleCompleted(task)"
+								>
+									<i
+										:class="`fas ${
+											task.completed
+												? 'fa-undo'
+												: 'fa-check-circle'
+										}`"
+									></i>
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			</template>
 		</div>
 		<div class="mt-3 bg-white rounded-lg shadow-sm border p-3">
 			<h5 class="mb-0 font-rajdhani font-semibold">

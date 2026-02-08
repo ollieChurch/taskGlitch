@@ -1,20 +1,18 @@
 <template>
 	<div>
-		<div class="flex flex-wrap items-center mb-4">
-			<h1 class="mb-0 text-center sm:text-left order-2 sm:order-1 pt-3">
+		<div class="mb-4">
+			<div class="flex justify-center sm:justify-start mb-3">
+				<img :src="glitchImg" class="w-24" alt="a cartoon robot" />
+			</div>
+			<h1 class="mb-2 text-center sm:text-left font-rajdhani font-bold text-2xl">
 				Let's get to work!
 			</h1>
-			<div class="w-full order-3 sm:order-2 sm:w-9/12">
-				<p class="mb-0 sm:text-left">
-					Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-					Nullam a tortor sed enim rutrum molestie in at metus. Proin
-					ac accumsan ipsum, ac pellentesque odio. Aliquam mattis erat
-					tellus.
-				</p>
-			</div>
-			<div class="w-full px-5 py-3 sm:py-0 sm:px-0 order-1 sm:order-3 sm:w-3/12">
-				<img :src="glitchImg" class="w-full" alt="a cartoon robot" />
-			</div>
+			<p class="mb-0 text-center sm:text-left font-rajdhani">
+				Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+				Nullam a tortor sed enim rutrum molestie in at metus. Proin
+				ac accumsan ipsum, ac pellentesque odio. Aliquam mattis erat
+				tellus.
+			</p>
 		</div>
 		<div>
 			<button

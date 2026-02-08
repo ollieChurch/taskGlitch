@@ -1,5 +1,5 @@
 <template>
-	<div class="my-3 py-2 pl-5 pr-4 bg-white rounded-lg shadow-sm border relative task-card">
+	<div class="mt-4 mb-3 py-2 pl-5 pr-4 bg-white rounded-lg shadow-sm border relative task-card overflow-visible">
 		<div
 			class="priority-icon text-center text-white"
 			:style="{ backgroundColor: task.completedDateTime ? '#1a8754' : priorityIcons[task.priority].hex }"

@@ -1,13 +1,13 @@
 <template>
-	<div class="flex flex-col justify-between items-center mb-3 gap-3">
+	<div class="flex-1">
 		<button
 			@click="handleClick()"
 			:class="variantClass"
-			class="font-bold py-2 px-4 rounded text-3xl"
+			class="w-full font-bold py-3 px-4 rounded text-lg font-rajdhani"
 		>
-			<i :class="iconClass"></i>
+			<i :class="iconClass" class="mr-2"></i>
+			{{ label }}
 		</button>
-		<h5 class="font-rajdhani font-semibold">{{ label }}</h5>
 	</div>
 </template>
 

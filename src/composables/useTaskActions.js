@@ -78,8 +78,10 @@ export function useTaskActions() {
 			`schedule/${store.user.uid}`
 		)
 
-		await set(scheduleRef, schedule)
-		console.log('updated schedule: ', schedule)
+		// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
+		const plainSchedule = JSON.parse(JSON.stringify(schedule))
+		await set(scheduleRef, plainSchedule)
+		console.log('updated schedule: ', plainSchedule)
 	}
 
 	function getScheduleTasks(tasks, sessionInMins, includeBreaks) {
@@ -100,7 +102,8 @@ export function useTaskActions() {
 			const taskLength = task.sizing
 
 			if (totalTaskTime + taskLength <= sessionInMins) {
-				schedule.push(task)
+				// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
+				schedule.push(JSON.parse(JSON.stringify(task)))
 				totalTaskTime += taskLength
 				timeSinceLastBreak += taskLength
 			}

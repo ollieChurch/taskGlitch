@@ -1,7 +1,9 @@
 <template>
-	<div id="app" class="flex flex-col justify-between sm:min-h-screen">
+	<div id="app" class="flex flex-col min-h-screen">
 		<header-nav />
-		<router-view></router-view>
+		<main class="flex-1">
+			<router-view></router-view>
+		</main>
 		<page-footer />
 		<patch-notes-modal ref="patchNotesModalRef" v-if="lastVersion" :lastVersion="lastVersion" />
 	</div>
