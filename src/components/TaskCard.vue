@@ -1,49 +1,37 @@
 <template>
-	<b-card class="my-3 py-2 ps-5 pe-4 task-card" no-body>
+	<div class="my-3 py-2 pl-5 pr-4 bg-white rounded-lg shadow-sm border relative task-card">
 		<div
-			:class="`
-				priority-icon 
-				text-center
-				text-white
-				bg-${
-					task.completedDateTime
-						? 'success'
-						: priorityIcons[task.priority].color
-				}
-			`"
+			class="priority-icon text-center text-white"
+			:style="{ backgroundColor: task.completedDateTime ? '#1a8754' : priorityIcons[task.priority].hex }"
 		>
 			<i
-				:class="`
-					fas
-					fa-lg 
-					${
-						task.completedDateTime
-							? 'fa-check-circle'
-							: priorityIcons[task.priority].icon
-					}
-				`"
+				:class="`fas fa-lg ${
+					task.completedDateTime
+						? 'fa-check-circle'
+						: priorityIcons[task.priority].icon
+				}`"
 			></i>
 		</div>
-		<div class="row align-items-center">
-			<div class="col-10 pe-4">
-				<b-card-title
-					:class="`text-start mb-1 ${
+		<div class="flex items-center">
+			<div class="w-10/12 pr-4">
+				<h5
+					:class="`text-left mb-1 font-rajdhani font-semibold ${
 						task.completedDateTime
-							? 'text-decoration-line-through opacity-75'
+							? 'line-through opacity-75'
 							: ''
 					}`"
 				>
 					{{ task.name }}
 					<span v-if="debug"> - {{ task.score }}</span>
-				</b-card-title>
-				<div v-if="task.completedDateTime" class="row task-details opacity-75">
-					<b-link
-						class="col-sm-auto text-start"
+				</h5>
+				<div v-if="task.completedDateTime" class="flex flex-wrap task-details opacity-75 text-sm">
+					<a
+						class="sm:w-auto text-left cursor-pointer mr-3"
 						@click="editTask(task)"
 					>
 						<i class="fas fa-edit"></i>
-					</b-link>
-					<b-card-text class="col-sm-auto text-start mb-0">
+					</a>
+					<p class="sm:w-auto text-left mb-0">
 						<i class="fas fa-check-circle"></i>
 						{{
 							new Date(task.completedDateTime).toLocaleDateString(
@@ -55,21 +43,21 @@
 								}
 							)
 						}}
-					</b-card-text>
+					</p>
 				</div>
-				<div v-else class="row task-details">
-					<b-link
-						class="col-sm-auto text-start mb-0"
+				<div v-else class="flex flex-wrap task-details text-sm">
+					<a
+						class="sm:w-auto text-left mb-0 cursor-pointer mr-3"
 						@click="editTask(task)"
 					>
 						<i class="fas fa-edit"></i>
-					</b-link>
-					<b-card-text class="col-sm-auto text-start mb-0">
+					</a>
+					<p class="sm:w-auto text-left mb-0 mr-3">
 						<i class="fas fa-stopwatch"></i>
 						{{ task.sizing }} mins
-					</b-card-text>
-					<b-card-text
-						class="col-sm text-start mb-0"
+					</p>
+					<p
+						class="sm:flex-1 text-left mb-0"
 						v-if="task.targetDateTime"
 					>
 						<i
@@ -89,99 +77,96 @@
 								}
 							)
 						}}
-					</b-card-text>
+					</p>
 				</div>
 			</div>
-			<div class="col-2">
-				<b-button
-					variant="light"
-					class="complete-btn border"
+			<div class="w-2/12">
+				<button
+					class="complete-btn bg-gray-100 border rounded hover:bg-gray-200"
 					@click="handleMainAction(task)"
 				>
-					<b-icon
-						:icon="
+					<i
+						:class="`fas ${
 							task.completedDateTime
-								? 'arrow-counterclockwise'
-								: 'check-circle'
-						"
-					></b-icon>
-				</b-button>
+								? 'fa-undo'
+								: 'fa-check-circle'
+						}`"
+					></i>
+				</button>
 			</div>
 		</div>
-	</b-card>
+	</div>
 </template>
 
 <script>
-	export default {
-		props: ['task'],
+import { useAppStore } from '@/stores/app'
+import { useTaskActions } from '@/composables/useTaskActions'
 
-		data() {
-			return {
-				priorityIcons: [
-					{
-						icon: 'fa-fire',
-						color: 'danger'
-					},
-					{
-						icon: 'fa-thermometer-three-quarters',
-						color: 'warning'
-					},
-					{
-						icon: 'fa-thermometer-half',
-						color: 'success'
-					},
-					{
-						icon: 'fa-thermometer-quarter',
-						color: 'info'
-					}
-				]
-			}
+export default {
+	props: ['task'],
+	emits: ['editTask'],
+
+	setup() {
+		const store = useAppStore()
+		const { moveTask, rescoreActiveBacklog } = useTaskActions()
+		return { store, moveTask, rescoreActiveBacklog }
+	},
+
+	data() {
+		return {
+			priorityIcons: [
+				{ icon: 'fa-fire', hex: '#dc3546' },
+				{ icon: 'fa-thermometer-three-quarters', hex: '#ffc107' },
+				{ icon: 'fa-thermometer-half', hex: '#1a8754' },
+				{ icon: 'fa-thermometer-quarter', hex: '#10caf0' }
+			]
+		}
+	},
+
+	computed: {
+		debug() {
+			return this.store.debug
+		}
+	},
+
+	methods: {
+		editTask(task) {
+			this.store.setTaskToPatch(task)
+			this.$emit('editTask')
 		},
 
-		computed: {
-			debug() {
-				return this.$store.state.debug
-			}
-		},
-
-		methods: {
-			editTask(task) {
-				this.$store.commit('setTaskToPatch', task)
-				this.$bvModal.show('taskModal')
-			},
-
-			handleMainAction(task) {
-				const moveTo = task.completedDateTime ? 'tasks' : 'completed'
-				this.moveTask(task, moveTo)
-			}
+		handleMainAction(task) {
+			const moveTo = task.completedDateTime ? 'tasks' : 'completed'
+			this.moveTask(task, moveTo)
 		}
 	}
+}
 </script>
 
 <style scoped>
-	.task-card {
-		position: relative;
-	}
+.task-card {
+	position: relative;
+}
 
-	.complete-btn {
-		width: 50px;
-		text-align: center;
-		aspect-ratio: 1;
-		padding: 0;
-	}
+.complete-btn {
+	width: 50px;
+	text-align: center;
+	aspect-ratio: 1;
+	padding: 0;
+}
 
-	.task-details {
-		width: 100%;
-	}
+.task-details {
+	width: 100%;
+}
 
-	.priority-icon {
-		position: absolute;
-		top: -7px;
-		left: -7px;
-		aspect-ratio: 1;
-		width: 40px;
-		padding-top: 0.5em;
-		border-top-left-radius: 5px;
-		border-bottom-right-radius: 5px;
-	}
+.priority-icon {
+	position: absolute;
+	top: -7px;
+	left: -7px;
+	aspect-ratio: 1;
+	width: 40px;
+	padding-top: 0.5em;
+	border-top-left-radius: 5px;
+	border-bottom-right-radius: 5px;
+}
 </style>

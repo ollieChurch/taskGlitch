@@ -6,135 +6,138 @@
 				@createSchedule="openScheduleSetUp()"
 			/>
 			<div v-else>
-				<div class="row mb-3 gap-3">
-					<b-btn
+				<div class="flex flex-wrap mb-3 gap-3">
+					<button
 						@click="openScheduleSetUp()"
-						variant="success"
-						block
-						class="col font-weight-bold"
+						class="flex-1 bg-green-600 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-green-700"
 					>
 						New Schedule
-					</b-btn>
-					<b-btn
+					</button>
+					<button
 						@click="deleteSchedule()"
-						variant="danger"
-						block
-						class="col mt-0 font-weight-bold"
+						class="flex-1 bg-red-600 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-red-700"
 					>
 						Delete Schedule
-					</b-btn>
+					</button>
 				</div>
-				<div class="row gap-3">
-					<b-btn
+				<div class="flex flex-wrap gap-3">
+					<button
 						@click="reschedule()"
-						variant="warning"
-						class="col font-weight-bold"
+						class="flex-1 bg-yellow-400 text-black py-2 px-4 rounded font-bold font-rajdhani hover:bg-yellow-500"
 					>
 						Reschedule
-					</b-btn>
-					<b-btn
+					</button>
+					<button
 						@click="() => console.log('export clicked')"
-						variant="primary"
-						class="col font-weight-bold"
+						class="flex-1 bg-blue-600 text-white py-2 px-4 rounded font-bold font-rajdhani opacity-50 cursor-not-allowed"
 						disabled
 					>
 						Export
-					</b-btn>
+					</button>
 				</div>
 				<hr class="my-4" />
 				<task-schedule />
 			</div>
 		</content-card>
-		<schedule-set-up-modal />
+		<schedule-set-up-modal ref="scheduleSetUpModalRef" />
 	</div>
 </template>
 
 <script>
-	import ScheduleSetUpModal from '@/components/ScheduleSetUpModal.vue'
-	import GlitchExplained from '@/components/GlitchExplained.vue'
-	import TaskSchedule from '@/components/TaskSchedule.vue'
-	import ContentCard from '@/components/ContentCard.vue'
-	import { mapGetters } from 'vuex'
+import { useAppStore } from '@/stores/app'
+import { useTaskActions } from '@/composables/useTaskActions'
+import ScheduleSetUpModal from '@/components/ScheduleSetUpModal.vue'
+import GlitchExplained from '@/components/GlitchExplained.vue'
+import TaskSchedule from '@/components/TaskSchedule.vue'
+import ContentCard from '@/components/ContentCard.vue'
 
-	export default {
-		name: 'ScheduleView',
+export default {
+	name: 'ScheduleView',
 
-		components: {
-			ContentCard,
-			ScheduleSetUpModal,
-			GlitchExplained,
-			TaskSchedule
+	components: {
+		ContentCard,
+		ScheduleSetUpModal,
+		GlitchExplained,
+		TaskSchedule
+	},
+
+	setup() {
+		const store = useAppStore()
+		const { pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks } = useTaskActions()
+		return { store, pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks }
+	},
+
+	created() {
+		this.pageCheck()
+	},
+
+	computed: {
+		getAccountSettings() {
+			return this.store.getAccountSettings
 		},
 
-		created() {
-			this.pageCheck()
+		schedule() {
+			return this.store.schedule
 		},
 
-		computed: {
-			...mapGetters(['getAccountSettings']),
+		maintainFinish() {
+			return (
+				this.getAccountSettings.rescheduling.maintainFinishTime
+			)
+		},
 
-			schedule() {
-				return this.$store.state.schedule
-			},
+		taskType() {
+			return this.store.taskType
+		}
+	},
 
-			maintainFinish() {
-				return (
-					this.getAccountSettings.rescheduling.maintainFinishTime
-				)
-			},
+	methods: {
+		openScheduleSetUp() {
+			this.$refs.scheduleSetUpModalRef.show()
+		},
 
-			taskType() {
-				return this.$store.state.taskType
+		deleteSchedule() {
+			this.saveScheduleToDatabase({})
+		},
+
+		reschedule() {
+			const remainingTasks = this.schedule.tasks.filter(
+				x =>
+					x.completed !== true &&
+					x.type !== this.taskType.systemBreak
+			)
+
+			const now = new Date()
+			const startDateTime = new Date(this.schedule.start)
+			const isStartTimeInPast = now > startDateTime
+
+			console.log('start time is in past: ', isStartTimeInPast)
+
+			const calculatedTimes = this.getScheduleTimes(
+				this.schedule.start,
+				isStartTimeInPast
+					? now.toLocaleTimeString()
+					: startDateTime.toLocaleTimeString(),
+				this.maintainFinish
+					? new Date(this.schedule.finish).toLocaleTimeString()
+					: null,
+				this.maintainFinish ? this.schedule.finish : null
+			)
+
+			const scheduleDetails = {
+				categoriesToInclude: this.schedule.categoriesToInclude,
+				tasks: this.getScheduleTasks(
+					remainingTasks,
+					calculatedTimes.sessionInMins,
+					this.schedule.includeBreaks
+				).tasks,
+				start: calculatedTimes.start.toString(),
+				finish: calculatedTimes.finish.toString(),
+				includeBreaks: this.schedule.includeBreaks
 			}
-		},
 
-		methods: {
-			openScheduleSetUp() {
-				this.$bvModal.show('scheduleSetUpModal')
-			},
-
-			deleteSchedule() {
-				this.saveScheduleToDatabase({})
-			},
-
-			reschedule() {
-				const remainingTasks = this.schedule.tasks.filter(
-					x =>
-						x.completed !== true &&
-						x.type !== this.taskType.systemBreak
-				)
-
-				const now = new Date()
-				const startDateTime = new Date(this.schedule.start)
-				const isStartTimeInPast = now > startDateTime
-
-				console.log('start time is in past: ', isStartTimeInPast)
-
-				const calculatedTimes = this.getScheduleTimes(
-					this.schedule.start,
-					isStartTimeInPast
-						? now.toLocaleTimeString()
-						: startDateTime.toLocaleTimeString(),
-					this.maintainFinish
-						? new Date(this.schedule.finish).toLocaleTimeString()
-						: null,
-					this.maintainFinish ? this.schedule.finish : null
-				)
-
-				const scheduleDetails = {
-					categoriesToInclude: this.schedule.categoriesToInclude,
-					tasks: this.getScheduleTasks(
-						remainingTasks,
-						calculatedTimes.sessionInMins,
-						this.schedule.includeBreaks
-					).tasks,
-					start: calculatedTimes.start.toString(),
-					finish: calculatedTimes.finish.toString(),
-					includeBreaks: this.schedule.includeBreaks
-				}
-
-				this.saveScheduleToDatabase(scheduleDetails)
-			}
+			this.saveScheduleToDatabase(scheduleDetails)
 		}
 	}
+}
 </script>

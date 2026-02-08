@@ -1,9 +1,9 @@
 <template>
 	<div>
 		<content-card>
-			<h1 class="text-left mb-2">Dashboard</h1>
+			<h1 class="text-left mb-2 font-rajdhani font-bold text-2xl">Dashboard</h1>
 			<hr class="pb-4" />
-			<div class="row">
+			<div class="flex flex-wrap gap-3">
 				<icon-button
 					@buttonClicked="() => openScheduleSetUp()"
 					variant="primary"
@@ -18,7 +18,7 @@
 					label="Add task"
 				/>
 			</div>
-			<hr class="pb-4" />
+			<hr class="pb-4 mt-4" />
 			<filter-widget
 				title="Highest Priority Task"
 				:tasks="[getPrioritisedTasks[0]]"
@@ -28,153 +28,168 @@
 				:tasks="[getTasksInCreatedOrder[0]]"
 			/>
 			<div>
-				<b-card-title class="text-start mb-2 font-weight-bold">
+				<h5 class="text-start mb-2 font-bold font-rajdhani">
 					Backlog Breakdown
-				</b-card-title>
-				<b-card>
-					<b-tabs fill>
-						<b-tab title="Categories" class="pt-4">
-							<doughnut
-								:data="categoryBreakdownData"
-								:options="chartOptions"
-								class="mx-auto"
-							/>
-						</b-tab>
-						<b-tab title="Priorities" class="pt-4">
-							<doughnut
-								:data="priorityBreakdownData"
-								:options="chartOptions"
-								class="mx-auto"
-							/>
-						</b-tab>
-					</b-tabs>
-				</b-card>
+				</h5>
+				<div class="bg-white rounded-lg shadow-sm border">
+					<BaseTabs fill>
+						<BaseTab title="Categories">
+							<div class="pt-4 pb-6">
+								<doughnut
+									:data="categoryBreakdownData"
+									:options="chartOptions"
+									class="mx-auto"
+								/>
+							</div>
+						</BaseTab>
+						<BaseTab title="Priorities">
+							<div class="pt-4 pb-6">
+								<doughnut
+									:data="priorityBreakdownData"
+									:options="chartOptions"
+									class="mx-auto"
+								/>
+							</div>
+						</BaseTab>
+					</BaseTabs>
+				</div>
 			</div>
 		</content-card>
-		<task-modal />
-		<schedule-set-up-modal />
+		<task-modal ref="taskModalRef" />
+		<schedule-set-up-modal ref="scheduleSetUpModalRef" />
 	</div>
 </template>
 
 <script>
-	import ContentCard from '../components/ContentCard.vue'
-	import TaskModal from '../components/TaskModal.vue'
-	import ScheduleSetUpModal from '../components/ScheduleSetUpModal.vue'
-	import IconButton from '../components/IconButton.vue'
-	import FilterWidget from '../components/FilterWidget.vue'
-	import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-	import { Doughnut } from 'vue-chartjs'
-	import { mapGetters } from 'vuex'
+import { useAppStore } from '@/stores/app'
+import { useTaskActions } from '@/composables/useTaskActions'
+import ContentCard from '@/components/ContentCard.vue'
+import TaskModal from '@/components/TaskModal.vue'
+import ScheduleSetUpModal from '@/components/ScheduleSetUpModal.vue'
+import IconButton from '@/components/IconButton.vue'
+import FilterWidget from '@/components/FilterWidget.vue'
+import BaseTabs from '@/components/ui/BaseTabs.vue'
+import BaseTab from '@/components/ui/BaseTab.vue'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import { Doughnut } from 'vue-chartjs'
 
-	ChartJS.register(ArcElement, Tooltip, Legend)
+ChartJS.register(ArcElement, Tooltip, Legend)
 
-	export default {
-		name: 'DashboardView',
+export default {
+	name: 'DashboardView',
 
-		components: {
-			ContentCard,
-			TaskModal,
-			Doughnut,
-			ScheduleSetUpModal,
-			IconButton,
-			FilterWidget
-		},
+	components: {
+		ContentCard,
+		TaskModal,
+		Doughnut,
+		ScheduleSetUpModal,
+		IconButton,
+		FilterWidget,
+		BaseTabs,
+		BaseTab
+	},
 
-		data() {
-			return {
-				categoryBreakdownData: { datasets: [] },
-				priorityBreakdownData: { datasets: [] },
+	setup() {
+		const store = useAppStore()
+		const { pageCheck } = useTaskActions()
+		return { store, pageCheck }
+	},
 
-				chartOptions: {
-					responsive: false,
-					maintainAspectRatio: true
-				}
-			}
-		},
+	data() {
+		return {
+			categoryBreakdownData: { datasets: [] },
+			priorityBreakdownData: { datasets: [] },
 
-		created() {
-			this.pageCheck()
-			this.setUpCategoryBreakdown()
-			this.setUpPriorityBreakdown()
-		},
-
-		computed: {
-			...mapGetters([
-				'getCategories',
-				'getPrioritisedTasks',
-				'getPriorityNames',
-				'getTasksInCreatedOrder'
-			]),
-
-			priorities() {
-				return this.$store.state.priorities
-			}
-		},
-
-		methods: {
-			addTask() {
-				this.$bvModal.show('taskModal')
-			},
-
-			openScheduleSetUp() {
-				if (this.$store.state.schedule) {
-					this.$router.push('/schedule')
-				} else {
-					this.$bvModal.show('scheduleSetUpModal')
-				}
-			},
-
-			setUpCategoryBreakdown() {
-				let labels = []
-				let data = []
-				let backgroundColor = []
-
-				this.getCategories.forEach(category => {
-					labels.push(category)
-					const tasksInCategory = this.getPrioritisedTasks.filter(
-						x => x.category == category
-					)
-					data.push(tasksInCategory.length)
-					backgroundColor.push(this.getRandomColor())
-				})
-
-				this.categoryBreakdownData.labels = labels
-				this.categoryBreakdownData.datasets.push({
-					data,
-					backgroundColor
-				})
-			},
-
-			setUpPriorityBreakdown() {
-				let labels = []
-				let data = []
-				let backgroundColor = []
-
-				this.getPriorityNames.forEach(priority => {
-					labels.push(priority)
-					const tasksInPriority = this.getPrioritisedTasks.filter(
-						x => x.priority == this.priorities[priority].value
-					)
-					data.push(tasksInPriority.length)
-					backgroundColor.push(this.priorities[priority].color)
-				})
-
-				this.priorityBreakdownData.labels = labels
-				this.priorityBreakdownData.datasets.push({
-					data,
-					backgroundColor
-				})
-			},
-
-			getRandomColor() {
-				return `#${Math.floor(Math.random() * 16777215).toString(16)}`
+			chartOptions: {
+				responsive: false,
+				maintainAspectRatio: true
 			}
 		}
-	}
-</script>
+	},
 
-<style scoped>
-	.card-body {
-		padding: 0 0 1.5rem;
+	created() {
+		this.pageCheck()
+		this.setUpCategoryBreakdown()
+		this.setUpPriorityBreakdown()
+	},
+
+	computed: {
+		getCategories() {
+			return this.store.getCategories
+		},
+		getPrioritisedTasks() {
+			return this.store.getPrioritisedTasks
+		},
+		getPriorityNames() {
+			return this.store.getPriorityNames
+		},
+		getTasksInCreatedOrder() {
+			return this.store.getTasksInCreatedOrder
+		},
+
+		priorities() {
+			return this.store.priorities
+		}
+	},
+
+	methods: {
+		addTask() {
+			this.$refs.taskModalRef.show()
+		},
+
+		openScheduleSetUp() {
+			if (this.store.schedule) {
+				this.$router.push('/schedule')
+			} else {
+				this.$refs.scheduleSetUpModalRef.show()
+			}
+		},
+
+		setUpCategoryBreakdown() {
+			let labels = []
+			let data = []
+			let backgroundColor = []
+
+			this.getCategories.forEach(category => {
+				labels.push(category)
+				const tasksInCategory = this.getPrioritisedTasks.filter(
+					x => x.category == category
+				)
+				data.push(tasksInCategory.length)
+				backgroundColor.push(this.getRandomColor())
+			})
+
+			this.categoryBreakdownData.labels = labels
+			this.categoryBreakdownData.datasets.push({
+				data,
+				backgroundColor
+			})
+		},
+
+		setUpPriorityBreakdown() {
+			let labels = []
+			let data = []
+			let backgroundColor = []
+
+			this.getPriorityNames.forEach(priority => {
+				labels.push(priority)
+				const tasksInPriority = this.getPrioritisedTasks.filter(
+					x => x.priority == this.priorities[priority].value
+				)
+				data.push(tasksInPriority.length)
+				backgroundColor.push(this.priorities[priority].color)
+			})
+
+			this.priorityBreakdownData.labels = labels
+			this.priorityBreakdownData.datasets.push({
+				data,
+				backgroundColor
+			})
+		},
+
+		getRandomColor() {
+			return `#${Math.floor(Math.random() * 16777215).toString(16)}`
+		}
 	}
-</style>
+}
+</script>

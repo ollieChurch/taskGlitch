@@ -1,124 +1,126 @@
 <template>
-	<b-modal
-		id="settingsModal"
+	<BaseModal
+		ref="modalRef"
+		title="Customise your Glitch"
 		@ok="handleOk"
 		@hide="handleClose"
 		@show="setUpData"
-		title="Customise your Glitch"
 	>
-		<b-form ref="settingsForm">
+		<form ref="settingsForm">
 			<div
 				v-for="(settingsGroup, index) in Object.keys(settings)"
 				:key="`settingsModal-${settingsGroup}-${index}`"
 			>
-				<b-card-title class="mb-4">{{ settingsGroup }}</b-card-title>
-				<b-form-group
-					v-for="(setting, settingIndex) in Object.keys(
-						settings[settingsGroup]
-					)"
+				<h5 class="mb-4 font-rajdhani font-semibold">{{ settingsGroup }}</h5>
+				<div
+					v-for="(setting, settingIndex) in Object.keys(settings[settingsGroup])"
 					:key="`settingsModal-${settingsGroup}-${setting}-${settingIndex}`"
-					invalid-feedback="this is invalid input"
-					:state="valid[settingsGroup][setting]"
-					class="form-input d-flex justify-content-between gap-4 align-items-center"
+					class="flex justify-between gap-4 items-center mb-3"
 				>
-					<template #label>
-						<b-card-text class="mb-0">{{ setting }}</b-card-text>
-						<small class="text-muted">{{
-							typeof accountSettings[settingsGroup][setting] ==
-							'number'
+					<div>
+						<p class="mb-0 font-rajdhani">{{ setting }}</p>
+						<small class="text-gray-500">{{
+							typeof accountSettings[settingsGroup][setting] == 'number'
 								? 'time in minutes'
 								: ''
 						}}</small>
-					</template>
-					<b-form-checkbox
-						v-if="
-							typeof accountSettings[settingsGroup][setting] ==
-							'boolean'
-						"
-						:id="setting"
-						v-model="settings[settingsGroup][setting]"
-						:state="valid[settingsGroup][setting]"
-						switch
-						size="lg"
-					></b-form-checkbox>
-					<b-form-input
+					</div>
+					<label
+						v-if="typeof accountSettings[settingsGroup][setting] == 'boolean'"
+						class="relative inline-flex items-center cursor-pointer"
+					>
+						<input
+							type="checkbox"
+							:id="setting"
+							v-model="settings[settingsGroup][setting]"
+							class="sr-only peer"
+						/>
+						<div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+					</label>
+					<input
 						v-else
 						:id="setting"
 						v-model="settings[settingsGroup][setting]"
-						:state="valid[settingsGroup][setting]"
 						required
-						:number="typeof accountSettings[settingsGroup][setting] == 'number'"
 						:type="typeof accountSettings[settingsGroup][setting] == 'number' ? 'number' : 'text'"
-					></b-form-input>
-				</b-form-group>
-				<hr v-if="index !== Object.keys(settings).length - 1" />
+						class="border rounded px-3 py-1 w-24 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+				<hr v-if="index !== Object.keys(settings).length - 1" class="my-4" />
 			</div>
-		</b-form>
-	</b-modal>
+		</form>
+	</BaseModal>
 </template>
 
 <script>
-	export default {
-		name: 'SettingsModal',
+import { useAppStore } from '@/stores/app'
+import { useTaskActions } from '@/composables/useTaskActions'
+import BaseModal from './ui/BaseModal.vue'
 
-		props: ['accountSettings'],
+export default {
+	name: 'SettingsModal',
+	components: { BaseModal },
+	props: ['accountSettings'],
 
-		data() {
-			return {
-				settings: {},
-				valid: {}
-			}
-		},
+	setup() {
+		const store = useAppStore()
+		const { saveAccountToDatabase } = useTaskActions()
+		return { store, saveAccountToDatabase }
+	},
 
-		mounted() {
-			this.setUpData()
-		},
-
-		methods: {
-			setUpData() {
-				Object.keys(this.accountSettings).forEach(settingsGroup => {
-					let newValidGroup = {}
-					let newDataGroup = {}
-					Object.keys(this.accountSettings[settingsGroup]).forEach(
-						setting => {
-							newValidGroup = {
-								...newValidGroup,
-								[setting]: null
-							}
-
-							newDataGroup = {
-								...newDataGroup,
-								[setting]:
-									this.accountSettings[settingsGroup][setting]
-							}
-						}
-					)
-
-					this.valid = {
-						...this.valid,
-						[settingsGroup]: newValidGroup
-					}
-
-					this.settings = {
-						...this.settings,
-						[settingsGroup]: newDataGroup
-					}
-				})
-			},
-
-			handleOk(bvModalEvent) {
-				bvModalEvent.preventDefault()
-				this.$store.commit('setAccountSettings', this.settings)
-				this.saveAccountToDatabase(this.$store.state.account)
-
-				this.$nextTick(() => {
-					this.$bvModal.hide('settingsModal')
-				})
-			},
-
-			handleClose() {
-				this.settings = {}
-			}
+	data() {
+		return {
+			settings: {},
+			valid: {}
 		}
-	}
+	},
+
+	mounted() {
+		this.setUpData()
+	},
+
+	methods: {
+		show() {
+			this.$refs.modalRef.show()
+		},
+		setUpData() {
+			Object.keys(this.accountSettings).forEach(settingsGroup => {
+				let newValidGroup = {}
+				let newDataGroup = {}
+				Object.keys(this.accountSettings[settingsGroup]).forEach(
+					setting => {
+						newValidGroup = {
+							...newValidGroup,
+							[setting]: null
+						}
+						newDataGroup = {
+							...newDataGroup,
+							[setting]: this.accountSettings[settingsGroup][setting]
+						}
+					}
+				)
+
+				this.valid = {
+					...this.valid,
+					[settingsGroup]: newValidGroup
+				}
+				this.settings = {
+					...this.settings,
+					[settingsGroup]: newDataGroup
+				}
+			})
+		},
+
+		handleOk() {
+			this.store.setAccountSettings(this.settings)
+			this.saveAccountToDatabase(this.store.account)
+			this.$refs.modalRef.close()
+		},
+
+		handleClose() {
+			this.settings = {}
+		}
+	},
+	expose: ['show']
+}
 </script>

@@ -1,8 +1,8 @@
 <template>
 	<div class="mb-4">
-		<b-card-title class="text-start font-weight-bold">
+		<h5 class="text-left font-bold font-rajdhani">
 			{{ title }}
-		</b-card-title>
+		</h5>
 		<task-card
 			v-for="task in tasks"
 			:key="`filterWidget-task-${task.id}`"
@@ -13,13 +13,12 @@
 </template>
 
 <script>
-	import TaskCard from './TaskCard.vue'
+import TaskCard from './TaskCard.vue'
 
-	export default {
-		props: ['title', 'tasks'],
-
-		components: {
-			TaskCard
-		}
+export default {
+	props: ['title', 'tasks'],
+	components: {
+		TaskCard
 	}
+}
 </script>

@@ -1,269 +1,283 @@
 <template>
-	<b-modal
-		id="taskModal"
+	<BaseModal
+		ref="modalRef"
 		@show="resetModal"
 		@ok="handleOk"
 		@hide="clearTaskToPatch"
-		hide-header-close
+		:hideHeaderClose="true"
+		:showDefaultFooter="true"
 	>
-		<template #modal-header>
-			<b-card-title
-				>{{ taskToPatch.id ? 'Edit' : 'Add' }} A Task</b-card-title
-			>
-			<b-btn
+		<template #header>
+			<h5 class="text-lg font-rajdhani font-semibold">
+				{{ taskToPatch.id ? 'Edit' : 'Add' }} A Task
+			</h5>
+			<button
 				v-if="taskToPatch.id"
-				variant="danger"
+				class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
 				@click="deleteTask(task, 'tasks')"
 			>
 				<i class="fas fa-trash-alt"></i>
-			</b-btn>
+			</button>
 		</template>
-		<b-form ref="taskForm">
-			<b-form-group
-				label="Task"
-				label-for="task"
-				invalid-feedback="this is invalid input"
-				:state="valid.task"
-				class="form-input"
-			>
-				<b-form-input
+		<form ref="taskForm">
+			<div class="mb-3">
+				<label for="task" class="block mb-1 font-rajdhani font-semibold">Task</label>
+				<input
 					id="task"
 					v-model="task.name"
-					:state="valid.task"
-					trim
+					type="text"
 					autocomplete="off"
 					required
-				></b-form-input>
-			</b-form-group>
-			<div class="d-flex justify-content-between">
-				<b-form-group
-					label="Priority"
-					label-for="priority"
-					class="form-input col-6 pe-2 ps-0"
-				>
-					<b-form-select
+					class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+					:class="valid.task === false ? 'border-red-500' : ''"
+				/>
+				<p v-if="valid.task === false" class="text-red-500 text-sm mt-1">This is invalid input</p>
+			</div>
+			<div class="flex justify-between gap-2">
+				<div class="w-1/2">
+					<label for="priority" class="block mb-1 font-rajdhani font-semibold">Priority</label>
+					<select
 						id="priority"
 						v-model="task.priority"
-						:options="priorityOptions"
-						class="form-control"
-						size="lg"
+						class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
 					>
-					</b-form-select>
-				</b-form-group>
-				<b-form-group
-					label="Size"
-					label-for="sizing"
-					class="form-input col-6 ps-2 pe-0"
-				>
-					<b-form-select
+						<option
+							v-for="option in priorityOptions"
+							:key="option.value"
+							:value="option.value"
+						>
+							{{ option.text }}
+						</option>
+					</select>
+				</div>
+				<div class="w-1/2">
+					<label for="sizing" class="block mb-1 font-rajdhani font-semibold">Size</label>
+					<select
 						id="sizing"
 						v-model="task.sizing"
-						:options="sizingOptions"
-						class="form-control"
-						size="lg"
+						class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
 					>
-					</b-form-select>
-				</b-form-group>
+						<option
+							v-for="option in sizingOptions"
+							:key="option.value"
+							:value="option.value"
+						>
+							{{ option.text }}
+						</option>
+					</select>
+				</div>
 			</div>
-
-			<b-form-group
-				label="Category"
-				label-for="category"
-				invalid-feedback="this is invalid input"
-				:state="valid.category"
-				class="form-input"
-			>
-				<b-form-input
+			<div class="mt-3">
+				<label for="category" class="block mb-1 font-rajdhani font-semibold">Category</label>
+				<input
 					id="category"
 					v-model="task.category"
-					:state="valid.category"
 					list="tags"
-					trim
 					autocomplete="off"
 					required
-				></b-form-input>
-				<datalist id="tags" autocomplete="false">
+					class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+					:class="valid.category === false ? 'border-red-500' : ''"
+				/>
+				<datalist id="tags">
 					<option
 						v-for="(category, index) in getCategories"
 						:key="`${index}-${category}`"
+						:value="category"
 					>
-						{{ category }}
 					</option>
 				</datalist>
-			</b-form-group>
-			<div class="d-flex flex-wrap align-items-end justify-content-between gap-2">
-				<b-form-group
-					label="Target Date"
-					label-for="targetDate"
-					class="form-input col-sm-8 col-12 px-0"
-				>
-					<b-form-datepicker
-						id="targetDate"
-						v-model="task.targetDateTime"
-						:min="new Date()"
-						reset-button
-					></b-form-datepicker>
-				</b-form-group>
+				<p v-if="valid.category === false" class="text-red-500 text-sm mt-1">This is invalid input</p>
+			</div>
+			<div class="flex flex-wrap items-end justify-between gap-2 mt-3">
+				<div class="sm:w-8/12 w-full">
+					<label for="targetDate" class="block mb-1 font-rajdhani font-semibold">Target Date</label>
+					<div class="flex gap-2">
+						<input
+							id="targetDate"
+							type="date"
+							v-model="task.targetDateTime"
+							:min="todayDate"
+							class="flex-1 border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+						/>
+						<button
+							type="button"
+							@click="task.targetDateTime = null"
+							class="px-2 py-1 text-gray-500 hover:text-gray-700 border rounded"
+						>
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+				</div>
 				<div>
 					<input
 						type="checkbox"
-						class="btn-check"
+						class="sr-only peer"
 						id="hardDeadlineToggle"
 						autocomplete="off"
 						v-model="task.isHardDeadline"
 					/>
 					<label
-						class="btn btn-outline-danger form-input"
+						class="px-3 py-2 border-2 rounded cursor-pointer font-rajdhani font-semibold transition-colors peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 border-red-600 text-red-600 hover:bg-red-50"
 						for="hardDeadlineToggle"
 					>
 						Hard Deadline
 					</label>
 				</div>
 			</div>
-		</b-form>
-	</b-modal>
+		</form>
+	</BaseModal>
 </template>
 
 <script>
-	import { getDatabase, ref, set } from 'firebase/database'
-	import { mapGetters } from 'vuex'
+import { getDatabase, ref, set } from 'firebase/database'
+import { useAppStore } from '@/stores/app'
+import { useTaskActions } from '@/composables/useTaskActions'
+import BaseModal from './ui/BaseModal.vue'
 
-	export default {
-		created() {
-			this.taskDefaults.sizing = this.sizes.short
-			this.task = { ...this.taskDefaults }
-		},
+export default {
+	components: { BaseModal },
 
-		data() {
-			return {
-				task: {},
+	setup() {
+		const store = useAppStore()
+		const { createGuid, scorePriority, rescoreActiveBacklog, removeTask } = useTaskActions()
+		return { store, createGuid, scorePriority, rescoreActiveBacklog, removeTask }
+	},
 
-				taskDefaults: {
-					name: null,
-					priority: this.$store.state.priorities.medium.value,
-					sizing: null,
-					category: null,
-					targetDateTime: null,
-					deadline: null,
-					isHardDeadline: false,
-					score: 0,
-					type: this.$store.state.taskType.userTask
-				},
+	created() {
+		this.taskDefaults.sizing = this.sizes.short
+		this.task = { ...this.taskDefaults }
+	},
 
-				valid: {
-					task: null,
-					category: null
-				}
-			}
-		},
-
-		computed: {
-			...mapGetters(['getCategories', 'getAccountSettings']),
-
-			priorities() {
-				return this.$store.state.priorities
+	data() {
+		return {
+			task: {},
+			taskDefaults: {
+				name: null,
+				priority: 2,
+				sizing: null,
+				category: null,
+				targetDateTime: null,
+				deadline: null,
+				isHardDeadline: false,
+				score: 0,
+				type: 'userTask'
 			},
-
-			sizes() {
-				return this.getAccountSettings.taskLength
-			},
-
-			priorityOptions() {
-				let options = []
-				for (let priority in this.priorities) {
-					options.push({
-						text: priority,
-						value: this.priorities[priority].value
-					})
-				}
-
-				return options
-			},
-
-			sizingOptions() {
-				let options = []
-				for (let size in this.sizes) {
-					options.push({
-						text: size,
-						value: this.sizes[size]
-					})
-				}
-
-				return options
-			},
-
-			taskToPatch() {
-				return this.$store.state.taskToPatch
-			}
-		},
-
-		methods: {
-			resetModal() {
-				this.task = {}
-				this.task = { ...this.taskDefaults }
-
-				if (this.taskToPatch.id) {
-					this.task = this.taskToPatch
-				} else {
-					this.task.id = this.createGuid()
-				}
-			},
-
-			handleOk(bvModalEvent) {
-				bvModalEvent.preventDefault()
-				if (this.isFormValid()) {
-					if (!this.task.createdDateTime) {
-						this.task.createdDateTime = new Date().toString()
-					}
-
-					if (!this.task.targetDateTime) {
-						this.task.isHardDeadline = false
-					}
-
-					this.task.score = this.scorePriority(this.task)
-
-					this.saveToDatabase()
-					this.rescoreActiveBacklog()
-
-					this.$nextTick(() => {
-						this.$bvModal.hide('taskModal')
-					})
-				}
-			},
-
-			clearTaskToPatch() {
-				this.$store.commit('setTaskToPatch', { taskToPatch: null })
-			},
-
-			async saveToDatabase() {
-				const db = getDatabase(this.$store.state.app)
-				const tasksRef = ref(
-					db,
-					`tasks/${this.$store.state.user.uid}/${this.task.id}`
-				)
-
-				await set(tasksRef, this.task)
-				console.log('added task: ', this.task)
-			},
-
-			isFormValid() {
-				const valid = this.$refs.taskForm.checkValidity()
-
-				if (!valid) {
-					this.valid.task = this.task.name ? null : false
-					this.valid.category = this.task.category ? null : false
-				}
-
-				return valid
-			},
-
-			deleteTask(task) {
-				this.removeTask(task, 'tasks')
-
-				this.$nextTick(() => {
-					this.$bvModal.hide('taskModal')
-				})
+			valid: {
+				task: null,
+				category: null
 			}
 		}
-	}
+	},
+
+	computed: {
+		priorities() {
+			return this.store.priorities
+		},
+
+		sizes() {
+			return this.store.getAccountSettings.taskLength
+		},
+
+		todayDate() {
+			return new Date().toISOString().split('T')[0]
+		},
+
+		priorityOptions() {
+			let options = []
+			for (let priority in this.priorities) {
+				options.push({
+					text: priority,
+					value: this.priorities[priority].value
+				})
+			}
+			return options
+		},
+
+		sizingOptions() {
+			let options = []
+			for (let size in this.sizes) {
+				options.push({
+					text: size,
+					value: this.sizes[size]
+				})
+			}
+			return options
+		},
+
+		taskToPatch() {
+			return this.store.taskToPatch
+		},
+
+		getCategories() {
+			return this.store.getCategories
+		}
+	},
+
+	methods: {
+		show() {
+			this.$refs.modalRef.show()
+		},
+
+		resetModal() {
+			this.task = {}
+			this.task = { ...this.taskDefaults }
+
+			if (this.taskToPatch.id) {
+				this.task = this.taskToPatch
+			} else {
+				this.task.id = this.createGuid()
+			}
+		},
+
+		handleOk() {
+			if (this.isFormValid()) {
+				if (!this.task.createdDateTime) {
+					this.task.createdDateTime = new Date().toString()
+				}
+
+				if (!this.task.targetDateTime) {
+					this.task.isHardDeadline = false
+				}
+
+				this.task.score = this.scorePriority(this.task)
+
+				this.saveToDatabase()
+				this.rescoreActiveBacklog()
+				this.$refs.modalRef.close()
+			}
+		},
+
+		clearTaskToPatch() {
+			this.store.setTaskToPatch({ taskToPatch: null })
+		},
+
+		async saveToDatabase() {
+			const db = getDatabase(this.store.app)
+			const tasksRef = ref(
+				db,
+				`tasks/${this.store.user.uid}/${this.task.id}`
+			)
+
+			await set(tasksRef, this.task)
+			console.log('added task: ', this.task)
+		},
+
+		isFormValid() {
+			const valid = this.$refs.taskForm.checkValidity()
+
+			if (!valid) {
+				this.valid.task = this.task.name ? null : false
+				this.valid.category = this.task.category ? null : false
+			}
+
+			return valid
+		},
+
+		deleteTask(task) {
+			this.removeTask(task, 'tasks')
+			this.$refs.modalRef.close()
+		}
+	},
+	expose: ['show']
+}
 </script>
