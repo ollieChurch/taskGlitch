@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { initializeApp } from 'firebase/app'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getDatabase, ref, onValue } from 'firebase/database'
@@ -39,8 +40,10 @@ export default {
 	},
 
 	async created() {
-		const app = initializeApp(this.store.firebaseConfig)
-		const auth = getAuth(app)
+		// markRaw prevents Pinia from wrapping Firebase internals in reactive Proxies,
+		// which would corrupt Firebase's internal SortedMap data structures
+		const app = markRaw(initializeApp(this.store.firebaseConfig))
+		const auth = markRaw(getAuth(app))
 		this.store.setApp(app)
 		this.store.setAuth(auth)
 
@@ -52,7 +55,7 @@ export default {
 					user.uid != this.store.user.uid)
 			) {
 				console.log('updating user')
-				this.store.setUser(user)
+				this.store.setUser(markRaw(user))
 				this.linkToDatabase()
 				this.redirectToFirstPage()
 			} else if (!user) {
