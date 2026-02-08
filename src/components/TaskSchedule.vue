@@ -15,13 +15,54 @@
 				<span class="ml-2 text-sm font-rajdhani">edit</span>
 			</label>
 		</div>
-		<div ref="draggableContainer">
+		<VueDraggable
+			v-if="isEditMode && scheduleDetails?.tasks"
+			v-model="scheduleDetails.tasks"
+			handle=".grab-handle"
+			@update="updateSchedule(scheduleDetails)"
+		>
 			<div
 				v-for="task in scheduleDetails.tasks"
 				:key="`schedule-${task.id}`"
 				class="flex items-center schedule-item"
 			>
-				<div v-if="!isEditMode && shouldDisplayDate(task)" class="w-full">
+				<p
+					class="w-3/12 text-left mb-0"
+					:class="isSimpleSchedule ? 'text-lg' : 'text-2xl'"
+				>
+					{{ task.time }}
+				</p>
+				<div class="my-2 p-2 bg-white rounded-lg shadow-sm border w-9/12">
+					<div class="flex items-center justify-between">
+						<div class="w-1/12 pl-0 pr-3 grab-handle">
+							<i class="fas fa-grip-horizontal"></i>
+						</div>
+						<h5
+							class="text-left mb-0 pl-0 pr-2 w-9/12 font-rajdhani font-semibold"
+							:class="task.completed ? 'completed-task' : ''"
+						>
+							{{ task.name }}
+						</h5>
+						<div class="w-2/12" v-if="!isSimpleSchedule">
+							<button
+								v-if="!task.completed"
+								class="bg-cyan-500 text-white px-2 py-1 rounded hover:bg-cyan-600"
+								@click="removeFromSchedule(task)"
+							>
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</VueDraggable>
+		<div v-else>
+			<div
+				v-for="task in scheduleDetails?.tasks"
+				:key="`schedule-${task.id}`"
+				class="flex items-center schedule-item"
+			>
+				<div v-if="shouldDisplayDate(task)" class="w-full">
 					<h5 class="mt-3 mb-1 text-left font-rajdhani font-semibold">
 						{{ task.date }}
 					</h5>
@@ -34,12 +75,6 @@
 				</p>
 				<div class="my-2 p-2 bg-white rounded-lg shadow-sm border w-9/12">
 					<div class="flex items-center justify-between">
-						<div
-							v-if="isEditMode"
-							class="w-1/12 pl-0 pr-3 grab-handle"
-						>
-							<i class="fas fa-grip-horizontal"></i>
-						</div>
 						<h5
 							class="text-left mb-0 pl-0 pr-2 w-9/12 font-rajdhani font-semibold"
 							:class="task.completed ? 'completed-task' : ''"
@@ -48,14 +83,6 @@
 						</h5>
 						<div class="w-2/12" v-if="!isSimpleSchedule">
 							<button
-								v-if="isEditMode && !task.completed"
-								class="bg-cyan-500 text-white px-2 py-1 rounded hover:bg-cyan-600"
-								@click="removeFromSchedule(task)"
-							>
-								<i class="fas fa-times"></i>
-							</button>
-							<button
-								v-else
 								:class="task.completed
 									? 'bg-yellow-400 text-black hover:bg-yellow-500'
 									: 'bg-green-600 text-white hover:bg-green-700'"
@@ -87,8 +114,10 @@
 <script>
 import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
+import { VueDraggable } from 'vue-draggable-plus'
 
 export default {
+	components: { VueDraggable },
 	props: ['isSimpleSchedule'],
 
 	setup() {

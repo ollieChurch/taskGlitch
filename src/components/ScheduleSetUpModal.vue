@@ -79,6 +79,7 @@ import { useTaskActions } from '@/composables/useTaskActions'
 import { useRouter, useRoute } from 'vue-router'
 import BaseModal from './ui/BaseModal.vue'
 import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
 
 export default {
 	components: {
