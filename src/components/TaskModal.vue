@@ -88,40 +88,38 @@
 				</datalist>
 				<p v-if="valid.category === false" class="text-red-500 text-sm mt-1">This is invalid input</p>
 			</div>
-			<div class="flex flex-wrap items-end justify-between gap-2 mt-3">
-				<div class="sm:w-8/12 w-full">
-					<label for="targetDate" class="block mb-1 font-rajdhani font-semibold">Target Date</label>
-					<div class="flex gap-2">
-						<input
-							id="targetDate"
-							type="date"
-							v-model="task.targetDateTime"
-							:min="todayDate"
-							class="flex-1 border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
-						/>
-						<button
-							type="button"
-							@click="task.targetDateTime = null"
-							class="px-2 py-1 text-gray-500 hover:text-gray-700 border rounded"
-						>
-							<i class="fas fa-times"></i>
-						</button>
-					</div>
-				</div>
-				<div>
+			<div class="mt-3">
+				<label for="targetDate" class="block mb-1 font-rajdhani font-semibold">Target Date</label>
+				<div class="flex items-center gap-2">
 					<input
-						type="checkbox"
-						class="sr-only peer"
-						id="hardDeadlineToggle"
-						autocomplete="off"
-						v-model="task.isHardDeadline"
+						id="targetDate"
+						type="date"
+						v-model="task.targetDateTime"
+						:min="todayDate"
+						class="flex-1 border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
 					/>
-					<label
-						class="px-3 py-2 border-2 rounded cursor-pointer font-rajdhani font-semibold transition-colors peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 border-red-600 text-red-600 hover:bg-red-50"
-						for="hardDeadlineToggle"
+					<button
+						type="button"
+						@click="task.targetDateTime = null"
+						class="px-2 py-2 text-gray-500 hover:text-gray-700 border rounded"
 					>
-						Hard Deadline
-					</label>
+						<i class="fas fa-times"></i>
+					</button>
+					<div>
+						<input
+							type="checkbox"
+							class="sr-only peer"
+							id="hardDeadlineToggle"
+							autocomplete="off"
+							v-model="task.isHardDeadline"
+						/>
+						<label
+							class="block px-3 py-2 border-2 rounded cursor-pointer font-rajdhani font-semibold transition-colors peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 border-red-600 text-red-600 hover:bg-red-50 whitespace-nowrap"
+							for="hardDeadlineToggle"
+						>
+							Hard Deadline
+						</label>
+					</div>
 				</div>
 			</div>
 		</form>
