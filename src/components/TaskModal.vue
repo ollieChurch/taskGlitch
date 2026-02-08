@@ -256,8 +256,10 @@ export default {
 				`tasks/${this.store.user.uid}/${this.task.id}`
 			)
 
-			await set(tasksRef, this.task)
-			console.log('added task: ', this.task)
+			// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
+			const plainTask = JSON.parse(JSON.stringify(this.task))
+			await set(tasksRef, plainTask)
+			console.log('added task: ', plainTask)
 		},
 
 		isFormValid() {

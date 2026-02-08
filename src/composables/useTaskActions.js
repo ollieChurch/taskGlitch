@@ -54,9 +54,11 @@ export function useTaskActions() {
 				break
 		}
 
-		await set(listRef, task)
+		// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
+		const plainTask = JSON.parse(JSON.stringify(task))
+		await set(listRef, plainTask)
 		removeTask(task, removeFromList)
-		console.log('moved task: ', task)
+		console.log('moved task: ', plainTask)
 		rescoreActiveBacklog()
 	}
 
@@ -182,8 +184,10 @@ export function useTaskActions() {
 			account.settings = store.defaultSettings
 		}
 
-		await set(accountRef, account)
-		console.log('updated account: ', account)
+		// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
+		const plainAccount = JSON.parse(JSON.stringify(account))
+		await set(accountRef, plainAccount)
+		console.log('updated account: ', plainAccount)
 	}
 
 	function rescoreActiveBacklog() {
@@ -202,7 +206,9 @@ export function useTaskActions() {
 
 			if (task.score != newScore) {
 				task.score = newScore
-				await set(listRef, task)
+				// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
+				const plainTask = JSON.parse(JSON.stringify(task))
+				await set(listRef, plainTask)
 				console.log(`updated ${task.name} score: ${task.score}`)
 			}
 		})
