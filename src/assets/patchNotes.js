@@ -1,6 +1,6 @@
 export const patchNotes = [
 	{
-		version: '1.0.0',
+		version: '0.10.0',
 		changes: [
 			'Task Glitch has been rebuilt with a modernised tech stack for improved performance and reliability',
 			'Fresh new look with a cleaner, more streamlined design',
