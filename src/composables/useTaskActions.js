@@ -33,12 +33,14 @@ export function useTaskActions() {
 			`${list}/${store.user.uid}/${task.id}`
 		)
 
+		// Deep clone first to avoid mutating reactive Proxy objects
+		const plainTask = JSON.parse(JSON.stringify(task))
 		let removeFromList
 
 		switch (list) {
 			case 'completed':
 				removeFromList = 'tasks'
-				task.completedDateTime = new Date().toJSON()
+				plainTask.completedDateTime = new Date().toJSON()
 
 				if (store.tasks.length === 1) {
 					store.setTasks([])
@@ -46,7 +48,7 @@ export function useTaskActions() {
 				break
 			case 'tasks':
 				removeFromList = 'completed'
-				task.completedDateTime = null
+				plainTask.completedDateTime = null
 
 				if (store.completed.length === 1) {
 					store.setCompleted([])
@@ -54,12 +56,10 @@ export function useTaskActions() {
 				break
 		}
 
-		// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
-		const plainTask = JSON.parse(JSON.stringify(task))
 		await set(listRef, plainTask)
 		removeTask(task, removeFromList)
 		console.log('moved task: ', plainTask)
-		rescoreActiveBacklog()
+		await rescoreActiveBacklog()
 	}
 
 	async function removeTask(task, list) {
@@ -190,28 +190,27 @@ export function useTaskActions() {
 		console.log('updated account: ', plainAccount)
 	}
 
-	function rescoreActiveBacklog() {
+	async function rescoreActiveBacklog() {
 		const db = getDatabase(store.app)
 
-		const backlog = store.tasks
+		// Deep clone the entire backlog upfront to avoid iterating reactive Proxy
+		// objects that may be mutated by onValue listeners during writes
+		const backlog = JSON.parse(JSON.stringify(store.tasks))
 
-		backlog.forEach(async task => {
+		for (const task of backlog) {
 			console.log(`${task.name} current score: ${task.score}`)
-			const listRef = ref(
-				db,
-				`tasks/${store.user.uid}/${task.id}`
-			)
-
 			const newScore = scorePriority(task)
 
 			if (task.score != newScore) {
 				task.score = newScore
-				// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
-				const plainTask = JSON.parse(JSON.stringify(task))
-				await set(listRef, plainTask)
+				const listRef = ref(
+					db,
+					`tasks/${store.user.uid}/${task.id}`
+				)
+				await set(listRef, task)
 				console.log(`updated ${task.name} score: ${task.score}`)
 			}
-		})
+		}
 	}
 
 	function scorePriority(task) {
