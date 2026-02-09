@@ -1,34 +1,36 @@
 <template>
 	<content-card class="text-left">
-		<div class="d-flex align-items-center justify-content-between mb-3">
-			<h1 class="text-left mb-0">Profile</h1>
-			<b-btn @click="logout()" variant="warning">Logout</b-btn>
+		<div class="flex items-center justify-between mb-3">
+			<h1 class="text-left mb-0 font-rajdhani font-bold text-2xl">Profile</h1>
+			<button
+				@click="logout()"
+				class="bg-yellow-400 text-black px-4 py-2 rounded font-rajdhani font-semibold hover:bg-yellow-500"
+			>
+				Logout
+			</button>
 		</div>
 		<hr />
-		<div v-if="user?.email">
-			<div class="d-flex align-items-center justify-content-between mb-3">
-				<h3 class="mb-0">Account</h3>
-				<b-link class="text-start">
-					<!-- <i class="fas fa-edit"></i> -->
-				</b-link>
+		<div v-if="user?.email" class="mt-3">
+			<div class="flex items-center justify-between mb-3">
+				<h3 class="mb-0 font-rajdhani font-bold text-xl">Account</h3>
 			</div>
 
-			<b-row>
-				<b-col class="col-6 col-sm-5">
-					<b-card-text>Email</b-card-text>
-				</b-col>
-				<b-col>
-					<b-card-text>{{ user.email }}</b-card-text>
-				</b-col>
-			</b-row>
+			<div class="flex">
+				<div class="w-6/12 sm:w-5/12">
+					<p class="font-rajdhani">Email</p>
+				</div>
+				<div>
+					<p class="font-rajdhani">{{ user.email }}</p>
+				</div>
+			</div>
 		</div>
 		<hr />
-		<div>
-			<div class="d-flex align-items-center justify-content-between mb-3">
-				<h3 class="mb-0">Glitch Scheduling</h3>
-				<b-link class="text-start" @click="editSettings()">
+		<div class="mt-3">
+			<div class="flex items-center justify-between mb-3">
+				<h3 class="mb-0 font-rajdhani font-bold text-xl">Glitch Scheduling</h3>
+				<a class="text-start cursor-pointer" @click="editSettings()">
 					<i class="fas fa-edit"></i>
-				</b-link>
+				</a>
 			</div>
 			<div
 				v-for="(settingsGroup, index) in Object.keys(
@@ -36,19 +38,20 @@
 				)"
 				:key="`${settingsGroup}-settingDisplay-${index}`"
 			>
-				<b-card-title>{{ settingsGroup }}</b-card-title>
+				<h5 class="font-rajdhani font-semibold">{{ settingsGroup }}</h5>
 				<div class="mb-4">
-					<b-row
+					<div
 						v-for="setting in Object.keys(
 							getAccountSettings[settingsGroup]
 						)"
 						:key="`${setting}-${settingsGroup}-settingDisplay`"
+						class="flex"
 					>
-						<b-col class="col-6 col-sm-5 ps-4">
-							<b-card-text>{{ setting }}</b-card-text>
-						</b-col>
-						<b-col>
-							<b-card-text>
+						<div class="w-6/12 sm:w-5/12 pl-4">
+							<p class="font-rajdhani">{{ setting }}</p>
+						</div>
+						<div>
+							<p class="font-rajdhani">
 								{{
 									createSettingString(
 										getAccountSettings[settingsGroup][
@@ -56,79 +59,84 @@
 										]
 									)
 								}}
-							</b-card-text>
-						</b-col>
-					</b-row>
+							</p>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 		<hr />
-		<h3 class="mb-4">Danger Zone</h3>
-		<div class="d-flex justify-content-between align-items-center">
-			<b-card-title class="text-danger">
+		<h3 class="mb-4 mt-3 font-rajdhani font-bold text-xl">Danger Zone</h3>
+		<div class="flex justify-between items-center">
+			<h5 class="text-red-600 font-rajdhani font-semibold">
 				Restore Default Settings
-			</b-card-title>
-			<b-btn
-				variant="danger"
-				class="font-weight-bold"
+			</h5>
+			<button
+				class="bg-red-600 text-white px-4 py-2 rounded font-bold font-rajdhani hover:bg-red-700"
 				@click="restoreDefaultSettings()"
 			>
 				Restore
-			</b-btn>
+			</button>
 		</div>
 
-		<settings-modal :accountSettings="getAccountSettings" />
+		<settings-modal ref="settingsModalRef" :accountSettings="getAccountSettings" />
 	</content-card>
 </template>
 
 <script>
-	import { signOut } from 'firebase/auth'
-	import ContentCard from '@/components/ContentCard.vue'
-	import SettingsModal from '@/components/SettingsModal.vue'
-	import { mapGetters } from 'vuex'
+import { signOut } from 'firebase/auth'
+import { useAppStore } from '@/stores/app'
+import { useTaskActions } from '@/composables/useTaskActions'
+import ContentCard from '@/components/ContentCard.vue'
+import SettingsModal from '@/components/SettingsModal.vue'
 
-	export default {
-		name: 'ProfileView',
+export default {
+	name: 'ProfileView',
 
-		components: {
-			ContentCard,
-			SettingsModal
+	components: {
+		ContentCard,
+		SettingsModal
+	},
+
+	setup() {
+		const store = useAppStore()
+		const { pageCheck, saveAccountToDatabase } = useTaskActions()
+		return { store, pageCheck, saveAccountToDatabase }
+	},
+
+	created() {
+		this.pageCheck()
+	},
+
+	computed: {
+		getAccountSettings() {
+			return this.store.getAccountSettings
 		},
 
-		created() {
-			this.pageCheck()
+		user() {
+			return this.store.user
+		}
+	},
+
+	methods: {
+		logout() {
+			signOut(this.store.auth)
 		},
 
-		computed: {
-			...mapGetters(['getAccountSettings']),
-
-			user() {
-				return this.$store.state.user
-			}
+		restoreDefaultSettings() {
+			this.store.setAccountSettings(this.store.defaultSettings)
+			this.saveAccountToDatabase(this.store.account)
 		},
 
-		methods: {
-			logout() {
-				signOut(this.$store.state.auth)
-			},
+		createSettingString(settingValue) {
+			return typeof settingValue == 'number'
+				? `${settingValue} mins`
+				: settingValue
+		},
 
-			restoreDefaultSettings() {
-				this.$store.commit(
-					'setAccountSettings',
-					this.$store.state.defaultSettings
-				)
-				this.saveAccountToDatabase(this.$store.state.account)
-			},
-
-			createSettingString(settingValue) {
-				return typeof settingValue == 'number'
-					? `${settingValue} mins`
-					: settingValue
-			},
-
-			editSettings() {
-				this.$bvModal.show('settingsModal')
-			}
+		editSettings() {
+			this.$refs.settingsModalRef.show()
 		}
 	}
+}
 </script>

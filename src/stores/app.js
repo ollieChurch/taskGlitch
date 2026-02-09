@@ -1,11 +1,8 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { defineStore } from 'pinia'
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-	state: {
-		appVersion: '0.9.0',
+export const useAppStore = defineStore('app', {
+	state: () => ({
+		appVersion: '0.10.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -16,14 +13,14 @@ export default new Vuex.Store({
 		app: {},
 		auth: {},
 		firebaseConfig: {
-			apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
-			authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
-			databaseURL: process.env.VUE_APP_DATABASE_URL,
-			projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID,
-			storageBucket: process.env.VUE_APP_FIREBASE_STORAGE_BUCKET,
-			messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGING_SENDER_ID,
-			appId: process.env.VUE_APP_FIREBASE_APP_ID,
-			measurementId: process.env.VUE_APP_FIREBASE_MEASUREMENT_ID
+			apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+			authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+			databaseURL: import.meta.env.VITE_DATABASE_URL,
+			projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+			storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+			messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+			appId: import.meta.env.VITE_FIREBASE_APP_ID,
+			measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 		},
 		priorities: {
 			critical: {
@@ -58,18 +55,17 @@ export default new Vuex.Store({
 				long: 60,
 				veryLong: 120
 			},
-
 			rescheduling: {
 				maintainFinishTime: true
 			},
-
 			breaks: {
 				targetFrequency: 120,
 				length: 10
 			}
 		},
 		debug: false
-	},
+	}),
+
 	getters: {
 		getCategories(state) {
 			if (state.tasks) {
@@ -87,6 +83,7 @@ export default new Vuex.Store({
 					return a.score - b.score
 				})
 			}
+			return []
 		},
 
 		getTasksInCreatedOrder(state) {
@@ -96,6 +93,7 @@ export default new Vuex.Store({
 					return new Date(a.createdDateTime) - new Date(b.createdDateTime)
 				})
 			}
+			return []
 		},
 
 		getUpdateScheduleStatus(state) {
@@ -114,10 +112,11 @@ export default new Vuex.Store({
 			return state.account.settings ?? state.defaultSettings
 		}
 	},
-	mutations: {
-		setCompleted(state, payload) {
+
+	actions: {
+		setCompleted(payload) {
 			if (payload) {
-				state.completed = Object.values(payload).sort((a, b) => {
+				this.completed = Object.values(payload).sort((a, b) => {
 					return (
 						new Date(b.completedDateTime) -
 						new Date(a.completedDateTime)
@@ -126,9 +125,9 @@ export default new Vuex.Store({
 			}
 		},
 
-		setTasks(state, payload) {
+		setTasks(payload) {
 			if (payload) {
-				state.tasks = Object.values(payload).sort((a, b) => {
+				this.tasks = Object.values(payload).sort((a, b) => {
 					return (
 						new Date(a.targetDateTime) -
 							new Date(b.targetDateTime) ||
@@ -138,46 +137,42 @@ export default new Vuex.Store({
 			}
 		},
 
-		setSchedule(state, payload) {
-			state.schedule = payload
-			state.updateScheduleStatus = true
+		setSchedule(payload) {
+			this.schedule = payload
+			this.updateScheduleStatus = true
 		},
 
-		setScheduleTaskCompleted(state, payload) {
-			const newSchedule = state.schedule
-			newSchedule.tasks[payload.taskIndex].completed =
+		setScheduleTaskCompleted(payload) {
+			this.schedule.tasks[payload.taskIndex].completed =
 				payload.isTaskCompleted
-			state.schedule = newSchedule
 		},
 
-		setApp(state, payload) {
-			state.app = payload
+		setApp(payload) {
+			this.app = payload
 		},
 
-		setAuth(state, payload) {
-			state.auth = payload
+		setAuth(payload) {
+			this.auth = payload
 		},
 
-		setUser(state, payload) {
-			state.user = payload
+		setUser(payload) {
+			this.user = payload
 		},
 
-		setTaskToPatch(state, payload) {
-			state.taskToPatch = payload
+		setTaskToPatch(payload) {
+			this.taskToPatch = payload
 		},
 
-		setUpdateScheduleStatus(state, payload) {
-			state.updateScheduleStatus = payload
+		setUpdateScheduleStatus(payload) {
+			this.updateScheduleStatus = payload
 		},
 
-		setAccount(state, payload) {
-			state.account = payload
+		setAccount(payload) {
+			this.account = payload
 		},
 
-		setAccountSettings(state, payload) {
-			state.account.settings = payload
+		setAccountSettings(payload) {
+			this.account.settings = payload
 		}
-	},
-	actions: {},
-	modules: {}
+	}
 })

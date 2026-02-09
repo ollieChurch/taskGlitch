@@ -1,6 +1,7 @@
 # TaskGlitch
 
 ### Version
+0.10.0 - Migrates to Vue 3, Tailwind CSS, Pinia, and Vite\
 0.9.0 - Adds patch notes modal to communicate changes to users\
 0.8.2 - Refactors dashboard\
 0.8.1 - Fixes bugs in priority scoring and dashboard\
