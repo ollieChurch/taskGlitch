@@ -1,0 +1,62 @@
+# Schedule-Driven Time Tracking
+
+**Phase:** 1 | **Version:** 0.12 | **Status:** Not Started
+
+## Problem
+
+There is no way to know how long a task actually takes a user to complete. This data is essential for future features like accurate time estimation and AI-powered suggestions. Currently only `completedDateTime` is captured.
+
+## Requirements
+
+### Core: Schedule-Driven Tracking (automatic)
+
+- [ ] When a schedule is active and a user completes a task, record the time spent
+- [ ] First task in the schedule is considered "started" when the schedule begins (or when the schedule start time is reached)
+- [ ] When a task is completed during a schedule, the next non-completed task automatically becomes the "active" task
+- [ ] Record `actualStartTime` and `actualEndTime` on each scheduled task as they are worked on and completed
+- [ ] Calculate and store `actualDuration` (in minutes) on completed tasks
+- [ ] System breaks should also be trackable (helps understand if users take longer breaks than scheduled)
+
+### Core: Manual Start (optional, for ad-hoc tasks)
+
+- [ ] Add a "Start" action on task cards (outside of schedule context)
+- [ ] When started, record `startedAt` timestamp on the task
+- [ ] When later completed, calculate duration from `startedAt` to `completedDateTime`
+- [ ] If a task is completed without ever being started, `actualDuration` is null (not zero)
+
+### Data Model Changes
+
+- [ ] Add to task schema: `startedAt` (ISO timestamp, nullable)
+- [ ] Add to task schema: `actualDuration` (number in minutes, nullable)
+- [ ] Add to schedule task entries: `actualStartTime`, `actualEndTime`
+- [ ] Ensure backward compatibility — existing tasks without these fields still work
+
+### Display
+
+- [ ] Show "In Progress" indicator on the currently active task in a schedule
+- [ ] Optionally show elapsed time on the active task
+- [ ] In completed tasks view, show actual duration alongside estimated size where available
+
+## Files Likely Affected
+
+- `src/stores/app.js` — task schema updates
+- `src/composables/useTaskActions.js` — completion flow to capture timestamps
+- `src/components/TaskSchedule.vue` — active task indicator, auto-advance
+- `src/components/TaskCard.vue` — manual start button, duration display
+- `src/views/ScheduleView.vue` — schedule lifecycle awareness
+
+## Acceptance Criteria
+
+1. Completing tasks within an active schedule automatically records start and end times
+2. The next task in the schedule automatically becomes "active" after the current one is completed
+3. Duration data is persisted to Firebase and survives page refresh
+4. Tasks completed outside a schedule can optionally have a manual start time
+5. Existing tasks without time tracking data continue to work without errors
+
+## Future Value
+
+This data enables:
+- Average actual duration by task size/category
+- Estimation accuracy tracking (estimated vs actual)
+- AI-powered time suggestions based on historical patterns
+- Productivity analytics (throughput per session)

@@ -1,0 +1,49 @@
+# Onboarding / Feature Tutorial
+
+**Phase:** 2 | **Version:** 0.14 | **Status:** Not Started
+
+## Problem
+
+New users land on the app with no guidance on how TaskGlitch works. The core concept — creating tasks, then "glitching" them into a schedule — is unique and not immediately obvious. A `GlitchExplained` component exists but it's only shown on the schedule page when no schedule is active.
+
+## Requirements
+
+### Core
+
+- [ ] Create a first-time user onboarding flow that introduces the key concepts:
+  1. Add tasks to your backlog with priority, size, and optional deadline
+  2. TaskGlitch auto-prioritises your tasks using a scoring algorithm
+  3. Hit "Glitch It" to generate an optimised schedule for your work session
+  4. Work through your schedule, complete tasks, and track your progress
+- [ ] Onboarding should be skippable at any point
+- [ ] Onboarding should be re-accessible from a help menu or settings
+- [ ] Track whether onboarding has been completed in the user's account settings
+
+### Approach Options
+
+- **Option A: Guided tour** — Step-by-step tooltips that highlight each part of the UI as the user navigates. Works well for visual learning but requires a library (e.g., Shepherd.js, vue-tour).
+- **Option B: Welcome modal sequence** — A series of illustrated modal screens (like app store screenshots). Simpler to implement, but less contextual.
+- **Option C: Interactive walkthrough** — Guide the user through creating their first task and generating their first schedule with real actions. Most engaging but most complex to build.
+
+- [ ] Decide on approach (recommendation: Option B for v0.14, with Option A/C as a future enhancement)
+
+### Content
+
+- [ ] Write onboarding copy that explains TaskGlitch's value proposition in simple terms
+- [ ] Include visual examples or illustrations for each step
+- [ ] Keep it brief — 3-5 screens maximum
+
+## Files Likely Affected
+
+- `src/stores/app.js` — onboarding completion flag in account settings
+- `src/components/GlitchExplained.vue` — may be refactored/replaced
+- New component: `src/components/OnboardingModal.vue`
+- `src/App.vue` — trigger onboarding for new users
+
+## Acceptance Criteria
+
+1. New users see onboarding on their first login
+2. Onboarding explains the core workflow clearly
+3. Users can skip onboarding at any point
+4. Users can re-access onboarding from settings/help
+5. Onboarding state persists across sessions
