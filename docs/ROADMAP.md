@@ -21,13 +21,14 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
-| 0.11 | Add loading states | [x] | [phase-1/loading-states.md](requirements/phase-1/loading-states.md) |
-| 0.11 | Fix stats data bug (0 created/resolved) | [x] | [phase-1/stats-bug-fix.md](requirements/phase-1/stats-bug-fix.md) |
-| 0.11 | Improve dashboard colours (no duplicates) | [x] | [phase-1/dashboard-colours.md](requirements/phase-1/dashboard-colours.md) |
-| 0.12 | Schedule-driven time tracking | [ ] | [phase-1/time-tracking.md](requirements/phase-1/time-tracking.md) |
-| 0.12 | Add schedule finish state | [ ] | [phase-1/schedule-finish-state.md](requirements/phase-1/schedule-finish-state.md) |
-| 0.13 | Improve labels taken from code | [ ] | [phase-1/improve-labels.md](requirements/phase-1/improve-labels.md) |
-| 0.13 | Schedule updates on task changes | [ ] | [phase-1/schedule-task-sync.md](requirements/phase-1/schedule-task-sync.md) |
+| 0.11 | Add loading states | [x] | [phase-1/v0.11-loading-states.md](requirements/phase-1/v0.11-loading-states.md) |
+| 0.11 | Fix stats data bug (0 created/resolved) | [x] | [phase-1/v0.11-stats-bug-fix.md](requirements/phase-1/v0.11-stats-bug-fix.md) |
+| 0.11 | Improve dashboard colours (no duplicates) | [x] | [phase-1/v0.11-dashboard-colours.md](requirements/phase-1/v0.11-dashboard-colours.md) |
+| 0.12 | Schedule-driven time tracking | [ ] | [phase-1/v0.12-time-tracking.md](requirements/phase-1/v0.12-time-tracking.md) |
+| 0.12 | Add schedule finish state | [ ] | [phase-1/v0.12-schedule-finish-state.md](requirements/phase-1/v0.12-schedule-finish-state.md) |
+| 0.13 | Improve labels taken from code | [ ] | [phase-1/v0.13-improve-labels.md](requirements/phase-1/v0.13-improve-labels.md) |
+| 0.13 | Schedule updates on task changes | [ ] | [phase-1/v0.13-schedule-task-sync.md](requirements/phase-1/v0.13-schedule-task-sync.md) |
+| 0.13 | Fix npm audit vulnerabilities | [ ] | [phase-1/v0.13-dependency-audit.md](requirements/phase-1/v0.13-dependency-audit.md) |
 
 ## Phase 2: UX & Onboarding (v0.14 - v0.15)
 
@@ -35,11 +36,12 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
-| 0.14 | Onboarding / feature tutorial | [ ] | [phase-2/onboarding.md](requirements/phase-2/onboarding.md) |
-| 0.14 | Write website copy | [ ] | [phase-2/website-copy.md](requirements/phase-2/website-copy.md) |
-| 0.15 | Improve accessibility | [ ] | [phase-2/accessibility.md](requirements/phase-2/accessibility.md) |
-| 0.15 | Improve Lighthouse score | [ ] | [phase-2/lighthouse.md](requirements/phase-2/lighthouse.md) |
-| 0.15 | Footer polish | [ ] | [phase-2/footer.md](requirements/phase-2/footer.md) |
+| 0.14 | Design overhaul | [ ] | [phase-2/v0.14-design-overhaul.md](requirements/phase-2/v0.14-design-overhaul.md) |
+| 0.14 | Onboarding / feature tutorial | [ ] | [phase-2/v0.14-onboarding.md](requirements/phase-2/v0.14-onboarding.md) |
+| 0.14 | Write website copy | [ ] | [phase-2/v0.14-website-copy.md](requirements/phase-2/v0.14-website-copy.md) |
+| 0.15 | Improve accessibility | [ ] | [phase-2/v0.15-accessibility.md](requirements/phase-2/v0.15-accessibility.md) |
+| 0.15 | Improve Lighthouse score | [ ] | [phase-2/v0.15-lighthouse.md](requirements/phase-2/v0.15-lighthouse.md) |
+| 0.15 | Footer polish | [ ] | [phase-2/v0.15-footer.md](requirements/phase-2/v0.15-footer.md) |
 
 ## Phase 3: Core Feature Gaps (v0.16 - v0.18)
 
@@ -47,11 +49,11 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
-| 0.16 | Filter & search backlog | [ ] | [phase-3/filter-search.md](requirements/phase-3/filter-search.md) |
-| 0.16 | Improve backlog-to-completed transition | [ ] | [phase-3/completion-transition.md](requirements/phase-3/completion-transition.md) |
-| 0.17 | Flag blocked tasks | [ ] | [phase-3/blocked-tasks.md](requirements/phase-3/blocked-tasks.md) |
-| 0.17 | Task dependencies | [ ] | [phase-3/task-dependencies.md](requirements/phase-3/task-dependencies.md) |
-| 0.18 | Repeating tasks | [ ] | [phase-3/repeating-tasks.md](requirements/phase-3/repeating-tasks.md) |
+| 0.16 | Filter & search backlog | [ ] | [phase-3/v0.16-filter-search.md](requirements/phase-3/v0.16-filter-search.md) |
+| 0.16 | Improve backlog-to-completed transition | [ ] | [phase-3/v0.16-completion-transition.md](requirements/phase-3/v0.16-completion-transition.md) |
+| 0.17 | Flag blocked tasks | [ ] | [phase-3/v0.17-blocked-tasks.md](requirements/phase-3/v0.17-blocked-tasks.md) |
+| 0.17 | Task dependencies | [ ] | [phase-3/v0.17-task-dependencies.md](requirements/phase-3/v0.17-task-dependencies.md) |
+| 0.18 | Repeating tasks | [ ] | [phase-3/v0.18-repeating-tasks.md](requirements/phase-3/v0.18-repeating-tasks.md) |
 
 ---
 
@@ -65,10 +67,10 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
-| 1.1 | Multiple lists (personal, work, etc.) | [ ] | [phase-4/multiple-lists.md](requirements/phase-4/multiple-lists.md) |
-| 1.1 | Custom settings per list | [ ] | [phase-4/list-settings.md](requirements/phase-4/list-settings.md) |
-| 1.2 | Google Calendar integration | [ ] | [phase-4/google-calendar.md](requirements/phase-4/google-calendar.md) |
-| 1.2 | Export schedule | [ ] | [phase-4/export-schedule.md](requirements/phase-4/export-schedule.md) |
+| 1.1 | Multiple lists (personal, work, etc.) | [ ] | [phase-4/v1.1-multiple-lists.md](requirements/phase-4/v1.1-multiple-lists.md) |
+| 1.1 | Custom settings per list | [ ] | [phase-4/v1.1-list-settings.md](requirements/phase-4/v1.1-list-settings.md) |
+| 1.2 | Google Calendar integration | [ ] | [phase-4/v1.2-google-calendar.md](requirements/phase-4/v1.2-google-calendar.md) |
+| 1.2 | Export schedule | [ ] | [phase-4/v1.2-export-schedule.md](requirements/phase-4/v1.2-export-schedule.md) |
 
 ## Phase 5: AI-Ready Platform (v1.3 - v1.4)
 
@@ -76,10 +78,10 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
-| 1.3 | Public REST API | [ ] | [phase-5/rest-api.md](requirements/phase-5/rest-api.md) |
-| 1.3 | Webhook support | [ ] | [phase-5/webhooks.md](requirements/phase-5/webhooks.md) |
-| 1.4 | MCP Server | [ ] | [phase-5/mcp-server.md](requirements/phase-5/mcp-server.md) |
-| 1.4 | Data export (JSON/CSV) | [ ] | [phase-5/data-export.md](requirements/phase-5/data-export.md) |
+| 1.3 | Public REST API | [ ] | [phase-5/v1.3-rest-api.md](requirements/phase-5/v1.3-rest-api.md) |
+| 1.3 | Webhook support | [ ] | [phase-5/v1.3-webhooks.md](requirements/phase-5/v1.3-webhooks.md) |
+| 1.4 | MCP Server | [ ] | [phase-5/v1.4-mcp-server.md](requirements/phase-5/v1.4-mcp-server.md) |
+| 1.4 | Data export (JSON/CSV) | [ ] | [phase-5/v1.4-data-export.md](requirements/phase-5/v1.4-data-export.md) |
 
 ---
 

@@ -2,7 +2,11 @@
 	<div id="app" class="flex flex-col min-h-screen">
 		<header-nav />
 		<main class="flex-1">
-			<router-view></router-view>
+			<router-view v-slot="{ Component }">
+				<transition name="page" mode="out-in">
+					<component :is="Component" />
+				</transition>
+			</router-view>
 		</main>
 		<page-footer />
 		<patch-notes-modal ref="patchNotesModalRef" v-if="lastVersion" :lastVersion="lastVersion" />
@@ -161,5 +165,16 @@ nav a {
 
 nav a.router-link-exact-active {
 	color: #42b983;
+}
+
+/* Route transition — fast fade so navigation feels responsive */
+.page-enter-active,
+.page-leave-active {
+	transition: opacity 0.15s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+	opacity: 0;
 }
 </style>
