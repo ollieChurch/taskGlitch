@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
 	state: () => ({
-		appVersion: '0.10.0',
+		appVersion: '0.11.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -12,6 +12,13 @@ export const useAppStore = defineStore('app', {
 		updateScheduleStatus: false,
 		app: {},
 		auth: {},
+		// Loading states — true until first Firebase snapshot received
+		loading: {
+			tasks: true,
+			completed: true,
+			schedule: true,
+			account: true
+		},
 		firebaseConfig: {
 			apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
 			authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -63,10 +70,41 @@ export const useAppStore = defineStore('app', {
 				length: 10
 			}
 		},
+		// Deterministic colour palette for category charts
+		categoryPalette: [
+			'#6366f1', // indigo
+			'#f59e0b', // amber
+			'#10b981', // emerald
+			'#ef4444', // red
+			'#8b5cf6', // violet
+			'#06b6d4', // cyan
+			'#f97316', // orange
+			'#ec4899', // pink
+			'#14b8a6', // teal
+			'#84cc16', // lime
+			'#a855f7', // purple
+			'#e11d48', // rose
+			'#0ea5e9', // sky
+			'#d97706', // amber darker
+			'#059669', // emerald darker
+			'#7c3aed'  // violet darker
+		],
 		debug: false
 	}),
 
 	getters: {
+		isLoading(state) {
+			return state.loading.tasks || state.loading.completed || state.loading.schedule || state.loading.account
+		},
+
+		isLoadingTasks(state) {
+			return state.loading.tasks
+		},
+
+		isLoadingSchedule(state) {
+			return state.loading.schedule
+		},
+
 		getCategories(state) {
 			if (state.tasks) {
 				const tasks = Object.values(state.tasks)
@@ -173,6 +211,19 @@ export const useAppStore = defineStore('app', {
 
 		setAccountSettings(payload) {
 			this.account.settings = payload
+		},
+
+		setLoaded(key) {
+			this.loading[key] = false
+		},
+
+		resetLoading() {
+			this.loading = {
+				tasks: true,
+				completed: true,
+				schedule: true,
+				account: true
+			}
 		}
 	}
 })

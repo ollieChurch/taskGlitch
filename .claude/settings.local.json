@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd project roadmap and requirements documentation\n\nDefines the full development roadmap from v0.11 to v1.4+, covering\nfive phases: polish & stability, UX & onboarding, core features,\nmulti-list support, and AI-ready platform. Each feature has a\ndetailed requirements document with acceptance criteria.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git checkout:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install)",
+      "Bash(npx vite build)",
+      "Bash(npx vitest run)"
+    ]
+  }
+}

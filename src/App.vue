@@ -55,6 +55,7 @@ export default {
 					user.uid != this.store.user.uid)
 			) {
 				console.log('updating user')
+				this.store.resetLoading()
 				this.store.setUser(markRaw(user))
 				this.linkToDatabase()
 				this.redirectToFirstPage()
@@ -63,6 +64,7 @@ export default {
 				this.store.setTasks([])
 				this.store.setAccount({})
 				this.store.setUser(null)
+				this.store.resetLoading()
 				console.log('user should be logged out')
 				this.redirectToFirstPage()
 			}
@@ -88,8 +90,8 @@ export default {
 
 			onValue(accountRef, snapshot => {
 				const currentAccount = snapshot.val()
-				console.log('account snapshot', currentAccount)
 				this.store.setAccount(currentAccount)
+				this.store.setLoaded('account')
 
 				const currentAppVersion = this.store.appVersion
 				if (currentAppVersion == currentAccount?.lastLoginVersion) {
@@ -113,18 +115,18 @@ export default {
 			})
 
 			onValue(completedRef, snapshot => {
-				console.log('completed snapshot', snapshot.val())
 				this.store.setCompleted(snapshot.val())
+				this.store.setLoaded('completed')
 			})
 
 			onValue(tasksRef, snapshot => {
-				console.log('tasks snapshot', snapshot.val())
 				this.store.setTasks(snapshot.val())
+				this.store.setLoaded('tasks')
 			})
 
 			onValue(scheduleRef, snapshot => {
-				console.log('schedule snapshot', snapshot.val())
 				this.store.setSchedule(snapshot.val())
+				this.store.setLoaded('schedule')
 			})
 		},
 

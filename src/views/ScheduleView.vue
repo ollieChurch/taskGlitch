@@ -1,8 +1,12 @@
 <template>
 	<div>
 		<content-card>
+			<!-- Loading state -->
+			<div v-if="isLoadingSchedule" class="py-4">
+				<skeleton-loader :lines="3" height="2.5rem" />
+			</div>
 			<glitch-explained
-				v-if="!schedule"
+				v-else-if="!schedule"
 				@createSchedule="openScheduleSetUp()"
 			/>
 			<div v-else>
@@ -50,6 +54,7 @@ import ScheduleSetUpModal from '@/components/ScheduleSetUpModal.vue'
 import GlitchExplained from '@/components/GlitchExplained.vue'
 import TaskSchedule from '@/components/TaskSchedule.vue'
 import ContentCard from '@/components/ContentCard.vue'
+import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
 
 export default {
 	name: 'ScheduleView',
@@ -58,7 +63,8 @@ export default {
 		ContentCard,
 		ScheduleSetUpModal,
 		GlitchExplained,
-		TaskSchedule
+		TaskSchedule,
+		SkeletonLoader
 	},
 
 	setup() {
@@ -72,6 +78,10 @@ export default {
 	},
 
 	computed: {
+		isLoadingSchedule() {
+			return this.store.isLoadingSchedule
+		},
+
 		getAccountSettings() {
 			return this.store.getAccountSettings
 		},

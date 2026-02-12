@@ -1,33 +1,23 @@
 # Fix Stats Data Bug (0 Created/Resolved)
 
-**Phase:** 1 | **Version:** 0.11 | **Status:** Not Started
+**Phase:** 1 | **Version:** 0.11 | **Status:** Complete
 
 ## Problem
 
 The dashboard stats show "0 created/resolved in a month" in certain conditions. This was flagged as an existing bug from the original backlog.
 
-## Requirements
+## Root Cause
 
-### Investigation
+The dashboard charts were built in `created()` using imperative methods (`setUpCategoryBreakdown`, `setUpPriorityBreakdown`) that ran once on mount. Since Firebase data arrives asynchronously via `onValue()` listeners, the charts would build with empty data if the dashboard rendered before data arrived. Additionally, `[getPrioritisedTasks[0]]` would pass `[undefined]` to FilterWidget when no tasks existed, causing rendering errors.
 
-- [ ] Reproduce the bug — identify which conditions cause 0 created/resolved to display
-- [ ] Check whether the issue is a data calculation error or a display/formatting issue
-- [ ] Check edge cases: new accounts with no completed tasks, months with no activity, boundary dates (start/end of month)
+## What Changed
 
-### Fix
+- [x] Converted chart data from imperative methods to reactive `computed` properties — charts now rebuild automatically when Firebase data arrives or changes
+- [x] Removed `setUpCategoryBreakdown()` and `setUpPriorityBreakdown()` methods
+- [x] Added safe array wrapping for `highestPriorityTask` and `oldestTask` — returns empty array instead of `[undefined]`
+- [x] Added empty state handling — shows helpful message when no tasks exist instead of empty/broken charts
+- [x] Stats update in real-time as tasks are created or completed (reactivity via computed properties)
 
-- [ ] Ensure stats correctly count tasks created within the current month
-- [ ] Ensure stats correctly count tasks resolved (completed) within the current month
-- [ ] Handle edge case: if genuinely 0 tasks created/resolved, display appropriately (not as a bug)
-- [ ] Add basic data validation before rendering stats
+## Files Changed
 
-## Files Likely Affected
-
-- `src/views/DashboardView.vue` — stats calculation and display logic
-
-## Acceptance Criteria
-
-1. Dashboard accurately shows tasks created this month
-2. Dashboard accurately shows tasks resolved this month
-3. A new account with no tasks shows a valid empty/zero state (not a broken display)
-4. Stats update in real-time as tasks are created or completed
+- `src/views/DashboardView.vue` — complete rewrite of chart data logic from methods to computed properties

@@ -1,6 +1,6 @@
 # TaskGlitch Roadmap
 
-> Current version: **0.10.0**
+> Current version: **0.11.0**
 > Target: **1.0** release, then continued development toward an AI-ready platform
 
 ## Overview
@@ -21,9 +21,9 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
-| 0.11 | Add loading states | [ ] | [phase-1/loading-states.md](requirements/phase-1/loading-states.md) |
-| 0.11 | Fix stats data bug (0 created/resolved) | [ ] | [phase-1/stats-bug-fix.md](requirements/phase-1/stats-bug-fix.md) |
-| 0.11 | Improve dashboard colours (no duplicates) | [ ] | [phase-1/dashboard-colours.md](requirements/phase-1/dashboard-colours.md) |
+| 0.11 | Add loading states | [x] | [phase-1/loading-states.md](requirements/phase-1/loading-states.md) |
+| 0.11 | Fix stats data bug (0 created/resolved) | [x] | [phase-1/stats-bug-fix.md](requirements/phase-1/stats-bug-fix.md) |
+| 0.11 | Improve dashboard colours (no duplicates) | [x] | [phase-1/dashboard-colours.md](requirements/phase-1/dashboard-colours.md) |
 | 0.12 | Schedule-driven time tracking | [ ] | [phase-1/time-tracking.md](requirements/phase-1/time-tracking.md) |
 | 0.12 | Add schedule finish state | [ ] | [phase-1/schedule-finish-state.md](requirements/phase-1/schedule-finish-state.md) |
 | 0.13 | Improve labels taken from code | [ ] | [phase-1/improve-labels.md](requirements/phase-1/improve-labels.md) |

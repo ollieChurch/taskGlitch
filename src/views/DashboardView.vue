@@ -19,39 +19,60 @@
 				/>
 			</div>
 			<hr class="pb-4 mt-4" />
-			<filter-widget
-				title="Highest Priority Task"
-				:tasks="[getPrioritisedTasks[0]]"
-			/>
-			<filter-widget
-				title="Oldest Task"
-				:tasks="[getTasksInCreatedOrder[0]]"
-			/>
-			<div>
-				<h5 class="text-start mb-2 font-bold font-rajdhani">
-					Backlog Breakdown
-				</h5>
-				<div class="bg-white rounded-lg shadow-sm border">
-					<BaseTabs fill>
-						<BaseTab title="Categories">
-							<div class="pt-4 pb-6">
-								<doughnut
-									:data="categoryBreakdownData"
-									:options="chartOptions"
-									class="mx-auto"
-								/>
-							</div>
-						</BaseTab>
-						<BaseTab title="Priorities">
-							<div class="pt-4 pb-6">
-								<doughnut
-									:data="priorityBreakdownData"
-									:options="chartOptions"
-									class="mx-auto"
-								/>
-							</div>
-						</BaseTab>
-					</BaseTabs>
+
+			<!-- Loading state -->
+			<div v-if="isLoading">
+				<skeleton-loader :lines="2" height="4.5rem" />
+				<div class="mt-6">
+					<skeleton-loader :lines="1" height="1.2rem" />
+					<div class="mt-4 flex justify-center">
+						<skeleton-loader :lines="1" height="12rem" />
+					</div>
+				</div>
+			</div>
+
+			<!-- Empty state -->
+			<div v-else-if="!hasTasks" class="py-8 text-gray-500 font-rajdhani">
+				<p class="text-lg font-semibold">No tasks yet</p>
+				<p class="text-sm">Add your first task to see your dashboard come to life.</p>
+			</div>
+
+			<!-- Data loaded -->
+			<div v-else>
+				<filter-widget
+					title="Highest Priority Task"
+					:tasks="highestPriorityTask"
+				/>
+				<filter-widget
+					title="Oldest Task"
+					:tasks="oldestTask"
+				/>
+				<div>
+					<h5 class="text-start mb-2 font-bold font-rajdhani">
+						Backlog Breakdown
+					</h5>
+					<div class="bg-white rounded-lg shadow-sm border">
+						<BaseTabs fill>
+							<BaseTab title="Categories">
+								<div class="pt-4 pb-6">
+									<doughnut
+										:data="categoryBreakdownData"
+										:options="chartOptions"
+										class="mx-auto"
+									/>
+								</div>
+							</BaseTab>
+							<BaseTab title="Priorities">
+								<div class="pt-4 pb-6">
+									<doughnut
+										:data="priorityBreakdownData"
+										:options="chartOptions"
+										class="mx-auto"
+									/>
+								</div>
+							</BaseTab>
+						</BaseTabs>
+					</div>
 				</div>
 			</div>
 		</content-card>
@@ -68,6 +89,7 @@ import TaskModal from '@/components/TaskModal.vue'
 import ScheduleSetUpModal from '@/components/ScheduleSetUpModal.vue'
 import IconButton from '@/components/IconButton.vue'
 import FilterWidget from '@/components/FilterWidget.vue'
+import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
 import BaseTabs from '@/components/ui/BaseTabs.vue'
 import BaseTab from '@/components/ui/BaseTab.vue'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
@@ -85,6 +107,7 @@ export default {
 		ScheduleSetUpModal,
 		IconButton,
 		FilterWidget,
+		SkeletonLoader,
 		BaseTabs,
 		BaseTab
 	},
@@ -97,9 +120,6 @@ export default {
 
 	data() {
 		return {
-			categoryBreakdownData: { datasets: [] },
-			priorityBreakdownData: { datasets: [] },
-
 			chartOptions: {
 				responsive: false,
 				maintainAspectRatio: true
@@ -109,26 +129,82 @@ export default {
 
 	created() {
 		this.pageCheck()
-		this.setUpCategoryBreakdown()
-		this.setUpPriorityBreakdown()
 	},
 
 	computed: {
+		isLoading() {
+			return this.store.isLoadingTasks
+		},
+
+		hasTasks() {
+			return this.store.getPrioritisedTasks.length > 0
+		},
+
+		highestPriorityTask() {
+			const tasks = this.store.getPrioritisedTasks
+			return tasks.length > 0 ? [tasks[0]] : []
+		},
+
+		oldestTask() {
+			const tasks = this.store.getTasksInCreatedOrder
+			return tasks.length > 0 ? [tasks[0]] : []
+		},
+
 		getCategories() {
 			return this.store.getCategories
 		},
+
 		getPrioritisedTasks() {
 			return this.store.getPrioritisedTasks
 		},
+
 		getPriorityNames() {
 			return this.store.getPriorityNames
-		},
-		getTasksInCreatedOrder() {
-			return this.store.getTasksInCreatedOrder
 		},
 
 		priorities() {
 			return this.store.priorities
+		},
+
+		categoryBreakdownData() {
+			const labels = []
+			const data = []
+			const backgroundColor = []
+			const palette = this.store.categoryPalette
+
+			this.getCategories.forEach((category, index) => {
+				labels.push(category)
+				const tasksInCategory = this.getPrioritisedTasks.filter(
+					x => x.category == category
+				)
+				data.push(tasksInCategory.length)
+				backgroundColor.push(palette[index % palette.length])
+			})
+
+			return {
+				labels,
+				datasets: [{ data, backgroundColor }]
+			}
+		},
+
+		priorityBreakdownData() {
+			const labels = []
+			const data = []
+			const backgroundColor = []
+
+			this.getPriorityNames.forEach(priority => {
+				labels.push(priority)
+				const tasksInPriority = this.getPrioritisedTasks.filter(
+					x => x.priority == this.priorities[priority].value
+				)
+				data.push(tasksInPriority.length)
+				backgroundColor.push(this.priorities[priority].color)
+			})
+
+			return {
+				labels,
+				datasets: [{ data, backgroundColor }]
+			}
 		}
 	},
 
@@ -143,52 +219,6 @@ export default {
 			} else {
 				this.$refs.scheduleSetUpModalRef.show()
 			}
-		},
-
-		setUpCategoryBreakdown() {
-			let labels = []
-			let data = []
-			let backgroundColor = []
-
-			this.getCategories.forEach(category => {
-				labels.push(category)
-				const tasksInCategory = this.getPrioritisedTasks.filter(
-					x => x.category == category
-				)
-				data.push(tasksInCategory.length)
-				backgroundColor.push(this.getRandomColor())
-			})
-
-			this.categoryBreakdownData.labels = labels
-			this.categoryBreakdownData.datasets.push({
-				data,
-				backgroundColor
-			})
-		},
-
-		setUpPriorityBreakdown() {
-			let labels = []
-			let data = []
-			let backgroundColor = []
-
-			this.getPriorityNames.forEach(priority => {
-				labels.push(priority)
-				const tasksInPriority = this.getPrioritisedTasks.filter(
-					x => x.priority == this.priorities[priority].value
-				)
-				data.push(tasksInPriority.length)
-				backgroundColor.push(this.priorities[priority].color)
-			})
-
-			this.priorityBreakdownData.labels = labels
-			this.priorityBreakdownData.datasets.push({
-				data,
-				backgroundColor
-			})
-		},
-
-		getRandomColor() {
-			return `#${Math.floor(Math.random() * 16777215).toString(16)}`
 		}
 	}
 }

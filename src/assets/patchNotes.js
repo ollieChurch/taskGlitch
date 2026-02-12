@@ -1,5 +1,14 @@
 export const patchNotes = [
 	{
+		version: '0.11.0',
+		changes: [
+			'Added loading indicators while your data syncs — no more empty screens on page load',
+			'Helpful empty states when you have no tasks or schedule yet',
+			'Dashboard chart colours are now consistent between page loads',
+			'Charts and stats now update in real-time as your data changes'
+		]
+	},
+	{
 		version: '0.10.0',
 		changes: [
 			'Task Glitch has been rebuilt with a modernised tech stack for improved performance and reliability',
