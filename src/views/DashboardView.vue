@@ -42,10 +42,12 @@
 				<filter-widget
 					title="Highest Priority Task"
 					:tasks="highestPriorityTask"
+					@editTask="openTaskModal()"
 				/>
 				<filter-widget
 					title="Oldest Task"
 					:tasks="oldestTask"
+					@editTask="openTaskModal()"
 				/>
 				<div>
 					<h5 class="text-start mb-2 font-bold font-rajdhani">
@@ -210,6 +212,10 @@ export default {
 
 	methods: {
 		addTask() {
+			this.$refs.taskModalRef.show()
+		},
+
+		openTaskModal() {
 			this.$refs.taskModalRef.show()
 		},
 
