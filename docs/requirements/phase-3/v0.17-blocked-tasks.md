@@ -1,0 +1,53 @@
+# Flag Blocked Tasks
+
+**Phase:** 3 | **Version:** 0.17 | **Status:** Not Started
+
+## Problem
+
+Some tasks cannot be worked on because they are waiting on something external (a response, a delivery, another person, etc.). Currently there is no way to indicate this, so blocked tasks still appear in the priority list and get scheduled.
+
+## Requirements
+
+### Core
+
+- [ ] Add a "blocked" status to tasks (distinct from priority — a task can be high priority AND blocked)
+- [ ] Blocked tasks should be visually distinct in the backlog (e.g., greyed out, with a blocked icon)
+- [ ] Blocked tasks should NOT be included when generating a schedule
+- [ ] Blocked tasks should still appear in the backlog (not hidden) so the user remembers they exist
+- [ ] Add a reason field (optional) — "Blocked: waiting on client response"
+- [ ] Unblocking a task returns it to normal status and it becomes schedulable again
+
+### UX
+
+- [ ] Toggle blocked status via a quick action on the task card (not requiring full edit modal)
+- [ ] When blocking, optionally prompt for a reason
+- [ ] Blocked tasks should sort to the bottom of the backlog (or have a separate "Blocked" section)
+- [ ] Show a count of blocked tasks somewhere visible ("3 tasks blocked")
+
+### Data Model
+
+- [ ] Add to task schema: `blocked` (boolean, default false)
+- [ ] Add to task schema: `blockedReason` (string, nullable)
+- [ ] Add to task schema: `blockedAt` (ISO timestamp, nullable)
+- [ ] Ensure backward compatibility — existing tasks default to not blocked
+
+### Filters
+
+- [ ] Add "Blocked" as a filter option (show only blocked / hide blocked)
+- [ ] By default, blocked tasks are shown but visually de-emphasised
+
+## Files Likely Affected
+
+- `src/stores/app.js` — task schema, filtered getters to exclude blocked from scheduling
+- `src/components/TaskCard.vue` — blocked indicator, toggle action
+- `src/composables/useTaskActions.js` — exclude blocked tasks from schedule generation
+- `src/components/TaskModal.vue` — blocked reason field
+- `src/components/FilterWidget.vue` — blocked filter option
+
+## Acceptance Criteria
+
+1. Users can mark a task as blocked with one click
+2. Blocked tasks are visually distinct from active tasks
+3. Blocked tasks are never included in generated schedules
+4. Unblocking a task makes it schedulable again immediately
+5. Blocked status is persisted to Firebase

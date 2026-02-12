@@ -1,6 +1,7 @@
 # TaskGlitch
 
 ### Version
+0.11.0 - Adds loading states, empty states, and fixes dashboard chart reactivity and colours\
 0.10.0 - Migrates to Vue 3, Tailwind CSS, Pinia, and Vite\
 0.9.0 - Adds patch notes modal to communicate changes to users\
 0.8.2 - Refactors dashboard\

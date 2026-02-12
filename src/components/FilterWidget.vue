@@ -7,6 +7,7 @@
 			v-for="task in tasks"
 			:key="`filterWidget-task-${task.id}`"
 			:task="task"
+			@editTask="$emit('editTask')"
 			class="mt-3"
 		/>
 	</div>
@@ -17,6 +18,7 @@ import TaskCard from './TaskCard.vue'
 
 export default {
 	props: ['title', 'tasks'],
+	emits: ['editTask'],
 	components: {
 		TaskCard
 	}

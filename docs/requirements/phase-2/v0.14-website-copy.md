@@ -1,0 +1,53 @@
+# Write Website Copy
+
+**Phase:** 2 | **Version:** 0.14 | **Status:** Not Started
+
+## Problem
+
+The app has no marketing or explanatory copy. There's no landing page for logged-out users, no feature descriptions, and no clear value proposition communicated to potential users.
+
+## Requirements
+
+### Core
+
+- [ ] Write a landing page for logged-out visitors that explains what TaskGlitch does
+- [ ] Define the value proposition: what makes TaskGlitch different from other task managers?
+- [ ] Write feature descriptions for the main capabilities:
+  - Intelligent task prioritisation
+  - Schedule generation ("Glitch It")
+  - Break scheduling
+  - Dashboard & analytics
+- [ ] Include a clear call-to-action (sign up / get started)
+
+### Content Sections
+
+- [ ] Hero section: tagline + one-sentence description
+- [ ] How it works: 3-4 step visual explanation
+- [ ] Features: brief descriptions of key capabilities
+- [ ] CTA: sign up prompt
+
+### Tone
+
+- Modern, slightly playful (fits the "Glitch" branding)
+- Productivity-focused but not corporate
+- Concise — respect the user's time (very on-brand for a task manager)
+
+### Technical
+
+- [ ] Create a landing page view for unauthenticated users (or repurpose the login page)
+- [ ] Ensure copy is accessible and readable
+- [ ] Consider SEO basics: meta description, Open Graph tags
+
+## Files Likely Affected
+
+- `src/views/LoginView.vue` — may become a landing page with login embedded
+- New view: `src/views/LandingView.vue` (if separate from login)
+- `index.html` — meta tags, Open Graph
+- `src/router/index.js` — routing for landing page
+
+## Acceptance Criteria
+
+1. Logged-out users see a landing page that explains TaskGlitch
+2. The value proposition is clear within 5 seconds of landing
+3. There is a clear path to sign up
+4. Copy is consistent with the app's tone and branding
