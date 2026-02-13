@@ -170,12 +170,18 @@
 				{{ scheduleDetails.estimatedFinishTime }}
 			</h5>
 		</div>
+		<div v-if="scheduleDetails.isOverflowing" class="mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded-lg text-left">
+			<p class="font-rajdhani font-semibold text-yellow-800 mb-0">
+				<i class="fas fa-exclamation-triangle mr-1"></i> Schedule runs past end time
+			</p>
+		</div>
 	</div>
 </template>
 
 <script>
 import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
+import { logger } from '@/utils/logger'
 import { VueDraggable } from 'vue-draggable-plus'
 
 export default {
@@ -268,9 +274,17 @@ export default {
 						timeStyle: 'short'
 					}
 				)
+
+				// Detect if schedule overflows past the planned end time
+				if (schedule.finish) {
+					const scheduledFinish = new Date(schedule.finish)
+					schedule.isOverflowing = taskTime > scheduledFinish
+				} else {
+					schedule.isOverflowing = false
+				}
 			}
 
-			console.log('scheduleDetails: ', schedule)
+			logger.log('scheduleDetails: ', schedule)
 			return schedule
 		},
 
@@ -370,7 +384,7 @@ export default {
 		},
 
 		updateSchedule(newSchedule) {
-			console.log('new schedule: ', newSchedule)
+			logger.log('new schedule: ', newSchedule)
 			this.saveScheduleToDatabase(newSchedule)
 			this.store.setSchedule(newSchedule)
 		},

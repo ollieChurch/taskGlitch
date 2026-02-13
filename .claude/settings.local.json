@@ -15,7 +15,13 @@
       "Bash(git fetch:*)",
       "Bash(git pull:*)",
       "Bash(npm install:*)",
-      "Bash(npx vitest:*)"
+      "Bash(npx vitest:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:vite.dev)",
+      "WebFetch(domain:v6.vite.dev)",
+      "Bash(node:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run test:unit:*)"
     ]
   }
 }

@@ -184,6 +184,7 @@ import {
 	sendPasswordResetEmail
 } from 'firebase/auth'
 import { useAppStore } from '@/stores/app'
+import { logger } from '@/utils/logger'
 import ContentCard from '@/components/ContentCard.vue'
 import BaseTabs from '@/components/ui/BaseTabs.vue'
 import BaseTab from '@/components/ui/BaseTab.vue'
@@ -244,9 +245,9 @@ export default {
 						this.password
 					)
 					await sendEmailVerification(response.user)
-					console.log('sent email verification')
+					logger.log('sent email verification')
 				} catch (ex) {
-					console.error(ex)
+					logger.error(ex)
 					window.alert('something went wrong')
 					// TODO: Better unhappy path handling of register
 				}

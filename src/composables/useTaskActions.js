@@ -1,6 +1,7 @@
 import { useAppStore } from '@/stores/app'
 import { useRouter } from 'vue-router'
 import { getDatabase, ref, set, remove } from 'firebase/database'
+import { logger } from '@/utils/logger'
 
 export function useTaskActions() {
 	const store = useAppStore()
@@ -18,9 +19,9 @@ export function useTaskActions() {
 	}
 
 	function pageCheck() {
-		console.log('checking page: ', store.user)
+		logger.log('checking page: ', store.user)
 		if (!store.user) {
-			console.log('no user found')
+			logger.log('no user found')
 			router.push('/login')
 		}
 	}
@@ -65,7 +66,7 @@ export function useTaskActions() {
 
 		await set(listRef, plainTask)
 		removeTask(task, removeFromList)
-		console.log('moved task: ', plainTask)
+		logger.log('moved task: ', plainTask)
 		await rescoreActiveBacklog()
 	}
 
@@ -77,7 +78,7 @@ export function useTaskActions() {
 		)
 
 		await remove(listRef)
-		console.log(`removed from ${list}: `, task)
+		logger.log(`removed from ${list}: `, task)
 	}
 
 	async function saveScheduleToDatabase(schedule) {
@@ -90,7 +91,7 @@ export function useTaskActions() {
 		// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
 		const plainSchedule = JSON.parse(JSON.stringify(schedule))
 		await set(scheduleRef, plainSchedule)
-		console.log('updated schedule: ', plainSchedule)
+		logger.log('updated schedule: ', plainSchedule)
 	}
 
 	function getScheduleTasks(tasks, sessionInMins, includeBreaks) {
@@ -135,7 +136,7 @@ export function useTaskActions() {
 			schedule.pop()
 		}
 
-		console.log('schedule length in mins: ', totalTaskTime)
+		logger.log('schedule length in mins: ', totalTaskTime)
 
 		return {
 			tasks: schedule,
@@ -144,7 +145,7 @@ export function useTaskActions() {
 	}
 
 	function getScheduleTimes(date, fromTime, toTime, finishDate = null) {
-		console.log('getScheduleTimes: ', date, fromTime, toTime)
+		logger.log('getScheduleTimes: ', date, fromTime, toTime)
 		const sessionFromDate = new Date(date)
 		const sessionToDate = finishDate ? new Date(finishDate) : new Date(date)
 
@@ -165,13 +166,13 @@ export function useTaskActions() {
 			}`
 		)
 
-		console.log(start, finish)
+		logger.log(start, finish)
 
 		var sessionInMins = Math.floor(
 			(finish.getTime() - start.getTime()) / 1000 / 60
 		)
 
-		console.log('session length in mins: ', sessionInMins)
+		logger.log('session length in mins: ', sessionInMins)
 
 		return {
 			start: start,
@@ -194,7 +195,7 @@ export function useTaskActions() {
 		// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
 		const plainAccount = JSON.parse(JSON.stringify(account))
 		await set(accountRef, plainAccount)
-		console.log('updated account: ', plainAccount)
+		logger.log('updated account: ', plainAccount)
 	}
 
 	async function rescoreActiveBacklog() {
@@ -205,7 +206,7 @@ export function useTaskActions() {
 		const backlog = JSON.parse(JSON.stringify(store.tasks))
 
 		for (const task of backlog) {
-			console.log(`${task.name} current score: ${task.score}`)
+			logger.log(`${task.name} current score: ${task.score}`)
 			const newScore = scorePriority(task)
 
 			if (task.score != newScore) {
@@ -215,7 +216,7 @@ export function useTaskActions() {
 					`tasks/${store.user.uid}/${task.id}`
 				)
 				await set(listRef, task)
-				console.log(`updated ${task.name} score: ${task.score}`)
+				logger.log(`updated ${task.name} score: ${task.score}`)
 			}
 		}
 	}
@@ -241,6 +242,87 @@ export function useTaskActions() {
 		}
 	}
 
+	function findTaskInSchedule(taskId) {
+		const schedule = store.schedule
+		if (!schedule?.tasks) return -1
+		return schedule.tasks.findIndex(t => t.id === taskId)
+	}
+
+	function syncTaskToSchedule(updatedTask) {
+		const schedule = store.schedule
+		if (!schedule?.tasks) return { inSchedule: false }
+
+		const index = schedule.tasks.findIndex(t => t.id === updatedTask.id)
+		if (index === -1) return { inSchedule: false }
+
+		const scheduleCopy = schedule.tasks[index]
+
+		const sizeChanged = scheduleCopy.sizing !== updatedTask.sizing
+		const nameChanged = scheduleCopy.name !== updatedTask.name
+		const categoryChanged = scheduleCopy.category !== updatedTask.category
+
+		// Check if the updated task's category still matches the schedule's filter
+		const categoryMatchesFilter = !schedule.categoriesToInclude ||
+			schedule.categoriesToInclude.length === 0 ||
+			schedule.categoriesToInclude.includes(updatedTask.category)
+
+		const anyChanged = sizeChanged || nameChanged || categoryChanged
+
+		return {
+			inSchedule: true,
+			sizeChanged,
+			nameChanged,
+			categoryChanged,
+			categoryMatchesFilter,
+			anyChanged
+		}
+	}
+
+	async function applyScheduleUpdate(updatedTask, shouldRemove = false) {
+		const schedule = store.schedule
+		if (!schedule?.tasks) return false
+
+		// Deep clone to avoid mutating reactive state directly
+		const newSchedule = JSON.parse(JSON.stringify(schedule))
+		const index = newSchedule.tasks.findIndex(t => t.id === updatedTask.id)
+		if (index === -1) return false
+
+		if (shouldRemove) {
+			newSchedule.tasks.splice(index, 1)
+		} else {
+			// Update task properties while preserving schedule-specific fields
+			const existing = newSchedule.tasks[index]
+			newSchedule.tasks[index] = {
+				...existing,
+				name: updatedTask.name,
+				sizing: updatedTask.sizing,
+				priority: updatedTask.priority,
+				category: updatedTask.category,
+				targetDateTime: updatedTask.targetDateTime,
+				isHardDeadline: updatedTask.isHardDeadline
+			}
+		}
+
+		await saveScheduleToDatabase(newSchedule)
+		store.setSchedule(newSchedule)
+		return true
+	}
+
+	async function removeTaskFromSchedule(taskId) {
+		const schedule = store.schedule
+		if (!schedule?.tasks) return false
+
+		const index = schedule.tasks.findIndex(t => t.id === taskId)
+		if (index === -1) return false
+
+		const newSchedule = JSON.parse(JSON.stringify(schedule))
+		newSchedule.tasks.splice(index, 1)
+
+		await saveScheduleToDatabase(newSchedule)
+		store.setSchedule(newSchedule)
+		return true
+	}
+
 	return {
 		createGuid,
 		pageCheck,
@@ -251,6 +333,10 @@ export function useTaskActions() {
 		getScheduleTimes,
 		saveAccountToDatabase,
 		rescoreActiveBacklog,
-		scorePriority
+		scorePriority,
+		findTaskInSchedule,
+		syncTaskToSchedule,
+		applyScheduleUpdate,
+		removeTaskFromSchedule
 	}
 }

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
 	state: () => ({
-		appVersion: '0.12.0',
+		appVersion: '0.13.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -51,6 +51,12 @@ export const useAppStore = defineStore('app', {
 				color: '#10caf0'
 			}
 		},
+		sizeLabels: {
+			15: 'Short',
+			30: 'Medium',
+			60: 'Long',
+			120: 'Very Long'
+		},
 		taskType: Object.freeze({
 			userTask: 'userTask',
 			systemBreak: 'systemBreak'
@@ -89,6 +95,13 @@ export const useAppStore = defineStore('app', {
 			'#059669', // emerald darker
 			'#7c3aed'  // violet darker
 		],
+		notification: {
+			visible: false,
+			title: '',
+			text: '',
+			autoDismissMs: 5000
+		},
+		pendingScheduleUpdate: null,
 		debug: false
 	}),
 
@@ -148,6 +161,10 @@ export const useAppStore = defineStore('app', {
 
 		getAccountSettings(state) {
 			return state.account.settings ?? state.defaultSettings
+		},
+
+		getSizeLabel(state) {
+			return (sizing) => state.sizeLabels[sizing] ?? `${sizing} mins`
 		}
 	},
 
@@ -224,6 +241,27 @@ export const useAppStore = defineStore('app', {
 				schedule: true,
 				account: true
 			}
+		},
+
+		showNotification(payload) {
+			this.notification = {
+				visible: true,
+				title: payload.title ?? '',
+				text: payload.text ?? '',
+				autoDismissMs: payload.autoDismissMs ?? 5000
+			}
+		},
+
+		hideNotification() {
+			this.notification.visible = false
+		},
+
+		setPendingScheduleUpdate(task) {
+			this.pendingScheduleUpdate = task
+		},
+
+		clearPendingScheduleUpdate() {
+			this.pendingScheduleUpdate = null
 		}
 	}
 })
