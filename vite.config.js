@@ -8,5 +8,16 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src')
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'firebase': ['firebase/app', 'firebase/auth', 'firebase/database'],
+          'chart': ['chart.js', 'vue-chartjs'],
+          'vue-vendor': ['vue', 'vue-router', 'pinia']
+        }
+      }
+    }
   }
 })
