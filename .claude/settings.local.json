@@ -11,7 +11,11 @@
       "Bash(npm audit:*)",
       "Bash(node -e:*)",
       "Bash(npx vite-bundle-visualizer:*)",
-      "Bash(npx rollup-plugin-visualizer)"
+      "Bash(npx rollup-plugin-visualizer)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)",
+      "Bash(npm install:*)",
+      "Bash(npx vitest:*)"
     ]
   }
 }

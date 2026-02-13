@@ -153,6 +153,18 @@ export default {
 				)
 			}
 
+			// Set actualStartTime on the first user task
+			const now = new Date()
+			const scheduleStart = calculatedTimes.start
+			const startTime = (now > scheduleStart ? now : scheduleStart).toISOString()
+
+			const firstUserTask = scheduleTasks.tasks.find(
+				t => t.type == null || t.type === this.store.taskType.userTask
+			)
+			if (firstUserTask) {
+				firstUserTask.actualStartTime = startTime
+			}
+
 			const scheduleDetails = {
 				categoriesToInclude: this.categoriesToInclude,
 				tasks: scheduleTasks.tasks,

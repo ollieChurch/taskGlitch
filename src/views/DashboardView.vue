@@ -49,6 +49,25 @@
 					:tasks="oldestTask"
 					@editTask="openTaskModal()"
 				/>
+
+				<!-- Estimation accuracy (only shown when time-tracked data exists) -->
+				<div v-if="estimationAccuracy" class="bg-white rounded-lg shadow-sm border mb-4 overflow-hidden">
+					<div class="flex items-stretch">
+						<div class="flex items-center justify-center px-5 py-4" :class="estimationAccuracy.bgClass">
+							<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
+						</div>
+						<div class="flex-1 px-4 py-3 text-left">
+							<div class="flex items-center gap-2">
+								<h5 class="font-bold font-rajdhani text-sm">Estimation Accuracy</h5>
+								<span class="text-xs text-gray-400 font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
+							</div>
+							<p class="text-sm text-gray-500 font-rajdhani mt-1 mb-0">
+								{{ estimationAccuracy.summary }}
+							</p>
+						</div>
+					</div>
+				</div>
+
 				<div>
 					<h5 class="text-start mb-2 font-bold font-rajdhani">
 						Backlog Breakdown
@@ -166,6 +185,36 @@ export default {
 
 		priorities() {
 			return this.store.priorities
+		},
+
+		estimationAccuracy() {
+			const tracked = this.store.completed.filter(
+				t => t.actualDuration != null && t.sizing != null && t.sizing > 0
+			)
+			if (tracked.length === 0) return null
+
+			const totalEstimated = tracked.reduce((sum, t) => sum + t.sizing, 0)
+			const totalActual = tracked.reduce((sum, t) => sum + t.actualDuration, 0)
+
+			// Accuracy as percentage — 100% means perfect, >100 means underestimating, <100 means overestimating
+			const ratio = totalActual / totalEstimated
+			const percentage = Math.round((1 - Math.abs(1 - ratio)) * 100)
+
+			let summary, bgClass
+			if (ratio > 1.1) {
+				const overMins = totalActual - totalEstimated
+				summary = `You tend to underestimate — tasks took ${overMins}m longer than expected`
+				bgClass = 'bg-yellow-500'
+			} else if (ratio < 0.9) {
+				const underMins = totalEstimated - totalActual
+				summary = `You tend to overestimate — tasks took ${underMins}m less than expected`
+				bgClass = 'bg-blue-500'
+			} else {
+				summary = 'Your estimates are close to reality — nice work'
+				bgClass = 'bg-green-500'
+			}
+
+			return { percentage: Math.max(0, percentage), taskCount: tracked.length, summary, bgClass }
 		},
 
 		categoryBreakdownData() {

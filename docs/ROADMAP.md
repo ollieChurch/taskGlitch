@@ -1,6 +1,6 @@
 # TaskGlitch Roadmap
 
-> Current version: **0.11.0**
+> Current version: **0.12.0**
 > Target: **1.0** release, then continued development toward an AI-ready platform
 
 ## Overview
@@ -24,8 +24,9 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 | 0.11 | Add loading states | [x] | [phase-1/v0.11-loading-states.md](requirements/phase-1/v0.11-loading-states.md) |
 | 0.11 | Fix stats data bug (0 created/resolved) | [x] | [phase-1/v0.11-stats-bug-fix.md](requirements/phase-1/v0.11-stats-bug-fix.md) |
 | 0.11 | Improve dashboard colours (no duplicates) | [x] | [phase-1/v0.11-dashboard-colours.md](requirements/phase-1/v0.11-dashboard-colours.md) |
-| 0.12 | Schedule-driven time tracking | [ ] | [phase-1/v0.12-time-tracking.md](requirements/phase-1/v0.12-time-tracking.md) |
-| 0.12 | Add schedule finish state | [ ] | [phase-1/v0.12-schedule-finish-state.md](requirements/phase-1/v0.12-schedule-finish-state.md) |
+| 0.12 | Schedule-driven time tracking | [x] | [phase-1/v0.12-time-tracking.md](requirements/phase-1/v0.12-time-tracking.md) |
+| 0.12 | Add schedule finish state | [x] | [phase-1/v0.12-schedule-finish-state.md](requirements/phase-1/v0.12-schedule-finish-state.md) |
+| 0.12 | Improve reschedule to preserve completed tasks | [x] | [phase-1/v0.12-reschedule-preserve-completed.md](requirements/phase-1/v0.12-reschedule-preserve-completed.md) |
 | 0.13 | Improve labels taken from code | [ ] | [phase-1/v0.13-improve-labels.md](requirements/phase-1/v0.13-improve-labels.md) |
 | 0.13 | Schedule updates on task changes | [ ] | [phase-1/v0.13-schedule-task-sync.md](requirements/phase-1/v0.13-schedule-task-sync.md) |
 | 0.13 | Fix npm audit vulnerabilities | [ ] | [phase-1/v0.13-dependency-audit.md](requirements/phase-1/v0.13-dependency-audit.md) |

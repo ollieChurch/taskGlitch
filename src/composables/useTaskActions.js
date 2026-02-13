@@ -42,6 +42,13 @@ export function useTaskActions() {
 				removeFromList = 'tasks'
 				plainTask.completedDateTime = new Date().toJSON()
 
+				// Calculate duration if task was started (via schedule) but duration not yet set
+				if (plainTask.actualStartTime && !plainTask.actualDuration) {
+					plainTask.actualDuration = Math.round(
+						(new Date() - new Date(plainTask.actualStartTime)) / 1000 / 60
+					)
+				}
+
 				if (store.tasks.length === 1) {
 					store.setTasks([])
 				}
