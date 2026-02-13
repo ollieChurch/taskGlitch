@@ -1,41 +1,35 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import DashboardView from '../views/DashboardView.vue'
-import LoginView from '../views/LoginView.vue'
-import TaskView from '../views/TaskView.vue'
-import ScheduleView from '../views/ScheduleView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import UserManagementView from '../views/UserManagementView.vue'
 
 const routes = [
     {
         path: '/dashboard',
         name: 'dashboard',
-        component: DashboardView
+        component: () => import('../views/DashboardView.vue')
     },
     {
         path: '/profile',
         name: 'profile',
-        component: ProfileView
+        component: () => import('../views/ProfileView.vue')
     },
     {
         path: '/login',
         name: 'login',
-        component: LoginView
+        component: () => import('../views/LoginView.vue')
     },
     {
         path: '/schedule',
         name: 'schedule',
-        component: ScheduleView
+        component: () => import('../views/ScheduleView.vue')
     },
     {
         path: '/',
         name: 'tasks',
-        component: TaskView
+        component: () => import('../views/TaskView.vue')
     },
     {
         path: '/user',
         name: 'user',
-        component: UserManagementView
+        component: () => import('../views/UserManagementView.vue')
     }
 ]
 
