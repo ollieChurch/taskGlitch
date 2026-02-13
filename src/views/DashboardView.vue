@@ -244,7 +244,7 @@ export default {
 			const backgroundColor = []
 
 			this.getPriorityNames.forEach(priority => {
-				labels.push(priority)
+				labels.push(priority.charAt(0).toUpperCase() + priority.slice(1))
 				const tasksInPriority = this.getPrioritisedTasks.filter(
 					x => x.priority == this.priorities[priority].value
 				)

@@ -1,5 +1,16 @@
 export const patchNotes = [
 	{
+		version: '0.13.0',
+		changes: [
+			'Updated dependencies (Firebase, Vite) to fix security vulnerabilities',
+			'Task sizes now display as friendly labels (Short, Medium, Long, Very Long)',
+			'Editing or deleting a scheduled task now updates your schedule automatically',
+			'Schedule shows a warning if tasks run past the planned end time',
+			'Changing a task\'s category prompts you to keep or remove it from the schedule',
+			'Cleaned up development logging from production builds'
+		]
+	},
+	{
 		version: '0.12.0',
 		changes: [
 			'Schedule now tracks time automatically — see how long each task actually takes',

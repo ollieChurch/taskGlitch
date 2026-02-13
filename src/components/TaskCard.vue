@@ -22,7 +22,7 @@
 					}`"
 				>
 					{{ task.name }}
-					<span v-if="debug"> - {{ task.score }}</span>
+					<span v-if="isDev && debug"> - {{ task.score }}</span>
 				</h5>
 				<div v-if="task.completedDateTime" class="flex flex-wrap task-details opacity-75 text-sm">
 					<a
@@ -54,7 +54,7 @@
 					</a>
 					<p class="sm:w-auto text-left mb-0 mr-3">
 						<i class="fas fa-stopwatch"></i>
-						{{ task.sizing }} mins
+						{{ store.getSizeLabel(task.sizing) }}
 					</p>
 					<p
 						class="sm:flex-1 text-left mb-0"
@@ -108,8 +108,8 @@ export default {
 
 	setup() {
 		const store = useAppStore()
-		const { moveTask, rescoreActiveBacklog } = useTaskActions()
-		return { store, moveTask, rescoreActiveBacklog }
+		const { moveTask, rescoreActiveBacklog, removeTaskFromSchedule } = useTaskActions()
+		return { store, moveTask, rescoreActiveBacklog, removeTaskFromSchedule }
 	},
 
 	data() {
@@ -126,6 +126,10 @@ export default {
 	computed: {
 		debug() {
 			return this.store.debug
+		},
+
+		isDev() {
+			return import.meta.env.DEV
 		}
 	},
 
@@ -135,8 +139,11 @@ export default {
 			this.$emit('editTask')
 		},
 
-		handleMainAction(task) {
+		async handleMainAction(task) {
 			const moveTo = task.completedDateTime ? 'tasks' : 'completed'
+			if (moveTo === 'completed') {
+				await this.removeTaskFromSchedule(task.id)
+			}
 			this.moveTask(task, moveTo)
 		}
 	}

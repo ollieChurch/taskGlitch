@@ -42,7 +42,6 @@
 							Reschedule
 						</button>
 						<button
-							@click="() => console.log('export clicked')"
 							class="flex-1 bg-blue-600 text-white py-2 px-4 rounded font-bold font-rajdhani opacity-50 cursor-not-allowed"
 							disabled
 						>

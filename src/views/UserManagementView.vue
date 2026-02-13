@@ -75,6 +75,7 @@
 
 <script>
 import { useAppStore } from '@/stores/app'
+import { logger } from '@/utils/logger'
 import ContentCard from '@/components/ContentCard.vue'
 import {
 	applyActionCode,
@@ -136,7 +137,7 @@ export default {
 					this.handleVerifyEmail(actionCode)
 					break
 				default:
-					console.error('unrecognised user management mode')
+					logger.error('unrecognised user management mode')
 					this.displayError()
 			}
 		},
@@ -147,7 +148,7 @@ export default {
 				this.savedActionCode = actionCode
 				this.changePassword.displayForm = true
 			} catch (e) {
-				console.error(`the action code could not be verified ${e}`)
+				logger.error(`the action code could not be verified ${e}`)
 				this.displayError(
 					'Oops! That link does not look right. Please try again.'
 				)
@@ -169,7 +170,7 @@ export default {
 						'Your password has been successfully changed'
 					)
 				} catch (e) {
-					console.error(`the password could not be updated. ${e}`)
+					logger.error(`the password could not be updated. ${e}`)
 					this.displayError(
 						'Your password could not be changed. Please try again later.'
 					)
@@ -181,7 +182,7 @@ export default {
 		},
 
 		handleRecoverEmail(actionCode) {
-			console.log('handle recover email', actionCode)
+			logger.log('handle recover email', actionCode)
 		},
 
 		async handleVerifyEmail(actionCode) {
@@ -196,13 +197,13 @@ export default {
 						'Thanks for verifying your email address'
 					)
 				} catch {
-					console.error('email was not verified due to an error')
+					logger.error('email was not verified due to an error')
 					this.displayError(
 						'Please try verifying your email again later'
 					)
 				}
 			} else if (this.auth.currentUser?.emailVerified) {
-				console.log('user email is already verified')
+				logger.log('user email is already verified')
 				this.displayTaskSuccess(
 					'Thanks for verifying your email address'
 				)

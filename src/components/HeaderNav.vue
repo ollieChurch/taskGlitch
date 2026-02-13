@@ -67,6 +67,7 @@
 import { sendEmailVerification } from 'firebase/auth'
 import { useAppStore } from '@/stores/app'
 import { useRoute } from 'vue-router'
+import { logger } from '@/utils/logger'
 import NotificationBanner from './NotificationBanner.vue'
 
 export default {
@@ -118,7 +119,7 @@ export default {
 
 	methods: {
 		async resendVerifyEmail() {
-			console.log('resend verify email')
+			logger.log('resend verify email')
 			await sendEmailVerification(this.user)
 			this.verifyEmailSent = true
 		}

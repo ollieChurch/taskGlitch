@@ -130,6 +130,7 @@
 import { getDatabase, ref, set } from 'firebase/database'
 import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
+import { logger } from '@/utils/logger'
 import BaseModal from './ui/BaseModal.vue'
 
 export default {
@@ -137,8 +138,8 @@ export default {
 
 	setup() {
 		const store = useAppStore()
-		const { createGuid, scorePriority, rescoreActiveBacklog, removeTask } = useTaskActions()
-		return { store, createGuid, scorePriority, rescoreActiveBacklog, removeTask }
+		const { createGuid, scorePriority, rescoreActiveBacklog, removeTask, syncTaskToSchedule, applyScheduleUpdate, removeTaskFromSchedule } = useTaskActions()
+		return { store, createGuid, scorePriority, rescoreActiveBacklog, removeTask, syncTaskToSchedule, applyScheduleUpdate, removeTaskFromSchedule }
 	},
 
 	created() {
@@ -184,7 +185,7 @@ export default {
 			let options = []
 			for (let priority in this.priorities) {
 				options.push({
-					text: priority,
+					text: priority.charAt(0).toUpperCase() + priority.slice(1),
 					value: this.priorities[priority].value
 				})
 			}
@@ -195,7 +196,7 @@ export default {
 			let options = []
 			for (let size in this.sizes) {
 				options.push({
-					text: size,
+					text: this.store.getSizeLabel(this.sizes[size]),
 					value: this.sizes[size]
 				})
 			}
@@ -241,6 +242,7 @@ export default {
 
 				this.saveToDatabase()
 				this.rescoreActiveBacklog()
+				this.handleScheduleSync()
 				this.$refs.modalRef.close()
 			}
 		},
@@ -259,7 +261,7 @@ export default {
 			// Deep clone to strip Vue 3 reactivity proxies before Firebase serialization
 			const plainTask = JSON.parse(JSON.stringify(this.task))
 			await set(tasksRef, plainTask)
-			console.log('added task: ', plainTask)
+			logger.log('added task: ', plainTask)
 		},
 
 		isFormValid() {
@@ -273,8 +275,34 @@ export default {
 			return valid
 		},
 
-		deleteTask(task) {
+		handleScheduleSync() {
+			const result = this.syncTaskToSchedule(this.task)
+			if (result.inSchedule && result.anyChanged) {
+				if (result.categoryChanged && !result.categoryMatchesFilter) {
+					// Category no longer matches schedule filter — prompt user
+					this.store.setPendingScheduleUpdate(
+						JSON.parse(JSON.stringify(this.task))
+					)
+				} else {
+					// Auto-update the schedule
+					this.applyScheduleUpdate(this.task)
+					this.store.showNotification({
+						title: 'Schedule Updated',
+						text: `"${this.task.name}" has been updated in your schedule.`
+					})
+				}
+			}
+		},
+
+		async deleteTask(task) {
+			const wasInSchedule = await this.removeTaskFromSchedule(task.id)
 			this.removeTask(task, 'tasks')
+			if (wasInSchedule) {
+				this.store.showNotification({
+					title: 'Schedule Updated',
+					text: `"${task.name}" has been removed from your schedule.`
+				})
+			}
 			this.$refs.modalRef.close()
 		}
 	},
