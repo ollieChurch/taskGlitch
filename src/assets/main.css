@@ -1,3 +1,533 @@
 @tailwind base;
+
+@layer base {
+	:root {
+		/* Surface colors (dark theme) */
+		--color-surface-base: #0a0e17;
+		--color-surface-raised: #111827;
+		--color-surface-overlay: #1a2332;
+		--color-surface-hover: #1f2b3d;
+
+		/* Accent / UI chrome */
+		--color-accent: #22d3ee;
+		--color-accent-dim: #0e7490;
+		--color-accent-glow: rgba(34, 211, 238, 0.15);
+
+		/* Text hierarchy */
+		--color-text-primary: #e2e8f0;
+		--color-text-secondary: #94a3b8;
+		--color-text-heading: #f1f5f9;
+		--color-text-inverse: #0f172a;
+
+		/* Priority colors */
+		--color-priority-critical: #dc3546;
+		--color-priority-high: #ffc107;
+		--color-priority-medium: #1a8754;
+		--color-priority-low: #a78bfa;
+
+		/* Semantic */
+		--color-success: #34d399;
+		--color-danger: #f87171;
+		--color-warning: #fbbf24;
+		--color-info: #38bdf8;
+
+		/* Borders */
+		--color-border: #1e293b;
+		--color-border-visible: #2a3a50;
+		--color-border-accent: var(--color-accent-dim);
+
+		/* Depth gradients */
+		--color-surface-raised-end: #172033;
+		--color-surface-highlight: rgba(255, 255, 255, 0.04);
+
+		/* Rounded corners */
+		--radius-card: 0.75rem;
+		--radius-card-sm: 0.5rem;
+		--radius-btn: 0.375rem;
+	}
+}
+
 @tailwind components;
+
+@layer components {
+	/* Hover glow utility for interactive cards */
+	.hover-glow {
+		transition: box-shadow 0.2s ease, border-color 0.2s ease;
+	}
+	.hover-glow:hover {
+		box-shadow: 0 0 8px var(--color-accent-glow);
+		border-color: var(--color-accent-dim);
+	}
+
+	/* Task completion flash animation */
+	.task-complete-flash {
+		animation: completeFlash 0.4s ease;
+	}
+
+	/* Depth panel — subtle vertical gradient for raised surfaces */
+	.depth-panel {
+		background: linear-gradient(
+			180deg,
+			var(--color-surface-raised) 0%,
+			var(--color-surface-raised-end) 100%
+		);
+	}
+
+	/* Depth highlight — inset top edge light */
+	.depth-highlight {
+		box-shadow: inset 0 1px 0 var(--color-surface-highlight);
+	}
+
+	/* Section header — accent underline */
+	.section-header {
+		position: relative;
+		padding-bottom: 0.5rem;
+	}
+	.section-header::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		width: 3rem;
+		height: 2px;
+		background: var(--color-accent-dim);
+	}
+
+	/* Accent divider — gradient hr replacement */
+	.accent-divider {
+		border: none;
+		height: 1px;
+		background: linear-gradient(
+			90deg,
+			var(--color-accent-dim),
+			var(--color-border) 40%,
+			transparent
+		);
+	}
+
+	/* Button hover lift */
+	.btn-themed:hover {
+		transform: translateY(-1px);
+	}
+	.btn-themed {
+		border-radius: var(--radius-btn);
+		transition: transform 0.15s ease, box-shadow 0.15s ease;
+	}
+
+	/* Stat counter — command center gauge card */
+	.stat-counter {
+		transition: box-shadow 0.2s ease, border-color 0.2s ease;
+	}
+	.stat-counter:hover {
+		box-shadow: 0 0 6px var(--color-accent-glow);
+		border-color: var(--color-accent-dim);
+	}
+
+	/* Spotlight label — subtle accent tag above task cards */
+	.spotlight-label {
+		border-left: 2px solid var(--color-accent);
+	}
+
+	/* Thin dark scrollbar for internal scroll panels */
+	.scroll-panel {
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-border-visible) transparent;
+	}
+	.scroll-panel::-webkit-scrollbar {
+		width: 4px;
+	}
+	.scroll-panel::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	.scroll-panel::-webkit-scrollbar-thumb {
+		background: var(--color-border-visible);
+		border-radius: 2px;
+	}
+	.scroll-panel::-webkit-scrollbar-thumb:hover {
+		background: var(--color-accent-dim);
+	}
+}
+
+@keyframes completeFlash {
+	0% { background-color: var(--color-surface-raised); }
+	30% { background-color: var(--color-accent-glow); border-color: var(--color-accent); }
+	100% { background-color: var(--color-surface-hover); }
+}
+
 @tailwind utilities;
+
+/* Multiselect dark theme overrides */
+.multiselect {
+	background: var(--color-surface-base);
+	border-color: var(--color-border);
+	color: var(--color-text-primary);
+	font-family: 'Rajdhani', sans-serif;
+}
+
+.multiselect-input {
+	background: var(--color-surface-base);
+	color: var(--color-text-primary);
+}
+
+.multiselect-tag {
+	background: var(--color-accent-dim);
+	color: var(--color-text-primary);
+}
+
+.multiselect-tag-remove:hover {
+	background: var(--color-accent);
+	color: var(--color-text-inverse);
+}
+
+.multiselect-dropdown {
+	background: var(--color-surface-overlay);
+	border-color: var(--color-border);
+}
+
+.multiselect-option {
+	color: var(--color-text-primary);
+}
+
+.multiselect-option.is-pointed {
+	background: var(--color-surface-hover);
+	color: var(--color-text-primary);
+}
+
+.multiselect-option.is-selected {
+	background: var(--color-accent-dim);
+	color: var(--color-text-primary);
+}
+
+.multiselect-placeholder {
+	color: var(--color-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CYBERPUNK MODE — Cyberpunk 2077 "Neomilitarism" inspired
+   Activated by .cyberpunk on <html>
+   CP2077 palette: aggressive red primary, hot-pink secondary,
+   dark military surfaces, hostile typography, CRT degradation
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Colour tokens ── */
+.cyberpunk {
+	/* CP2077 red-dominant palette — hostile, military, aggressive */
+	--color-accent: #ff003c;
+	--color-accent-dim: #8b0022;
+	--color-accent-glow: rgba(255, 0, 60, 0.3);
+
+	/* Secondary: hot yellow for contrast pops */
+	--cp-secondary: #fcee0a;
+	--cp-secondary-dim: #8a8200;
+	--cp-secondary-glow: rgba(252, 238, 10, 0.2);
+
+	/* Degraded surface: slightly warmer, grittier */
+	--color-surface-base: #08080c;
+	--color-surface-raised: #0f1016;
+	--color-surface-overlay: #16171f;
+	--color-surface-hover: #1e1f2a;
+	--color-surface-raised-end: #121320;
+
+	/* Borders brighter, more aggressive */
+	--color-border: #1a1b28;
+	--color-border-visible: #2e2038;
+
+	/* Text — slightly off-white with warm cast (CP2077 uses beige/eggshell) */
+	--color-text-primary: #e8e0d4;
+	--color-text-secondary: #9a8f82;
+	--color-text-heading: #fcf5ea;
+}
+
+/* ── CRT scan-line overlay — clearly visible ── */
+.cyberpunk::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 9999;
+	background:
+		repeating-linear-gradient(
+			0deg,
+			transparent,
+			transparent 2px,
+			rgba(255, 0, 60, 0.04) 2px,
+			rgba(255, 0, 60, 0.04) 4px
+		);
+}
+
+/* ── Noise/grain texture (SVG-based) — gives that degraded low-fi look ── */
+.cyberpunk::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 9998;
+	opacity: 0.035;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+	background-size: 256px 256px;
+}
+
+/* ── CRT flicker — very subtle brightness oscillation ── */
+.cyberpunk #app {
+	animation: crtFlicker 4s ease-in-out infinite;
+}
+
+@keyframes crtFlicker {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.985; }
+}
+
+/* ── Content card — red-hot borders, aggressive glow ── */
+.cyberpunk .content-card {
+	border-color: var(--color-accent-dim);
+	transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.cyberpunk .content-card:hover {
+	border-color: var(--color-accent);
+	box-shadow:
+		0 0 8px var(--color-accent-glow),
+		0 0 24px var(--color-accent-glow),
+		inset 0 0 12px rgba(255, 0, 60, 0.05);
+}
+
+/* ── Task cards — subtle red inner glow ── */
+.cyberpunk .task-card {
+	border-color: var(--color-border-visible);
+}
+.cyberpunk .hover-glow:hover {
+	border-color: var(--color-accent-dim);
+	box-shadow:
+		0 0 6px var(--color-accent-glow),
+		0 0 16px var(--color-accent-glow);
+}
+
+/* ── Task card priority bar — neon bleed ── */
+.cyberpunk .task-priority-bar {
+	filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* ── LOGO: heavy glitch with red/cyan split ── */
+.cyberpunk .font-wallpoet {
+	animation: cpGlitch 3s infinite;
+	text-shadow:
+		0 0 10px var(--color-accent-glow),
+		0 0 30px var(--color-accent-glow),
+		0 0 60px rgba(255, 0, 60, 0.15);
+	color: var(--cp-secondary);
+}
+
+@keyframes cpGlitch {
+	0%, 88%, 100% {
+		transform: translate(0);
+		text-shadow:
+			0 0 10px var(--color-accent-glow),
+			0 0 30px var(--color-accent-glow);
+	}
+	89% {
+		transform: translate(-3px, 2px) skewX(-2deg);
+		text-shadow:
+			3px 0 #ff003c,
+			-3px 0 #00d4ff;
+	}
+	90% {
+		transform: translate(3px, -1px) skewX(1deg);
+		text-shadow:
+			-2px 0 #ff003c,
+			2px 0 #00d4ff;
+	}
+	91% {
+		transform: translate(-1px, -2px) skewX(-1deg);
+		text-shadow:
+			2px 0 #ff003c,
+			-2px 0 #fcee0a;
+	}
+	92% {
+		transform: translate(0);
+		text-shadow:
+			0 0 10px var(--color-accent-glow),
+			0 0 30px var(--color-accent-glow);
+	}
+}
+
+/* ── HEADINGS: strong chromatic aberration — red / cyan split ── */
+.cyberpunk h1,
+.cyberpunk h2 {
+	text-shadow:
+		-2px 0 rgba(255, 0, 60, 0.5),
+		2px 0 rgba(0, 212, 255, 0.4);
+}
+
+.cyberpunk h1 {
+	color: var(--cp-secondary);
+}
+
+/* ── BUTTONS: aggressive red styling ── */
+.cyberpunk .btn-themed {
+	border: 1px solid var(--color-accent-dim);
+	box-shadow:
+		0 0 4px var(--color-accent-glow),
+		inset 0 0 8px rgba(255, 0, 60, 0.05);
+}
+.cyberpunk .btn-themed:hover {
+	border-color: var(--color-accent);
+	box-shadow:
+		0 0 8px var(--color-accent-glow),
+		0 0 20px var(--color-accent-glow),
+		inset 0 0 12px rgba(255, 0, 60, 0.1);
+}
+
+/* ── Top bar: red accent line ── */
+.cyberpunk .top-bar {
+	border-color: var(--color-accent-dim) !important;
+	box-shadow: 0 2px 12px var(--color-accent-glow);
+	background:
+		linear-gradient(180deg, #0f1016 0%, #0c0c12 100%);
+}
+
+/* ── Section headers — yellow CP2077 accent ── */
+.cyberpunk .section-header::after {
+	background: var(--cp-secondary);
+	box-shadow: 0 0 8px var(--cp-secondary-glow);
+}
+
+/* ── Accent dividers — red bleed ── */
+.cyberpunk .accent-divider {
+	background: linear-gradient(
+		90deg,
+		var(--color-accent),
+		var(--color-accent-dim) 40%,
+		transparent
+	);
+	box-shadow: 0 0 6px var(--color-accent-glow);
+}
+
+/* ── Tab active indicator — yellow ── */
+.cyberpunk button.border-accent {
+	border-color: var(--cp-secondary) !important;
+	color: var(--cp-secondary) !important;
+}
+
+/* ── Neon pulse — red throb ── */
+.cyberpunk .animate-pulse {
+	animation: cpPulse 2s ease-in-out infinite;
+}
+
+@keyframes cpPulse {
+	0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px var(--color-accent-glow)); }
+	50% { opacity: 0.5; filter: drop-shadow(0 0 8px var(--color-accent-glow)); }
+}
+
+/* ── Depth panels — slightly different gradient ── */
+.cyberpunk .depth-panel {
+	background: linear-gradient(
+		180deg,
+		var(--color-surface-raised) 0%,
+		var(--color-surface-raised-end) 100%
+	);
+}
+
+/* ── Dashboard stat counters — red glow ── */
+.cyberpunk .stat-counter:hover {
+	box-shadow:
+		0 0 8px var(--color-accent-glow),
+		0 0 16px var(--color-accent-glow);
+	border-color: var(--color-accent);
+}
+
+/* ── Spotlight labels — red accent bar ── */
+.cyberpunk .spotlight-label {
+	border-left-color: var(--color-accent);
+}
+
+/* ── Inputs — dark with red focus ring ── */
+.cyberpunk input,
+.cyberpunk select,
+.cyberpunk textarea {
+	border-color: var(--color-border-visible) !important;
+	background-color: var(--color-surface-base) !important;
+}
+.cyberpunk input:focus,
+.cyberpunk select:focus,
+.cyberpunk textarea:focus {
+	border-color: var(--color-accent) !important;
+	box-shadow: 0 0 0 2px var(--color-accent-glow) !important;
+}
+
+/* ── Glitch emblem — red accent shift ── */
+.cyberpunk .glitch-emblem .emblem-hex {
+	stroke: var(--color-accent);
+	filter: url(#emblem-glow-strong);
+}
+.cyberpunk .glitch-emblem .emblem-hex-inner {
+	stroke: var(--color-accent-dim);
+}
+.cyberpunk .glitch-emblem .emblem-letter {
+	fill: var(--color-accent);
+}
+.cyberpunk .glitch-emblem .emblem-brackets {
+	stroke: var(--color-accent);
+}
+
+/* ── Scroll panels — red accent scrollbar ── */
+.cyberpunk .scroll-panel::-webkit-scrollbar-thumb {
+	background: var(--color-accent-dim);
+}
+.cyberpunk .scroll-panel::-webkit-scrollbar-thumb:hover {
+	background: var(--color-accent);
+}
+.cyberpunk .scroll-panel {
+	scrollbar-color: var(--color-accent-dim) transparent;
+}
+
+/* ── Bottom dock — red glow ── */
+.cyberpunk .bottom-dock {
+	border-color: var(--color-accent-dim) !important;
+	box-shadow: 0 -2px 12px var(--color-accent-glow);
+	background:
+		linear-gradient(180deg, #0f1016 0%, #08080c 100%);
+}
+
+.cyberpunk .dock-fab {
+	border-color: var(--color-accent);
+	box-shadow:
+		0 0 8px var(--color-accent-glow),
+		0 0 20px var(--color-accent-glow);
+}
+
+/* ═══ Respect reduced motion ═══ */
+@media (prefers-reduced-motion: reduce) {
+	.cyberpunk::after,
+	.cyberpunk::before {
+		display: none;
+	}
+	.cyberpunk #app {
+		animation: none;
+	}
+	.cyberpunk .font-wallpoet {
+		animation: none;
+	}
+	.cyberpunk .animate-pulse {
+		animation: none;
+	}
+	.cyberpunk .btn-themed {
+		box-shadow: none;
+	}
+	.cyberpunk .btn-themed:hover {
+		box-shadow: none;
+	}
+	.cyberpunk .task-priority-bar {
+		filter: none;
+	}
+	.cyberpunk .content-card:hover {
+		box-shadow: none;
+	}
+	.cyberpunk .top-bar {
+		box-shadow: none;
+	}
+	.cyberpunk .bottom-dock {
+		box-shadow: none;
+	}
+	.cyberpunk .dock-fab {
+		box-shadow: none;
+	}
+}

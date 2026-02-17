@@ -1,51 +1,51 @@
 <template>
 	<div>
-		<nav class="flex items-center justify-between flex-wrap px-3 py-3 bg-white">
-			<a href="/" class="font-wallpoet italic text-xl no-underline text-gray-800">
+		<nav class="flex items-center justify-between flex-wrap px-3 py-3 bg-surface-raised border-b-2 border-accent-dim">
+			<a href="/" class="font-wallpoet italic text-xl no-underline text-accent">
 				Task Glitch
 			</a>
 
 			<button
 				@click="navOpen = !navOpen"
-				class="lg:hidden p-2 text-gray-600 hover:text-gray-800"
+				class="lg:hidden p-2 text-text-secondary hover:text-accent transition-colors"
 			>
-				<i class="fas fa-bars text-xl"></i>
+				<Menu :size="20" />
 			</button>
 
 			<div
-				:class="['w-full lg:flex lg:items-center lg:w-auto', navOpen ? '' : 'hidden']"
+				:class="['w-full lg:flex lg:items-center lg:w-auto', navOpen ? 'bg-surface-overlay lg:bg-transparent' : 'hidden']"
 				class="pt-4 lg:pt-0"
 			>
 				<div class="lg:ml-auto flex flex-col lg:flex-row">
 					<router-link
 						v-if="!user"
 						to="/login"
-						class="px-3 pb-0 mb-0 text-xl font-semibold no-underline text-gray-800 hover:text-blue-600 font-rajdhani"
+						class="px-3 pb-0 mb-0 text-xl font-semibold no-underline text-text-secondary hover:text-accent transition-colors font-rajdhani"
 					>
 						Login
 					</router-link>
 					<template v-else>
 						<router-link
 							to="/dashboard"
-							class="lg:pr-4 pb-0 mb-0 text-xl font-semibold no-underline text-gray-800 hover:text-blue-600 font-rajdhani"
+							class="lg:pr-4 pb-0 mb-0 text-xl font-semibold no-underline text-text-secondary hover:text-accent transition-colors font-rajdhani"
 						>
 							Dashboard
 						</router-link>
 						<router-link
 							to="/"
-							class="lg:pr-4 pb-0 mb-0 text-xl font-semibold no-underline text-gray-800 hover:text-blue-600 font-rajdhani"
+							class="lg:pr-4 pb-0 mb-0 text-xl font-semibold no-underline text-text-secondary hover:text-accent transition-colors font-rajdhani"
 						>
 							Tasks
 						</router-link>
 						<router-link
 							to="/schedule"
-							class="lg:pr-4 pb-0 mb-0 text-xl font-semibold no-underline text-gray-800 hover:text-blue-600 font-rajdhani"
+							class="lg:pr-4 pb-0 mb-0 text-xl font-semibold no-underline text-text-secondary hover:text-accent transition-colors font-rajdhani"
 						>
 							Glitch
 						</router-link>
 						<router-link
 							to="/profile"
-							class="pb-0 mb-0 text-xl font-semibold no-underline text-gray-800 hover:text-blue-600 font-rajdhani"
+							class="pb-0 mb-0 text-xl font-semibold no-underline text-text-secondary hover:text-accent transition-colors font-rajdhani"
 						>
 							Profile
 						</router-link>
@@ -69,9 +69,10 @@ import { useAppStore } from '@/stores/app'
 import { useRoute } from 'vue-router'
 import { logger } from '@/utils/logger'
 import NotificationBanner from './NotificationBanner.vue'
+import { Menu } from 'lucide-vue-next'
 
 export default {
-	components: { NotificationBanner },
+	components: { NotificationBanner, Menu },
 
 	setup() {
 		const store = useAppStore()

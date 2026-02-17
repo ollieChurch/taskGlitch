@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<div class="flex items-center justify-between">
-			<h5 class="text-left mb-3 font-rajdhani font-semibold">Schedule</h5>
+			<h5 class="text-left mb-3 font-rajdhani font-semibold text-text-heading">Schedule</h5>
 			<label
 				v-if="!isSimpleSchedule"
 				class="relative inline-flex items-center cursor-pointer mb-3"
@@ -11,7 +11,7 @@
 					v-model="isEditMode"
 					class="sr-only peer"
 				/>
-				<div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+				<div class="w-11 h-6 bg-surface-hover rounded-full peer peer-checked:bg-accent peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-text-primary after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
 				<span class="ml-2 text-sm font-rajdhani">edit</span>
 			</label>
 		</div>
@@ -30,7 +30,7 @@
 				>
 					{{ task.time }}
 				</p>
-				<div class="my-2 p-2 bg-gray-50 rounded-lg shadow-sm border w-9/12 opacity-60">
+				<div class="my-2 p-2 bg-surface-hover rounded-lg shadow-sm border border-border-default w-9/12 opacity-60">
 					<div class="flex items-center justify-between">
 						<h5
 							class="text-left mb-0 pl-0 pr-2 w-full font-rajdhani font-semibold completed-task"
@@ -46,9 +46,9 @@
 				v-if="hasCompletedTasks && remainingScheduleTasks.length > 0"
 				class="flex items-center my-3"
 			>
-				<div class="flex-1 border-t border-gray-300"></div>
-				<span class="px-3 text-sm text-gray-500 font-rajdhani font-semibold">Remaining Tasks</span>
-				<div class="flex-1 border-t border-gray-300"></div>
+				<div class="flex-1 border-t border-border-default"></div>
+				<span class="px-3 text-sm text-text-secondary font-rajdhani font-semibold">Remaining Tasks</span>
+				<div class="flex-1 border-t border-border-default"></div>
 			</div>
 
 			<!-- Remaining tasks (draggable) -->
@@ -68,10 +68,10 @@
 					>
 						{{ task.time }}
 					</p>
-					<div class="my-2 p-2 bg-white rounded-lg shadow-sm border w-9/12">
+					<div class="my-2 p-2 bg-surface-raised rounded-lg shadow-sm border border-border-default w-9/12">
 						<div class="flex items-center justify-between">
 							<div class="w-1/12 pl-0 pr-3 grab-handle">
-								<i class="fas fa-grip-horizontal"></i>
+								<GripHorizontal :size="16" />
 							</div>
 							<h5
 								class="text-left mb-0 pl-0 pr-2 w-9/12 font-rajdhani font-semibold"
@@ -81,10 +81,10 @@
 							<div class="w-2/12" v-if="!isSimpleSchedule">
 								<button
 									v-if="!task.completed"
-									class="bg-cyan-500 text-white px-2 py-1 rounded hover:bg-cyan-600"
+									class="btn-themed bg-accent text-text-inverse px-2 py-1 hover:brightness-110"
 									@click="removeFromSchedule(task)"
 								>
-									<i class="fas fa-times"></i>
+									<X :size="14" />
 								</button>
 							</div>
 						</div>
@@ -100,7 +100,7 @@
 				:key="`schedule-${task.id}`"
 			>
 				<div v-if="shouldDisplayDate(task)">
-					<h5 class="mt-3 mb-1 text-left font-rajdhani font-semibold">
+					<h5 class="mt-3 mb-1 text-left font-rajdhani font-semibold text-text-heading">
 						{{ task.date }}
 					</h5>
 				</div>
@@ -110,9 +110,9 @@
 					v-if="task.isFirstRemaining && hasCompletedTasks"
 					class="flex items-center my-3"
 				>
-					<div class="flex-1 border-t border-gray-300"></div>
-					<span class="px-3 text-sm text-gray-500 font-rajdhani font-semibold">Remaining Tasks</span>
-					<div class="flex-1 border-t border-gray-300"></div>
+					<div class="flex-1 border-t border-border-default"></div>
+					<span class="px-3 text-sm text-text-secondary font-rajdhani font-semibold">Remaining Tasks</span>
+					<div class="flex-1 border-t border-border-default"></div>
 				</div>
 
 				<div class="flex items-center schedule-item">
@@ -124,7 +124,7 @@
 					</p>
 					<div
 						class="my-2 p-2 rounded-lg shadow-sm border w-9/12"
-						:class="task.isActive ? 'bg-blue-50 border-blue-300' : 'bg-white'"
+						:class="task.isActive ? 'bg-accent/10 border-accent' : 'bg-surface-raised border-border-default'"
 					>
 						<div class="flex items-center justify-between">
 							<div class="flex-1 pr-2 flex items-center gap-2">
@@ -136,27 +136,22 @@
 								</h5>
 								<span
 									v-if="task.isActive"
-									class="inline-flex items-center shrink-0 text-xs text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full font-rajdhani font-semibold"
+									class="inline-flex items-center shrink-0 text-xs text-accent bg-accent/10 px-2 py-0.5 rounded-full font-rajdhani font-semibold"
 								>
-									<span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1 animate-pulse"></span>
+									<span class="w-1.5 h-1.5 bg-accent rounded-full mr-1 animate-pulse"></span>
 									In Progress
 								</span>
 							</div>
 							<div class="shrink-0" v-if="!isSimpleSchedule">
 								<button
 									:class="task.completed
-										? 'bg-yellow-400 text-black hover:bg-yellow-500'
-										: 'bg-green-600 text-white hover:bg-green-700'"
-									class="px-2 py-1 rounded"
+										? 'bg-app-warning text-text-inverse hover:brightness-110'
+										: 'bg-app-success text-text-inverse hover:brightness-110'"
+									class="btn-themed px-2 py-1 transition-all"
 									@click="toggleCompleted(task)"
 								>
-									<i
-										:class="`fas ${
-											task.completed
-												? 'fa-undo'
-												: 'fa-check-circle'
-										}`"
-									></i>
+									<Undo2 v-if="task.completed" :size="16" />
+									<CheckCircle2 v-else :size="16" />
 								</button>
 							</div>
 						</div>
@@ -164,15 +159,15 @@
 				</div>
 			</template>
 		</div>
-		<div class="mt-3 bg-white rounded-lg shadow-sm border p-3">
-			<h5 class="mb-0 font-rajdhani font-semibold">
+		<div class="mt-3 depth-panel depth-highlight p-3 rounded-lg border border-border-visible">
+			<h5 class="mb-0 font-rajdhani font-semibold text-text-heading">
 				Estimated Finish Time
 				{{ scheduleDetails.estimatedFinishTime }}
 			</h5>
 		</div>
-		<div v-if="scheduleDetails.isOverflowing" class="mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded-lg text-left">
-			<p class="font-rajdhani font-semibold text-yellow-800 mb-0">
-				<i class="fas fa-exclamation-triangle mr-1"></i> Schedule runs past end time
+		<div v-if="scheduleDetails.isOverflowing" class="mt-2 p-3 bg-amber-900/30 border border-amber-600 rounded-lg text-left">
+			<p class="font-rajdhani font-semibold text-amber-300 mb-0">
+				<AlertTriangle :size="16" class="inline mr-1" /> Schedule runs past end time
 			</p>
 		</div>
 	</div>
@@ -183,9 +178,10 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import { logger } from '@/utils/logger'
 import { VueDraggable } from 'vue-draggable-plus'
+import { GripHorizontal, X, Undo2, CheckCircle2, AlertTriangle } from 'lucide-vue-next'
 
 export default {
-	components: { VueDraggable },
+	components: { VueDraggable, GripHorizontal, X, Undo2, CheckCircle2, AlertTriangle },
 	props: ['isSimpleSchedule'],
 
 	setup() {

@@ -1,10 +1,10 @@
 <template>
-	<div>
+	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 		<content-card>
-			<div class="flex items-center justify-between mb-3">
-				<h1 class="text-left mb-0 font-rajdhani font-bold text-2xl">Tasks</h1>
+			<div class="flex items-center justify-between mb-3 shrink-0">
+				<h1 class="text-left mb-0 font-rajdhani font-bold text-sm text-text-heading uppercase tracking-widest">Tasks</h1>
 				<button
-					class="bg-blue-600 text-white px-4 py-2 rounded font-rajdhani font-semibold hover:bg-blue-700"
+					class="btn-themed bg-accent text-text-inverse px-4 py-2 font-rajdhani font-semibold hover:brightness-110 transition-all"
 					@click="addTask()"
 				>
 					Add Task
@@ -12,12 +12,12 @@
 			</div>
 			<BaseTabs pills fill class="pt-2">
 				<BaseTab title="Backlog">
-					<div class="pt-2">
+					<div class="pt-2 md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
 						<!-- Loading state -->
 						<skeleton-loader v-if="isLoadingTasks" :lines="4" height="4.5rem" />
 
 						<!-- Empty state -->
-						<div v-else-if="getPrioritisedTasks.length === 0" class="py-8 text-gray-500 font-rajdhani text-center">
+						<div v-else-if="getPrioritisedTasks.length === 0" class="py-8 text-text-secondary font-rajdhani text-center">
 							<p class="text-lg font-semibold">Your backlog is empty</p>
 							<p class="text-sm">Add a task to get started with TaskGlitch.</p>
 						</div>
@@ -34,12 +34,12 @@
 					</div>
 				</BaseTab>
 				<BaseTab title="Completed">
-					<div class="pt-2">
+					<div class="pt-2 md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
 						<!-- Loading state -->
 						<skeleton-loader v-if="isLoadingCompleted" :lines="4" height="4.5rem" />
 
 						<!-- Empty state -->
-						<div v-else-if="completed.length === 0" class="py-8 text-gray-500 font-rajdhani text-center">
+						<div v-else-if="completed.length === 0" class="py-8 text-text-secondary font-rajdhani text-center">
 							<p class="text-lg font-semibold">No completed tasks yet</p>
 							<p class="text-sm">Tasks you complete will appear here.</p>
 						</div>
@@ -91,6 +91,12 @@ export default {
 
 	created() {
 		this.pageCheck()
+	},
+
+	watch: {
+		'store.addTaskTrigger'() {
+			this.addTask()
+		}
 	},
 
 	computed: {

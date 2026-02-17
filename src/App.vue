@@ -1,6 +1,6 @@
 <template>
-	<div id="app" class="flex flex-col min-h-screen">
-		<header-nav />
+	<div id="app" class="flex flex-col min-h-screen md:h-screen md:overflow-hidden">
+		<sidebar-nav />
 		<notification-banner
 			v-if="store.notification.visible"
 			:title="store.notification.title"
@@ -8,14 +8,14 @@
 			:dismissible="true"
 			@dismiss="store.hideNotification()"
 		/>
-		<main class="flex-1">
+		<main class="flex-1 min-h-0 pb-16 md:pb-0 md:overflow-hidden">
 			<router-view v-slot="{ Component }">
 				<transition name="page" mode="out-in">
 					<component :is="Component" />
 				</transition>
 			</router-view>
 		</main>
-		<page-footer />
+		<bottom-dock />
 		<patch-notes-modal ref="patchNotesModalRef" v-if="lastVersion" :lastVersion="lastVersion" />
 		<base-modal
 			ref="categoryPromptModalRef"
@@ -31,13 +31,13 @@
 			</p>
 			<div class="flex gap-3 mt-4">
 				<button
-					class="flex-1 bg-green-600 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-green-700"
+					class="btn-themed flex-1 bg-app-success text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
 					@click="handleKeepInSchedule()"
 				>
 					Keep in Schedule
 				</button>
 				<button
-					class="flex-1 bg-red-600 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-red-700"
+					class="btn-themed flex-1 bg-app-danger text-white py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
 					@click="handleRemoveFromSchedule()"
 				>
 					Remove from Schedule
@@ -54,17 +54,18 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { getDatabase, ref, onValue } from 'firebase/database'
 import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
+import { useCyberpunkMode } from '@/composables/useCyberpunkMode'
 import { logger } from '@/utils/logger'
-import PageFooter from './components/PageFooter.vue'
-import HeaderNav from './components/HeaderNav.vue'
+import SidebarNav from './components/SidebarNav.vue'
+import BottomDock from './components/BottomDock.vue'
 import PatchNotesModal from './components/PatchNotesModal.vue'
 import NotificationBanner from './components/NotificationBanner.vue'
 import BaseModal from './components/ui/BaseModal.vue'
 
 export default {
 	components: {
-		PageFooter,
-		HeaderNav,
+		SidebarNav,
+		BottomDock,
 		PatchNotesModal,
 		NotificationBanner,
 		BaseModal
@@ -73,6 +74,7 @@ export default {
 	setup() {
 		const store = useAppStore()
 		const { saveAccountToDatabase, applyScheduleUpdate, removeTaskFromSchedule } = useTaskActions()
+		useCyberpunkMode()
 		return { store, saveAccountToDatabase, applyScheduleUpdate, removeTaskFromSchedule }
 	},
 
@@ -240,30 +242,41 @@ export default {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
-	color: #2c3e50;
-	background: #d5e7eb;
-	min-width: 100vw;
-	min-height: 100vh;
+	color: var(--color-text-primary);
+	background: var(--color-surface-base);
 	position: relative;
 	user-select: none;
+	overflow-x: hidden;
 }
 
-nav a {
-	font-weight: bold;
-	color: #2c3e50;
+/* Desktop: flex height chain through main → transition → view */
+@media (min-width: 768px) {
+	main {
+		display: flex;
+		flex-direction: column;
+	}
+	main > :deep(*) {
+		flex: 1;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+	}
 }
 
-nav a.router-link-exact-active {
-	color: #42b983;
+/* Route transition — fade + slight rise on enter, fast leave */
+.page-enter-active {
+	transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Route transition — fast fade so navigation feels responsive */
-.page-enter-active,
 .page-leave-active {
-	transition: opacity 0.15s ease;
+	transition: opacity 0.12s ease;
 }
 
-.page-enter-from,
+.page-enter-from {
+	opacity: 0;
+	transform: translateY(8px);
+}
+
 .page-leave-to {
 	opacity: 0;
 }

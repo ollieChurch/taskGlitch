@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
 	state: () => ({
-		appVersion: '0.13.1',
+		appVersion: '0.14.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -32,23 +32,23 @@ export const useAppStore = defineStore('app', {
 		priorities: {
 			critical: {
 				value: 0,
-				icon: 'fa-fire',
+				icon: 'Zap',
 				color: '#dc3546'
 			},
 			high: {
 				value: 1,
-				icon: 'fa-thermometer-three-quarters',
+				icon: 'ArrowUp',
 				color: '#ffc107'
 			},
 			medium: {
 				value: 2,
-				icon: 'fa-thermometer-half',
+				icon: 'Minus',
 				color: '#1a8754'
 			},
 			low: {
 				value: 3,
-				icon: 'fa-thermometer-quarter',
-				color: '#10caf0'
+				icon: 'ArrowDown',
+				color: '#a78bfa'
 			}
 		},
 		sizeLabels: {
@@ -74,6 +74,9 @@ export const useAppStore = defineStore('app', {
 			breaks: {
 				targetFrequency: 120,
 				length: 10
+			},
+			display: {
+				cyberpunkMode: false
 			}
 		},
 		// Deterministic colour palette for category charts
@@ -102,6 +105,7 @@ export const useAppStore = defineStore('app', {
 			autoDismissMs: 5000
 		},
 		pendingScheduleUpdate: null,
+		addTaskTrigger: 0,
 		debug: false
 	}),
 
@@ -262,6 +266,10 @@ export const useAppStore = defineStore('app', {
 
 		clearPendingScheduleUpdate() {
 			this.pendingScheduleUpdate = null
+		},
+
+		triggerAddTask() {
+			this.addTaskTrigger++
 		}
 	}
 })

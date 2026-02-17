@@ -3,40 +3,44 @@
 		<button
 			@click="handleClick()"
 			:class="variantClass"
-			class="w-full font-bold py-3 px-4 rounded text-lg font-rajdhani"
+			class="btn-themed w-full font-bold py-2 px-3 text-sm font-rajdhani uppercase tracking-wider transition-all"
 		>
-			<i :class="iconClass" class="mr-2"></i>
+			<component :is="iconComponent" :size="16" class="mr-1.5 inline-block" />
 			{{ label }}
 		</button>
 	</div>
 </template>
 
 <script>
+import { markRaw } from 'vue'
+import { Star, Plus, Calendar, Check } from 'lucide-vue-next'
+
 const variantMap = {
-	primary: 'bg-blue-600 text-white hover:bg-blue-700',
-	success: 'bg-green-600 text-white hover:bg-green-700',
-	danger: 'bg-red-600 text-white hover:bg-red-700',
-	warning: 'bg-yellow-400 text-black hover:bg-yellow-500',
-	info: 'bg-cyan-500 text-white hover:bg-cyan-600',
-	light: 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+	primary: 'bg-accent text-text-inverse hover:brightness-110',
+	success: 'bg-app-success text-text-inverse hover:brightness-110',
+	danger: 'bg-app-danger text-white hover:brightness-110',
+	warning: 'bg-app-warning text-text-inverse hover:brightness-110',
+	info: 'bg-app-info text-white hover:brightness-110',
+	light: 'bg-surface-hover text-text-primary border border-border-default hover:border-accent-dim'
 }
 
 const iconMap = {
-	'stars': 'fas fa-star',
-	'plus-lg': 'fas fa-plus',
-	'calendar': 'fas fa-calendar',
-	'check': 'fas fa-check'
+	'stars': markRaw(Star),
+	'plus-lg': markRaw(Plus),
+	'calendar': markRaw(Calendar),
+	'check': markRaw(Check)
 }
 
 export default {
+	components: { Star, Plus, Calendar, Check },
 	props: ['variant', 'icon', 'label'],
 	emits: ['buttonClicked'],
 	computed: {
 		variantClass() {
 			return variantMap[this.variant] || variantMap.primary
 		},
-		iconClass() {
-			return iconMap[this.icon] || `fas ${this.icon}`
+		iconComponent() {
+			return iconMap[this.icon] || null
 		}
 	},
 	methods: {

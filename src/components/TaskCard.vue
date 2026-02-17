@@ -1,38 +1,37 @@
 <template>
-	<div class="mt-4 mb-3 py-2 pl-10 pr-4 bg-white rounded-lg shadow-sm border relative task-card overflow-visible">
+	<div class="task-card mt-3 mb-2 py-2 pl-4 pr-4 depth-panel relative overflow-hidden hover-glow"
+	>
 		<div
-			class="priority-icon text-center text-white"
-			:style="{ backgroundColor: task.completedDateTime ? '#1a8754' : priorityIcons[task.priority].hex }"
-		>
-			<i
-				:class="`fas fa-lg ${
-					task.completedDateTime
-						? 'fa-check-circle'
-						: priorityIcons[task.priority].icon
-				}`"
-			></i>
-		</div>
+			class="task-priority-bar"
+			:style="{ backgroundColor: categoryColor }"
+		></div>
 		<div class="flex items-center">
 			<div class="w-10/12 pr-4">
 				<h5
-					:class="`text-left mb-1 font-rajdhani font-semibold ${
+					:class="`text-left mb-1 font-rajdhani font-semibold text-text-heading ${
 						task.completedDateTime
-							? 'line-through opacity-75'
+							? 'line-through opacity-60'
 							: ''
 					}`"
 				>
+					<span v-if="!task.completedDateTime" class="inline-flex items-center mr-1 align-middle">
+						<Zap v-if="task.priority === 0" :size="14" :style="{ color: priorityIcons[0].hex }" />
+						<ArrowUp v-else-if="task.priority === 1" :size="14" :style="{ color: priorityIcons[1].hex }" />
+						<Minus v-else-if="task.priority === 2" :size="14" :style="{ color: priorityIcons[2].hex }" />
+						<ArrowDown v-else :size="14" :style="{ color: priorityIcons[3].hex }" />
+					</span>
 					{{ task.name }}
 					<span v-if="isDev && debug"> - {{ task.score }}</span>
 				</h5>
-				<div v-if="task.completedDateTime" class="flex flex-wrap task-details opacity-75 text-sm">
+				<div v-if="task.completedDateTime" class="flex flex-wrap task-details opacity-60 text-sm text-text-secondary">
 					<a
-						class="sm:w-auto text-left cursor-pointer mr-3"
+						class="sm:w-auto text-left cursor-pointer mr-3 hover:text-accent transition-colors"
 						@click="editTask(task)"
 					>
-						<i class="fas fa-edit"></i>
+						<Pencil :size="14" class="inline" />
 					</a>
 					<p class="sm:w-auto text-left mb-0">
-						<i class="fas fa-check-circle"></i>
+						<CheckCircle2 :size="14" class="inline" />
 						{{
 							new Date(task.completedDateTime).toLocaleDateString(
 								'en-uk',
@@ -45,28 +44,23 @@
 						}}
 					</p>
 				</div>
-				<div v-else class="flex flex-wrap task-details text-sm">
+				<div v-else class="flex flex-wrap task-details text-sm text-text-secondary">
 					<a
-						class="sm:w-auto text-left mb-0 cursor-pointer mr-3"
+						class="sm:w-auto text-left mb-0 cursor-pointer mr-3 hover:text-accent transition-colors"
 						@click="editTask(task)"
 					>
-						<i class="fas fa-edit"></i>
+						<Pencil :size="14" class="inline" />
 					</a>
 					<p class="sm:w-auto text-left mb-0 mr-3">
-						<i class="fas fa-stopwatch"></i>
+						<Timer :size="14" class="inline" />
 						{{ store.getSizeLabel(task.sizing) }}
 					</p>
 					<p
 						class="sm:flex-1 text-left mb-0"
 						v-if="task.targetDateTime"
 					>
-						<i
-							:class="`fas ${
-								task.isHardDeadline
-									? 'fa-exclamation-circle'
-									: 'fa-bullseye'
-							}`"
-						></i>
+						<AlertCircle v-if="task.isHardDeadline" :size="14" class="inline" />
+						<Target v-else :size="14" class="inline" />
 						{{
 							new Date(task.targetDateTime).toLocaleDateString(
 								'en-uk',
@@ -82,16 +76,11 @@
 			</div>
 			<div class="w-2/12">
 				<button
-					class="complete-btn bg-gray-100 border rounded hover:bg-gray-200"
+					class="complete-btn btn-themed bg-surface-hover border border-border-default hover:bg-accent hover:text-text-inverse hover:border-accent text-text-secondary transition-all"
 					@click="handleMainAction(task)"
 				>
-					<i
-						:class="`fas ${
-							task.completedDateTime
-								? 'fa-undo'
-								: 'fa-check-circle'
-						}`"
-					></i>
+					<Undo2 v-if="task.completedDateTime" :size="18" />
+					<CheckCircle2 v-else :size="18" />
 				</button>
 			</div>
 		</div>
@@ -99,12 +88,15 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
+import { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Pencil, Timer, AlertCircle, Target, Undo2 } from 'lucide-vue-next'
 
 export default {
 	props: ['task'],
 	emits: ['editTask'],
+	components: { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Pencil, Timer, AlertCircle, Target, Undo2 },
 
 	setup() {
 		const store = useAppStore()
@@ -115,10 +107,10 @@ export default {
 	data() {
 		return {
 			priorityIcons: [
-				{ icon: 'fa-fire', hex: '#dc3546' },
-				{ icon: 'fa-thermometer-three-quarters', hex: '#ffc107' },
-				{ icon: 'fa-thermometer-half', hex: '#1a8754' },
-				{ icon: 'fa-thermometer-quarter', hex: '#10caf0' }
+				{ icon: markRaw(Zap), hex: '#dc3546' },
+				{ icon: markRaw(ArrowUp), hex: '#ffc107' },
+				{ icon: markRaw(Minus), hex: '#1a8754' },
+				{ icon: markRaw(ArrowDown), hex: '#a78bfa' }
 			]
 		}
 	},
@@ -130,6 +122,16 @@ export default {
 
 		isDev() {
 			return import.meta.env.DEV
+		},
+
+		categoryColor() {
+			const categories = this.store.getCategories
+			const palette = this.store.categoryPalette
+			const idx = categories.indexOf(this.task.category)
+			if (idx >= 0) {
+				return palette[idx % palette.length]
+			}
+			return 'var(--color-accent-dim)'
 		}
 	},
 
@@ -153,27 +155,28 @@ export default {
 <style scoped>
 .task-card {
 	position: relative;
+	border: 1px solid var(--color-border-visible);
+	border-radius: var(--radius-card-sm);
 }
 
 .complete-btn {
 	width: 50px;
-	text-align: center;
 	aspect-ratio: 1;
 	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .task-details {
 	width: 100%;
 }
 
-.priority-icon {
+.task-priority-bar {
 	position: absolute;
-	top: -7px;
-	left: -7px;
-	aspect-ratio: 1;
-	width: 40px;
-	padding-top: 0.5em;
-	border-top-left-radius: 5px;
-	border-bottom-right-radius: 5px;
+	top: 0;
+	left: 0;
+	width: 4px;
+	height: 100%;
 }
 </style>

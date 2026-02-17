@@ -1,7 +1,7 @@
 <template>
-	<footer class="bg-white py-4 sm:mt-4">
-		<p class="text-center text-sm text-gray-500 font-rajdhani">
-			Task Glitch Version: {{ appVersion }}
+	<footer class="bg-surface-raised border-t border-border-default py-4 sm:mt-4">
+		<p class="text-center text-sm text-text-secondary font-rajdhani">
+			<span class="font-wallpoet">Task Glitch</span> Version: {{ appVersion }}
 		</p>
 	</footer>
 </template>

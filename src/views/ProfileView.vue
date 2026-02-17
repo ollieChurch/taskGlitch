@@ -1,35 +1,66 @@
 <template>
 	<content-card class="text-left">
 		<div class="flex items-center justify-between mb-3">
-			<h1 class="text-left mb-0 font-rajdhani font-bold text-2xl">Profile</h1>
+			<h1 class="text-left mb-0 font-rajdhani font-bold text-2xl text-text-heading">Profile</h1>
 			<button
 				@click="logout()"
-				class="bg-yellow-400 text-black px-4 py-2 rounded font-rajdhani font-semibold hover:bg-yellow-500"
-			>
+				class="btn-themed bg-app-warning text-text-inverse px-4 py-2 font-rajdhani font-semibold hover:brightness-110 transition-all"
+				>
 				Logout
 			</button>
 		</div>
-		<hr />
+		<hr class="border-border-default" />
+
+		<!-- Account -->
 		<div v-if="user?.email" class="mt-3">
 			<div class="flex items-center justify-between mb-3">
-				<h3 class="mb-0 font-rajdhani font-bold text-xl">Account</h3>
+				<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Account</h3>
 			</div>
-
 			<div class="flex">
 				<div class="w-6/12 sm:w-5/12">
-					<p class="font-rajdhani">Email</p>
+					<p class="font-rajdhani text-text-secondary">Email</p>
 				</div>
 				<div>
-					<p class="font-rajdhani">{{ user.email }}</p>
+					<p class="font-rajdhani text-text-primary">{{ user.email }}</p>
 				</div>
 			</div>
 		</div>
-		<hr />
+		<hr class="border-border-default" />
+
+		<!-- Display -->
 		<div class="mt-3">
 			<div class="flex items-center justify-between mb-3">
-				<h3 class="mb-0 font-rajdhani font-bold text-xl">Glitch Scheduling</h3>
-				<a class="text-start cursor-pointer" @click="editSettings()">
-					<i class="fas fa-edit"></i>
+				<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Display</h3>
+			</div>
+			<div class="flex items-center justify-between mb-4 pl-4">
+				<div>
+					<p class="font-rajdhani text-text-primary mb-0">Cyberpunk Mode</p>
+					<p class="font-rajdhani text-text-secondary text-sm mb-0">Neon glow, scan lines &amp; glitch effects</p>
+				</div>
+				<button
+					@click="toggleCyberpunkMode()"
+					:class="[
+						'relative w-12 h-6 rounded-full transition-colors duration-200',
+						isCyberpunkOn ? 'bg-accent' : 'bg-surface-hover'
+					]"
+				>
+					<span
+						:class="[
+							'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200',
+							isCyberpunkOn ? 'translate-x-6' : ''
+						]"
+					></span>
+				</button>
+			</div>
+		</div>
+		<hr class="border-border-default" />
+
+		<!-- Glitch Scheduling -->
+		<div class="mt-3">
+			<div class="flex items-center justify-between mb-3">
+				<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Glitch Scheduling</h3>
+				<a class="text-text-secondary hover:text-accent cursor-pointer transition-colors" @click="editSettings()">
+					<Pencil :size="18" />
 				</a>
 			</div>
 			<div
@@ -38,8 +69,8 @@
 				)"
 				:key="`${settingsGroup}-settingDisplay-${index}`"
 			>
-				<h5 class="font-rajdhani font-semibold">{{ settingsGroup }}</h5>
-				<div class="mb-4">
+				<h5 class="font-rajdhani font-semibold text-text-primary" v-if="settingsGroup !== 'display'">{{ settingsGroup }}</h5>
+				<div class="mb-4" v-if="settingsGroup !== 'display'">
 					<div
 						v-for="setting in Object.keys(
 							getAccountSettings[settingsGroup]
@@ -48,10 +79,10 @@
 						class="flex"
 					>
 						<div class="w-6/12 sm:w-5/12 pl-4">
-							<p class="font-rajdhani">{{ setting }}</p>
+							<p class="font-rajdhani text-text-secondary">{{ setting }}</p>
 						</div>
 						<div>
-							<p class="font-rajdhani">
+							<p class="font-rajdhani text-text-primary">
 								{{
 									createSettingString(
 										getAccountSettings[settingsGroup][
@@ -65,19 +96,26 @@
 				</div>
 			</div>
 		</div>
-		<hr />
-		<h3 class="mb-4 mt-3 font-rajdhani font-bold text-xl">Danger Zone</h3>
+		<hr class="border-border-default" />
+
+		<!-- Danger Zone -->
+		<h3 class="mb-4 mt-3 font-rajdhani font-bold text-xl text-app-danger">Danger Zone</h3>
 		<div class="flex justify-between items-center">
-			<h5 class="text-red-600 font-rajdhani font-semibold">
+			<h5 class="text-app-danger font-rajdhani font-semibold">
 				Restore Default Settings
 			</h5>
 			<button
-				class="bg-red-600 text-white px-4 py-2 rounded font-bold font-rajdhani hover:bg-red-700"
-				@click="restoreDefaultSettings()"
+				class="btn-themed bg-app-danger text-white px-4 py-2 font-bold font-rajdhani hover:brightness-110 transition-all"
+					@click="restoreDefaultSettings()"
 			>
 				Restore
 			</button>
 		</div>
+
+		<hr class="border-border-default mt-4" />
+		<p class="text-center text-xs text-text-secondary font-rajdhani mt-4 mb-0 uppercase tracking-widest">
+			v{{ store.appVersion }}
+		</p>
 
 		<settings-modal ref="settingsModalRef" :accountSettings="getAccountSettings" />
 	</content-card>
@@ -89,13 +127,15 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import ContentCard from '@/components/ContentCard.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
+import { Pencil } from 'lucide-vue-next'
 
 export default {
 	name: 'ProfileView',
 
 	components: {
 		ContentCard,
-		SettingsModal
+		SettingsModal,
+		Pencil
 	},
 
 	setup() {
@@ -115,6 +155,10 @@ export default {
 
 		user() {
 			return this.store.user
+		},
+
+		isCyberpunkOn() {
+			return this.store.account?.settings?.display?.cyberpunkMode ?? false
 		}
 	},
 
@@ -136,6 +180,20 @@ export default {
 
 		editSettings() {
 			this.$refs.settingsModalRef.show()
+		},
+
+		toggleCyberpunkMode() {
+			const currentSettings = this.store.account?.settings ?? { ...this.store.defaultSettings }
+			const displaySettings = currentSettings.display ?? {}
+			const newSettings = {
+				...currentSettings,
+				display: {
+					...displaySettings,
+					cyberpunkMode: !displaySettings.cyberpunkMode
+				}
+			}
+			this.store.setAccountSettings(newSettings)
+			this.saveAccountToDatabase(this.store.account)
 		}
 	}
 }

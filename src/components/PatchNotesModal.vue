@@ -1,11 +1,11 @@
 <template>
 	<BaseModal ref="modalRef" title="" :hideHeaderClose="true" :showDefaultFooter="false">
-		<h5 class="mb-4 font-rajdhani font-semibold text-lg">Task Glitch has been upgraded.</h5>
-		<ul class="divide-y" v-if="changes.length > 0">
+		<h5 class="mb-4 font-rajdhani font-semibold text-lg text-text-heading">Task Glitch has been upgraded.</h5>
+		<ul class="divide-y divide-border-default" v-if="changes.length > 0">
 			<li
 				v-for="(change, index) in changes"
 				:key="`patchNotes-change-${index}`"
-				class="py-2"
+				class="py-2 text-text-primary"
 			>
 				{{ change }}
 			</li>
@@ -13,7 +13,7 @@
 
 		<template #footer>
 			<button
-				class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 font-rajdhani font-semibold"
+				class="btn-themed px-3 py-1 bg-accent text-text-inverse text-sm hover:brightness-110 font-rajdhani font-semibold transition-all"
 				@click="$refs.modalRef.close()"
 			>
 				OK

@@ -2,7 +2,7 @@
 	<BaseModal ref="modalRef" @ok="onSubmit" :hideHeaderClose="true" title="Schedule Setup">
 		<form ref="scheduleSetUpForm" class="text-left" @submit.prevent="onSubmit">
 			<div>
-				<label class="block mb-1 font-rajdhani font-semibold">Options</label>
+				<label class="block mb-1 font-rajdhani font-semibold text-text-secondary">Options</label>
 				<div class="flex flex-wrap gap-3">
 					<div>
 						<input
@@ -13,7 +13,7 @@
 							v-model="includeBreaks"
 						/>
 						<label
-							class="px-3 py-2 border-2 rounded cursor-pointer font-rajdhani font-semibold transition-colors peer-checked:bg-green-600 peer-checked:text-white peer-checked:border-green-600 border-green-600 text-green-600 hover:bg-green-50"
+							class="px-3 py-2 border-2 rounded cursor-pointer font-rajdhani font-semibold transition-colors peer-checked:bg-app-success peer-checked:text-text-inverse peer-checked:border-app-success border-app-success text-app-success hover:bg-app-success/10"
 							for="includeBreaksToggle"
 						>
 							Add Breaks
@@ -22,44 +22,44 @@
 				</div>
 			</div>
 			<div class="mt-3">
-				<label for="sessionDate" class="block mb-1 font-rajdhani font-semibold">Date</label>
+				<label for="sessionDate" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Date</label>
 				<div class="flex gap-2">
 					<input
 						id="sessionDate"
 						type="date"
 						v-model="sessionDate"
 						:min="todayDate"
-						class="flex-1 border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+						class="flex-1 border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 					/>
 					<button
 						type="button"
 						@click="sessionDate = todayDate"
-						class="px-2 py-1 text-gray-500 hover:text-gray-700 border rounded"
+						class="px-2 py-1 text-text-secondary hover:text-accent border border-border-default bg-surface-base rounded transition-colors"
 					>
-						<i class="fas fa-times"></i>
+						<X :size="16" />
 					</button>
 				</div>
 			</div>
 			<div class="mt-3">
-				<label for="fromTime" class="block mb-1 font-rajdhani font-semibold">From</label>
+				<label for="fromTime" class="block mb-1 font-rajdhani font-semibold text-text-secondary">From</label>
 				<input
 					id="fromTime"
 					type="time"
 					v-model="fromTime"
-					class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+					class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 				/>
 			</div>
 			<div class="mt-3">
-				<label for="toTime" class="block mb-1 font-rajdhani font-semibold">To</label>
+				<label for="toTime" class="block mb-1 font-rajdhani font-semibold text-text-secondary">To</label>
 				<input
 					id="toTime"
 					type="time"
 					v-model="toTime"
-					class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+					class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 				/>
 			</div>
 			<div class="mt-3">
-				<label for="categoriesToInclude" class="block mb-1 font-rajdhani font-semibold">Categories To Include</label>
+				<label for="categoriesToInclude" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Categories To Include</label>
 				<Multiselect
 					v-model="categoriesToInclude"
 					:options="getCategories"
@@ -80,11 +80,13 @@ import { useRouter, useRoute } from 'vue-router'
 import BaseModal from './ui/BaseModal.vue'
 import Multiselect from '@vueform/multiselect'
 import '@vueform/multiselect/themes/default.css'
+import { X } from 'lucide-vue-next'
 
 export default {
 	components: {
 		BaseModal,
-		Multiselect
+		Multiselect,
+		X
 	},
 
 	setup() {

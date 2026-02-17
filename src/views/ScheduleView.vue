@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 		<content-card>
 			<!-- Loading state -->
 			<div v-if="isLoadingSchedule" class="py-4">
@@ -9,7 +9,7 @@
 				v-else-if="!schedule"
 				@createSchedule="openScheduleSetUp()"
 			/>
-			<div v-else>
+			<div v-else class="md:flex-1 md:min-h-0 md:flex md:flex-col">
 				<!-- Schedule complete celebration -->
 				<schedule-complete
 					v-if="isScheduleComplete"
@@ -20,36 +20,38 @@
 
 				<!-- Normal schedule view -->
 				<template v-else>
-					<div class="flex flex-wrap mb-3 gap-3">
+					<div class="flex flex-wrap mb-3 gap-3 shrink-0">
 						<button
 							@click="openScheduleSetUp()"
-							class="flex-1 bg-green-600 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-green-700"
+							class="btn-themed flex-1 bg-app-success text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
 						>
 							New Schedule
 						</button>
 						<button
 							@click="deleteSchedule()"
-							class="flex-1 bg-red-600 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-red-700"
+							class="btn-themed flex-1 bg-app-danger text-white py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
 						>
 							Delete Schedule
 						</button>
 					</div>
-					<div class="flex flex-wrap gap-3">
+					<div class="flex flex-wrap gap-3 shrink-0">
 						<button
 							@click="reschedule()"
-							class="flex-1 bg-yellow-400 text-black py-2 px-4 rounded font-bold font-rajdhani hover:bg-yellow-500"
+							class="btn-themed flex-1 bg-app-warning text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
 						>
 							Reschedule
 						</button>
 						<button
-							class="flex-1 bg-blue-600 text-white py-2 px-4 rounded font-bold font-rajdhani opacity-50 cursor-not-allowed"
+							class="btn-themed flex-1 bg-surface-hover text-text-secondary py-2 px-4 font-bold font-rajdhani opacity-50 cursor-not-allowed transition-all"
 							disabled
 						>
 							Export
 						</button>
 					</div>
-					<hr class="my-4" />
-					<task-schedule />
+					<hr class="my-4 border-border-default shrink-0" />
+					<div class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
+						<task-schedule />
+					</div>
 				</template>
 			</div>
 		</content-card>
