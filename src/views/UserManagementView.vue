@@ -2,13 +2,13 @@
 	<content-card>
 		<div v-if="changePassword.displayForm">
 			<div class="items-center mb-4">
-				<h1 class="mb-1 text-center pt-3 font-rajdhani font-bold text-2xl">
+				<h1 class="mb-1 text-center pt-3 font-rajdhani font-bold text-2xl text-text-heading">
 					Change you password
 				</h1>
 			</div>
 			<form @submit.prevent="() => confirmResetPassword()">
 				<div class="flex flex-wrap items-center text-start mt-4">
-					<label for="user-newPassword" class="w-full sm:w-3/12 font-rajdhani font-semibold">
+					<label for="user-newPassword" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
 						New Password
 					</label>
 					<div class="w-full sm:w-9/12">
@@ -17,12 +17,12 @@
 							v-model="changePassword.newPassword"
 							placeholder="password"
 							type="password"
-							class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 						/>
 					</div>
 				</div>
 				<div class="flex flex-wrap items-center text-start mt-4">
-					<label for="user-confirmNewPassword" class="w-full sm:w-3/12 font-rajdhani font-semibold">
+					<label for="user-confirmNewPassword" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
 						Confirm New Password
 					</label>
 					<div class="w-full sm:w-9/12">
@@ -31,15 +31,15 @@
 							v-model="changePassword.confirmNewPassword"
 							placeholder="confirm password"
 							type="password"
-							class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 						/>
 					</div>
 				</div>
 				<div class="flex flex-col mx-auto gap-3 mt-5 w-3/4">
 					<button
 						type="submit"
-						class="bg-yellow-400 text-black py-2 px-4 rounded text-lg font-rajdhani font-semibold hover:bg-yellow-500"
-					>
+						class="btn-themed bg-app-warning text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+											>
 						Change Password
 					</button>
 				</div>
@@ -47,26 +47,23 @@
 		</div>
 
 		<div v-if="displayMessage" class="text-center py-8">
-			<i
-				:class="`fas fa-lg mb-5 ${
-					taskComplete
-						? 'fa-check-circle text-green-600'
-						: 'fa-times-circle text-red-600'
-				}`"
-				style="font-size: 4rem"
-			></i>
-			<h1 class="font-rajdhani font-bold text-2xl">{{ title }}</h1>
-			<h5 class="mb-5 font-rajdhani font-semibold">
+			<component
+				:is="taskComplete ? CheckCircle2 : XCircle"
+				:size="64"
+				:class="taskComplete ? 'text-app-success' : 'text-app-danger'"
+				class="mb-5 mx-auto"
+			/>
+			<h1 class="font-rajdhani font-bold text-2xl text-text-heading">{{ title }}</h1>
+			<h5 class="mb-5 font-rajdhani font-semibold text-text-primary">
 				{{ text }}
 			</h5>
 			<button
 				@click="() => $router.push('/')"
-				:class="`py-2 px-6 rounded text-lg font-bold font-rajdhani ${
-					taskComplete
-						? 'bg-blue-600 text-white hover:bg-blue-700'
-						: 'bg-yellow-400 text-black hover:bg-yellow-500'
-				}`"
-			>
+				:class="taskComplete
+					? 'bg-accent text-text-inverse hover:brightness-110'
+					: 'bg-app-warning text-text-inverse hover:brightness-110'"
+				class="btn-themed py-2 px-6 text-lg font-bold font-rajdhani transition-all"
+							>
 				Back To Glitch
 			</button>
 		</div>
@@ -77,6 +74,7 @@
 import { useAppStore } from '@/stores/app'
 import { logger } from '@/utils/logger'
 import ContentCard from '@/components/ContentCard.vue'
+import { CheckCircle2, XCircle } from 'lucide-vue-next'
 import {
 	applyActionCode,
 	verifyPasswordResetCode,
@@ -86,7 +84,7 @@ import {
 export default {
 	name: 'UserManagementView',
 
-	components: { ContentCard },
+	components: { ContentCard, CheckCircle2, XCircle },
 
 	setup() {
 		const store = useAppStore()

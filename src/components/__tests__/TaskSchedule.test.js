@@ -222,7 +222,7 @@ describe('TaskSchedule', () => {
 	})
 
 	describe('template — active task highlighting', () => {
-		it('applies blue highlight class to active task card', () => {
+		it('applies accent highlight class to active task card', () => {
 			const schedule = makeSchedule([
 				{ type: null },
 				{ type: null }
@@ -231,13 +231,13 @@ describe('TaskSchedule', () => {
 			const { wrapper } = mountSchedule(schedule)
 			const cards = wrapper.findAll('.schedule-item')
 
-			// First card should have the active highlight
-			const firstCardDiv = cards[0].find('.bg-blue-50')
-			expect(firstCardDiv.exists()).toBe(true)
+			// First card should have the active highlight (bg-accent/10)
+			const firstCardHtml = cards[0].html()
+			expect(firstCardHtml).toContain('bg-accent')
 
 			// Second card should not have it
-			const secondCardDiv = cards[1].find('.bg-blue-50')
-			expect(secondCardDiv.exists()).toBe(false)
+			const secondCardHtml = cards[1].html()
+			expect(secondCardHtml).not.toContain('bg-accent/10')
 		})
 	})
 
@@ -337,7 +337,12 @@ describe('TaskSchedule', () => {
 
 			const { wrapper } = mountSchedule(schedule)
 
-			expect(wrapper.find('.fa-check-circle').exists()).toBe(true)
+			// Non-completed tasks render the CheckCircle2 Lucide icon (svg) inside a button
+			const buttons = wrapper.findAll('button')
+			const svgButton = buttons.find(b => b.find('svg').exists())
+
+			expect(svgButton).toBeTruthy()
+			expect(svgButton.html()).toContain('bg-app-success')
 		})
 
 		it('shows undo icon for completed tasks', () => {
@@ -347,7 +352,12 @@ describe('TaskSchedule', () => {
 
 			const { wrapper } = mountSchedule(schedule, { tasks: [] })
 
-			expect(wrapper.find('.fa-undo').exists()).toBe(true)
+			// Completed tasks render the Undo2 Lucide icon (svg) inside a button
+			const buttons = wrapper.findAll('button')
+			const svgButton = buttons.find(b => b.find('svg').exists())
+
+			expect(svgButton).toBeTruthy()
+			expect(svgButton.html()).toContain('bg-app-warning')
 		})
 	})
 })

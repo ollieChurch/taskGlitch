@@ -1,26 +1,26 @@
 <template>
 	<dialog
 		ref="dialogRef"
-		class="backdrop:bg-black/50 rounded-lg shadow-xl p-0 w-full max-w-lg m-auto border-0"
+		class="backdrop:bg-black/70 shadow-xl p-0 w-full max-w-lg m-auto border border-accent-dim bg-transparent rounded-xl overflow-hidden"
 		@close="onDialogClose"
 	>
-		<div class="bg-white rounded-lg p-6">
+		<div class="depth-panel p-6">
 			<!-- Header -->
 			<div class="flex justify-between items-center mb-4" v-if="title || $slots.header">
 				<slot name="header">
-					<h3 class="text-xl font-semibold font-rajdhani">{{ title }}</h3>
+					<h3 class="text-xl font-semibold font-rajdhani text-text-heading">{{ title }}</h3>
 				</slot>
 				<button
 					v-if="!hideHeaderClose"
 					@click="close"
-					class="text-gray-400 hover:text-gray-600 text-2xl leading-none ml-4"
+					class="text-text-secondary hover:text-accent text-2xl leading-none ml-4 transition-colors"
 				>
-					<i class="fas fa-times"></i>
+					<X :size="20" />
 				</button>
 			</div>
 
 			<!-- Body -->
-			<div>
+			<div class="text-text-primary">
 				<slot></slot>
 			</div>
 
@@ -29,13 +29,13 @@
 				<slot name="footer" :ok="handleOk" :close="close">
 					<button
 						@click="close"
-						class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-rajdhani font-semibold"
+						class="btn-themed px-4 py-2 bg-surface-hover text-text-secondary border border-border-default hover:border-accent-dim font-rajdhani font-semibold transition-colors"
 					>
 						Cancel
 					</button>
 					<button
 						@click="handleOk"
-						class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-rajdhani font-semibold"
+						class="btn-themed px-4 py-2 bg-accent text-text-inverse hover:brightness-110 font-rajdhani font-semibold transition-all"
 					>
 						OK
 					</button>
@@ -46,8 +46,11 @@
 </template>
 
 <script>
+import { X } from 'lucide-vue-next'
+
 export default {
 	name: 'BaseModal',
+	components: { X },
 	props: {
 		title: {
 			type: String,
@@ -99,7 +102,7 @@ export default {
 
 <style scoped>
 dialog::backdrop {
-	background-color: rgba(0, 0, 0, 0.5);
+	background-color: rgba(0, 0, 0, 0.7);
 }
 
 dialog[open] {

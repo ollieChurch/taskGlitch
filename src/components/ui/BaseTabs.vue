@@ -1,22 +1,22 @@
 <template>
-	<div>
-		<div class="flex" :class="fill ? 'w-full' : ''">
+	<div class="md:flex md:flex-col md:min-h-0 md:flex-1">
+		<div class="flex border-b border-border-default shrink-0" :class="fill ? 'w-full' : ''">
 			<button
 				v-for="(tab, index) in tabs"
 				:key="index"
 				@click="activeTab = index"
 				:class="[
-					'px-4 py-2 font-semibold font-rajdhani transition-colors rounded-full text-sm',
+					'px-4 py-2 font-bold font-rajdhani transition-colors text-xs uppercase tracking-widest border-b-2 -mb-px',
 					fill ? 'flex-1 text-center' : '',
 					activeTab === index
-						? 'bg-blue-600 text-white'
-						: 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+						? 'border-accent text-accent'
+						: 'border-transparent text-text-secondary hover:text-text-primary'
 				]"
 			>
 				{{ tab.title }}
 			</button>
 		</div>
-		<div class="mt-2">
+		<div class="mt-2 md:flex-1 md:min-h-0 md:flex md:flex-col">
 			<slot></slot>
 		</div>
 	</div>

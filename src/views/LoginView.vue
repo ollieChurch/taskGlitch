@@ -2,17 +2,17 @@
 	<content-card>
 		<div v-if="userForgotPassword">
 			<div class="items-center mb-4">
-				<h1 class="mb-1 text-center pt-3 font-rajdhani font-bold text-2xl">
+				<h1 class="mb-1 text-center pt-3 font-rajdhani font-bold text-2xl text-text-heading">
 					Forgotten your password?
 				</h1>
-				<p class="mb-0 text-center sm:text-left font-rajdhani">
+				<p class="mb-0 text-center sm:text-left font-rajdhani text-text-primary">
 					Let us know your email and if your are already registered
 					with Task Glitch we will drop you a message.
 				</p>
 			</div>
 			<form @submit.prevent="() => forgotPassword()">
 				<div class="flex flex-wrap items-center text-start mt-4">
-					<label for="forgotten-password-email" class="w-full sm:w-3/12 font-rajdhani font-semibold">
+					<label for="forgotten-password-email" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
 						Email
 					</label>
 					<div class="w-full sm:w-9/12">
@@ -21,20 +21,20 @@
 							v-model="email"
 							placeholder="email"
 							type="email"
-							class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+							class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 						/>
 					</div>
 				</div>
 				<div class="flex flex-col mx-auto gap-3 mt-5 w-3/4">
 					<button
 						type="submit"
-						class="bg-yellow-400 text-black py-2 px-4 rounded text-lg font-rajdhani font-semibold hover:bg-yellow-500"
+						class="btn-themed bg-app-warning text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
 					>
 						Send Request
 					</button>
 					<button
 						type="button"
-						class="bg-cyan-500 text-white py-2 px-4 rounded text-lg font-rajdhani font-semibold hover:bg-cyan-600"
+						class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
 						@click="setUserForgotPassword()"
 					>
 						Back
@@ -44,24 +44,23 @@
 		</div>
 		<div v-else>
 			<div class="items-center mb-4">
-				<h1
-					class="mb-0 text-center sm:text-left pt-3 font-rajdhani font-bold text-2xl"
-				>
-					Say hi to Glitch...
-				</h1>
 				<div class="flex flex-wrap items-center">
-					<div class="w-full order-3 sm:order-2 sm:w-9/12">
-						<p class="mb-0 text-center sm:text-left font-rajdhani">
-							Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-							Nullam a tortor sed enim rutrum molestie in at metus.
-							Proin ac accumsan ipsum, ac pellentesque odio. Aliquam
-							mattis erat tellus.
+					<div class="w-full order-1 sm:order-2 sm:w-9/12">
+						<h1
+							class="mb-1 text-center sm:text-left pt-3 font-rajdhani font-bold text-2xl text-text-heading"
+						>
+							Welcome to Task Glitch
+						</h1>
+						<p class="mb-0 text-center sm:text-left font-rajdhani text-text-primary">
+							Intelligent task scheduling that prioritises your backlog
+							and generates optimised work sessions. Add tasks, set
+							deadlines, and let the algorithm do the rest.
 						</p>
 					</div>
 					<div
-						class="w-full px-5 py-3 sm:py-0 sm:px-0 order-1 sm:order-3 sm:w-3/12"
+						class="w-full px-5 py-3 sm:py-0 sm:px-0 order-first sm:order-3 sm:w-3/12 flex justify-center"
 					>
-						<img :src="glitchImg" class="max-w-full max-h-full mx-auto" alt="a cartoon robot" />
+						<glitch-emblem :size="100" />
 					</div>
 				</div>
 			</div>
@@ -70,7 +69,7 @@
 				<BaseTab title="Login">
 					<form @submit.prevent="() => login()">
 						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="login-email" class="w-full sm:w-3/12 font-rajdhani font-semibold">
+							<label for="login-email" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
 								Email
 							</label>
 							<div class="w-full sm:w-9/12">
@@ -79,12 +78,12 @@
 									v-model="email"
 									placeholder="email"
 									type="email"
-									class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
 						</div>
 						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="login-password" class="w-full sm:w-3/12 font-rajdhani font-semibold">
+							<label for="login-password" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
 								Password
 							</label>
 							<div class="w-full sm:w-9/12">
@@ -93,21 +92,21 @@
 									v-model="password"
 									placeholder="password"
 									type="password"
-									class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
 						</div>
 						<div class="flex flex-col mx-auto gap-3 mt-5 w-3/4">
 							<button
 								type="submit"
-								class="bg-green-600 text-white py-2 px-4 rounded text-lg font-rajdhani font-semibold hover:bg-green-700"
-							>
+								class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+									>
 								Login
 							</button>
 							<button
 								type="button"
-								class="bg-yellow-400 text-black py-2 px-4 rounded text-lg font-rajdhani font-semibold hover:bg-yellow-500"
-								@click="setUserForgotPassword()"
+								class="btn-themed bg-app-warning text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+										@click="setUserForgotPassword()"
 							>
 								Forgot Your Password?
 							</button>
@@ -117,7 +116,7 @@
 				<BaseTab title="Sign Up">
 					<form @submit.prevent="() => register()">
 						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="register-email" class="w-full sm:w-3/12 font-rajdhani font-semibold">
+							<label for="register-email" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
 								Email
 							</label>
 							<div class="w-full sm:w-9/12">
@@ -126,12 +125,12 @@
 									v-model="email"
 									placeholder="email"
 									type="email"
-									class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
 						</div>
 						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="register-password" class="w-full sm:w-3/12 font-rajdhani font-semibold">
+							<label for="register-password" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
 								Password
 							</label>
 							<div class="w-full sm:w-9/12">
@@ -140,14 +139,14 @@
 									v-model="password"
 									placeholder="password"
 									type="password"
-									class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
 						</div>
 						<div class="flex flex-wrap items-center text-start mt-4">
 							<label
 								for="register-confirmPassword"
-								class="w-full sm:w-3/12 font-rajdhani font-semibold"
+								class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary"
 							>
 								Confirm Password
 							</label>
@@ -157,15 +156,15 @@
 									v-model="confirmPassword"
 									placeholder="confirm password"
 									type="password"
-									class="w-full border rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
 						</div>
 						<div class="flex flex-col mx-auto gap-3 mt-5 w-3/4">
 							<button
 								type="submit"
-								class="bg-cyan-500 text-white py-2 px-4 rounded text-lg font-rajdhani font-semibold hover:bg-cyan-600"
-							>
+								class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+									>
 								Register
 							</button>
 						</div>
@@ -188,7 +187,7 @@ import { logger } from '@/utils/logger'
 import ContentCard from '@/components/ContentCard.vue'
 import BaseTabs from '@/components/ui/BaseTabs.vue'
 import BaseTab from '@/components/ui/BaseTab.vue'
-import glitch from '@/assets/glitch.png'
+import GlitchEmblem from '@/components/GlitchEmblem.vue'
 
 export default {
 	name: 'LoginView',
@@ -196,7 +195,8 @@ export default {
 	components: {
 		ContentCard,
 		BaseTabs,
-		BaseTab
+		BaseTab,
+		GlitchEmblem
 	},
 
 	setup() {
@@ -209,7 +209,6 @@ export default {
 			email: '',
 			password: '',
 			confirmPassword: '',
-			glitchImg: glitch,
 			userForgotPassword: false
 		}
 	},

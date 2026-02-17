@@ -36,7 +36,7 @@ export default {
 
 <style scoped>
 .skeleton-line {
-	background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+	background: linear-gradient(90deg, var(--color-surface-hover) 25%, var(--color-surface-overlay) 50%, var(--color-surface-hover) 75%);
 	background-size: 200% 100%;
 	animation: shimmer 1.5s infinite;
 }

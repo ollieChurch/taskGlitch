@@ -1,27 +1,27 @@
 <template>
 	<div class="text-center py-6">
 		<div class="trophy-bounce mb-4">
-			<i class="fas fa-trophy text-yellow-400 text-6xl"></i>
+			<Trophy :size="64" class="text-amber-400 mx-auto" />
 		</div>
-		<h2 class="font-wallpoet text-2xl mb-2">Schedule Complete!</h2>
-		<p class="text-gray-600 font-rajdhani mb-6">Great work. Here's how your session went.</p>
+		<h2 class="font-wallpoet text-2xl mb-2 text-accent">Schedule Complete!</h2>
+		<p class="text-text-secondary font-rajdhani mb-6">Great work. Here's how your session went.</p>
 
-		<div class="bg-white rounded-lg shadow-sm border p-4 mb-6 text-left">
+		<div class="depth-panel depth-highlight p-4 mb-6 text-left rounded-lg border border-border-visible">
 			<div class="grid grid-cols-2 gap-4">
 				<div>
-					<p class="text-sm text-gray-500 font-rajdhani mb-1">Tasks Completed</p>
-					<p class="text-2xl font-rajdhani font-semibold">{{ summary.tasksCompleted }}</p>
+					<p class="text-sm text-text-secondary font-rajdhani mb-1">Tasks Completed</p>
+					<p class="text-2xl font-rajdhani font-semibold text-text-heading">{{ summary.tasksCompleted }}</p>
 				</div>
 				<div>
-					<p class="text-sm text-gray-500 font-rajdhani mb-1">Session Duration</p>
-					<p class="text-2xl font-rajdhani font-semibold">{{ formatDuration(summary.actualMins) }}</p>
+					<p class="text-sm text-text-secondary font-rajdhani mb-1">Session Duration</p>
+					<p class="text-2xl font-rajdhani font-semibold text-text-heading">{{ formatDuration(summary.actualMins) }}</p>
 				</div>
 				<div>
-					<p class="text-sm text-gray-500 font-rajdhani mb-1">Estimated Time</p>
-					<p class="text-2xl font-rajdhani font-semibold">{{ formatDuration(summary.estimatedMins) }}</p>
+					<p class="text-sm text-text-secondary font-rajdhani mb-1">Estimated Time</p>
+					<p class="text-2xl font-rajdhani font-semibold text-text-heading">{{ formatDuration(summary.estimatedMins) }}</p>
 				</div>
 				<div>
-					<p class="text-sm text-gray-500 font-rajdhani mb-1">Difference</p>
+					<p class="text-sm text-text-secondary font-rajdhani mb-1">Difference</p>
 					<p
 						class="text-2xl font-rajdhani font-semibold"
 						:class="differenceClass"
@@ -35,13 +35,13 @@
 		<div class="flex flex-wrap gap-3">
 			<button
 				@click="$emit('newSchedule')"
-				class="flex-1 bg-green-600 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-green-700"
+				class="btn-themed flex-1 bg-app-success text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
 			>
 				New Schedule
 			</button>
 			<button
 				@click="$emit('clearSchedule')"
-				class="flex-1 bg-gray-500 text-white py-2 px-4 rounded font-bold font-rajdhani hover:bg-gray-600"
+				class="btn-themed flex-1 bg-surface-hover text-text-primary border border-border-default py-2 px-4 font-bold font-rajdhani hover:border-accent-dim transition-all"
 			>
 				Done
 			</button>
@@ -51,8 +51,11 @@
 
 <script>
 import confetti from 'canvas-confetti'
+import { Trophy } from 'lucide-vue-next'
 
 export default {
+	components: { Trophy },
+
 	props: {
 		summary: {
 			type: Object,
@@ -81,11 +84,11 @@ export default {
 
 		differenceClass() {
 			if (this.summary.actualMins == null || this.summary.estimatedMins == null) {
-				return 'text-gray-500'
+				return 'text-text-secondary'
 			}
 			const diff = this.summary.actualMins - this.summary.estimatedMins
-			if (diff <= 0) return 'text-green-600'
-			return 'text-yellow-600'
+			if (diff <= 0) return 'text-app-success'
+			return 'text-app-warning'
 		}
 	},
 

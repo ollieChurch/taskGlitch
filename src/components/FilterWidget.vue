@@ -1,6 +1,6 @@
 <template>
 	<div class="mb-4">
-		<h5 class="text-left font-bold font-rajdhani">
+		<h5 class="text-left font-bold font-rajdhani text-xs text-text-secondary uppercase tracking-widest">
 			{{ title }}
 		</h5>
 		<task-card

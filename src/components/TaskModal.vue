@@ -8,38 +8,38 @@
 		:showDefaultFooter="true"
 	>
 		<template #header>
-			<h5 class="text-lg font-rajdhani font-semibold">
+			<h5 class="text-lg font-rajdhani font-semibold text-text-heading">
 				{{ taskToPatch.id ? 'Edit' : 'Add' }} A Task
 			</h5>
 			<button
 				v-if="taskToPatch.id"
-				class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+				class="btn-themed bg-app-danger text-white px-3 py-1 hover:brightness-110 transition-all"
 				@click="deleteTask(task, 'tasks')"
 			>
-				<i class="fas fa-trash-alt"></i>
+				<Trash2 :size="16" />
 			</button>
 		</template>
 		<form ref="taskForm">
 			<div class="mb-3">
-				<label for="task" class="block mb-1 font-rajdhani font-semibold">Task</label>
+				<label for="task" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Task</label>
 				<input
 					id="task"
 					v-model="task.name"
 					type="text"
 					autocomplete="off"
 					required
-					class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
-					:class="valid.task === false ? 'border-red-500' : ''"
+					class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+					:class="valid.task === false ? 'border-app-danger' : ''"
 				/>
-				<p v-if="valid.task === false" class="text-red-500 text-sm mt-1">This is invalid input</p>
+				<p v-if="valid.task === false" class="text-app-danger text-sm mt-1">This is invalid input</p>
 			</div>
 			<div class="flex justify-between gap-2">
 				<div class="w-1/2">
-					<label for="priority" class="block mb-1 font-rajdhani font-semibold">Priority</label>
+					<label for="priority" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Priority</label>
 					<select
 						id="priority"
 						v-model="task.priority"
-						class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+						class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 					>
 						<option
 							v-for="option in priorityOptions"
@@ -51,11 +51,11 @@
 					</select>
 				</div>
 				<div class="w-1/2">
-					<label for="sizing" class="block mb-1 font-rajdhani font-semibold">Size</label>
+					<label for="sizing" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Size</label>
 					<select
 						id="sizing"
 						v-model="task.sizing"
-						class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+						class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 					>
 						<option
 							v-for="option in sizingOptions"
@@ -68,15 +68,15 @@
 				</div>
 			</div>
 			<div class="mt-3">
-				<label for="category" class="block mb-1 font-rajdhani font-semibold">Category</label>
+				<label for="category" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Category</label>
 				<input
 					id="category"
 					v-model="task.category"
 					list="tags"
 					autocomplete="off"
 					required
-					class="w-full border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
-					:class="valid.category === false ? 'border-red-500' : ''"
+					class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+					:class="valid.category === false ? 'border-app-danger' : ''"
 				/>
 				<datalist id="tags">
 					<option
@@ -86,24 +86,24 @@
 					>
 					</option>
 				</datalist>
-				<p v-if="valid.category === false" class="text-red-500 text-sm mt-1">This is invalid input</p>
+				<p v-if="valid.category === false" class="text-app-danger text-sm mt-1">This is invalid input</p>
 			</div>
 			<div class="mt-3">
-				<label for="targetDate" class="block mb-1 font-rajdhani font-semibold">Target Date</label>
+				<label for="targetDate" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Target Date</label>
 				<div class="flex items-center gap-2">
 					<input
 						id="targetDate"
 						type="date"
 						v-model="task.targetDateTime"
 						:min="todayDate"
-						class="flex-1 border rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-blue-500"
+						class="flex-1 border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 					/>
 					<button
 						type="button"
 						@click="task.targetDateTime = null"
-						class="px-2 py-2 text-gray-500 hover:text-gray-700 border rounded"
+						class="px-2 py-2 text-text-secondary hover:text-accent border border-border-default bg-surface-base rounded transition-colors"
 					>
-						<i class="fas fa-times"></i>
+						<X :size="16" />
 					</button>
 					<div>
 						<input
@@ -114,7 +114,7 @@
 							v-model="task.isHardDeadline"
 						/>
 						<label
-							class="block px-3 py-2 border-2 rounded cursor-pointer font-rajdhani font-semibold transition-colors peer-checked:bg-red-600 peer-checked:text-white peer-checked:border-red-600 border-red-600 text-red-600 hover:bg-red-50 whitespace-nowrap"
+							class="block px-3 py-2 border-2 rounded cursor-pointer font-rajdhani font-semibold transition-colors peer-checked:bg-app-danger peer-checked:text-white peer-checked:border-app-danger border-app-danger text-app-danger hover:bg-app-danger/10 whitespace-nowrap"
 							for="hardDeadlineToggle"
 						>
 							Hard Deadline
@@ -132,9 +132,10 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import { logger } from '@/utils/logger'
 import BaseModal from './ui/BaseModal.vue'
+import { Trash2, X } from 'lucide-vue-next'
 
 export default {
-	components: { BaseModal },
+	components: { BaseModal, Trash2, X },
 
 	setup() {
 		const store = useAppStore()

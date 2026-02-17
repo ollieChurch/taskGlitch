@@ -106,7 +106,7 @@ describe('ScheduleComplete', () => {
 				actualMins: 25
 			})
 
-			expect(wrapper.find('.fa-trophy').exists()).toBe(true)
+			expect(wrapper.find('.trophy-bounce svg').exists()).toBe(true)
 		})
 	})
 

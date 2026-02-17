@@ -1,5 +1,15 @@
 export const patchNotes = [
 	{
+		version: '0.14.0',
+		changes: [
+			'Full dark sci-fi redesign — angular panels, glowing accents, and a command-center aesthetic',
+			'Toggleable Cyberpunk Mode in Profile settings — neon glow, scan lines, and glitch effects',
+			'Switched to Lucide icons for a sharper, more consistent look',
+			'New priority-low colour (violet) to stand out from the cyan UI accent',
+			'Smoother page transitions and hover glow effects throughout'
+		]
+	},
+	{
 		version: '0.13.0',
 		changes: [
 			'Updated dependencies (Firebase, Vite) to fix security vulnerabilities',
