@@ -156,50 +156,58 @@
 
 @tailwind utilities;
 
-/* Multiselect dark theme overrides */
+/* Multiselect dark theme — override CSS custom properties */
 .multiselect {
-	background: var(--color-surface-base);
-	border-color: var(--color-border);
+	--ms-bg: var(--color-surface-base);
+	--ms-bg-disabled: var(--color-surface-hover);
+	--ms-border-color: var(--color-border-visible);
+	--ms-border-color-active: var(--color-accent-dim);
+	--ms-ring-width: 2px;
+	--ms-ring-color: var(--color-accent-glow);
+	--ms-placeholder-color: var(--color-text-secondary);
+	--ms-caret-color: var(--color-text-secondary);
+	--ms-clear-color: var(--color-text-secondary);
+	--ms-spinner-color: var(--color-accent);
+
+	/* Tags */
+	--ms-tag-bg: var(--color-accent-dim);
+	--ms-tag-color: var(--color-text-primary);
+	--ms-tag-bg-disabled: var(--color-surface-hover);
+
+	/* Dropdown */
+	--ms-dropdown-bg: var(--color-surface-overlay);
+	--ms-dropdown-border-color: var(--color-border-visible);
+
+	/* Options */
+	--ms-option-bg-pointed: var(--color-surface-hover);
+	--ms-option-color-pointed: var(--color-text-primary);
+	--ms-option-bg-selected: var(--color-accent-dim);
+	--ms-option-color-selected: var(--color-text-primary);
+	--ms-option-bg-selected-pointed: var(--color-accent);
+	--ms-option-color-selected-pointed: var(--color-text-inverse);
+	--ms-option-bg-disabled: var(--color-surface-base);
+	--ms-option-color-disabled: var(--color-text-secondary);
+
+	/* Empty state */
+	--ms-empty-color: var(--color-text-secondary);
+
 	color: var(--color-text-primary);
 	font-family: 'Rajdhani', sans-serif;
 }
 
-.multiselect-input {
-	background: var(--color-surface-base);
+.multiselect-search {
+	background: var(--color-surface-base) !important;
 	color: var(--color-text-primary);
 }
 
-.multiselect-tag {
-	background: var(--color-accent-dim);
+.multiselect-tags-search {
+	background: transparent !important;
 	color: var(--color-text-primary);
 }
 
 .multiselect-tag-remove:hover {
 	background: var(--color-accent);
 	color: var(--color-text-inverse);
-}
-
-.multiselect-dropdown {
-	background: var(--color-surface-overlay);
-	border-color: var(--color-border);
-}
-
-.multiselect-option {
-	color: var(--color-text-primary);
-}
-
-.multiselect-option.is-pointed {
-	background: var(--color-surface-hover);
-	color: var(--color-text-primary);
-}
-
-.multiselect-option.is-selected {
-	background: var(--color-accent-dim);
-	color: var(--color-text-primary);
-}
-
-.multiselect-placeholder {
-	color: var(--color-text-secondary);
 }
 
 /* ═══════════════════════════════════════════════════════════

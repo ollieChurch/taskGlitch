@@ -1,6 +1,6 @@
 <template>
 	<div class="m-0 p-3 bg-surface-overlay border-l-4 border-accent text-left w-full sticky top-0 z-50">
-		<div class="mx-auto" style="max-width: 720px">
+		<div class="mx-auto notification-inner">
 			<div class="flex justify-between items-start">
 				<h5 class="font-bold font-rajdhani text-accent">{{ title }}</h5>
 				<button
@@ -37,3 +37,19 @@ export default {
 	emits: ['callToActionClicked', 'dismiss']
 }
 </script>
+
+<style scoped>
+@media (min-width: 768px) {
+	.notification-inner {
+		margin-left: 1.5rem;
+		margin-right: 1.5rem;
+	}
+}
+
+@media (min-width: 1280px) {
+	.notification-inner {
+		margin-left: 2.5rem;
+		margin-right: 2.5rem;
+	}
+}
+</style>

@@ -27,11 +27,8 @@
 
 			<!-- Data loaded -->
 			<div v-else class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
-				<div class="md:grid md:grid-cols-5 md:gap-5">
-				<!-- Left column: stats, spotlights, accuracy -->
-				<div class="md:col-span-3">
-				<!-- Stat Counters -->
-				<div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 gap-3 mb-5">
+				<!-- Stat Counters — full width row -->
+				<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
 					<!-- Active Tasks -->
 					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
 						<ListTodo :size="18" class="mx-auto mb-1 text-accent" />
@@ -81,86 +78,89 @@
 					</div>
 				</div>
 
-				<!-- Spotlight: Recommended Task -->
-				<div v-if="highestPriorityTask.length" class="mb-4">
-					<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
-						<Crosshair :size="12" class="text-accent" />
-						<span class="font-bold font-rajdhani text-xs text-accent uppercase tracking-widest">
-							Recommended
-						</span>
-					</div>
-					<task-card
-						:task="highestPriorityTask[0]"
-						@editTask="openTaskModal()"
-						class="!mt-0"
-					/>
-				</div>
-
-				<!-- Spotlight: Oldest Task -->
-				<div v-if="oldestTask.length" class="mb-4">
-					<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
-						<Clock :size="12" class="text-app-warning" />
-						<span class="font-bold font-rajdhani text-xs text-app-warning uppercase tracking-widest">
-							Oldest Task
-						</span>
-					</div>
-					<task-card
-						:task="oldestTask[0]"
-						@editTask="openTaskModal()"
-						class="!mt-0"
-					/>
-				</div>
-
-				<!-- Estimation accuracy (only shown when time-tracked data exists) -->
-				<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-4 overflow-hidden rounded-lg border border-border-visible">
-					<div class="flex items-stretch">
-						<div class="flex items-center justify-center px-5 py-4" :class="estimationAccuracy.bgClass">
-							<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
-						</div>
-						<div class="flex-1 px-4 py-3 text-left">
-							<div class="flex items-center gap-2">
-								<h5 class="font-bold font-rajdhani text-xs uppercase tracking-widest">Estimation Accuracy</h5>
-								<span class="text-xs text-text-secondary font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
+				<!-- 2-column layout: spotlights + charts -->
+				<div class="md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-5">
+					<!-- Left column: spotlights, accuracy -->
+					<div class="lg:col-span-3">
+						<!-- Spotlight: Recommended Task -->
+						<div v-if="highestPriorityTask.length" class="mb-4">
+							<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
+								<Crosshair :size="12" class="text-accent" />
+								<span class="font-bold font-rajdhani text-xs text-accent uppercase tracking-widest">
+									Recommended
+								</span>
 							</div>
-							<p class="text-sm text-text-secondary font-rajdhani mt-1 mb-0">
-								{{ estimationAccuracy.summary }}
-							</p>
+							<task-card
+								:task="highestPriorityTask[0]"
+								@editTask="openTaskModal()"
+								class="!mt-0"
+							/>
 						</div>
-					</div>
-				</div>
 
-				</div><!-- /left column -->
+						<!-- Spotlight: Oldest Task -->
+						<div v-if="oldestTask.length" class="mb-4">
+							<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
+								<Clock :size="12" class="text-app-warning" />
+								<span class="font-bold font-rajdhani text-xs text-app-warning uppercase tracking-widest">
+									Oldest Task
+								</span>
+							</div>
+							<task-card
+								:task="oldestTask[0]"
+								@editTask="openTaskModal()"
+								class="!mt-0"
+							/>
+						</div>
 
-				<!-- Right column: charts -->
-				<div class="md:col-span-2">
-					<h5 class="text-start mb-3 font-bold font-rajdhani text-sm text-text-heading section-header uppercase tracking-widest">
-						Backlog Breakdown
-					</h5>
-					<div class="depth-panel depth-highlight rounded-lg border border-border-visible">
-						<BaseTabs fill>
-							<BaseTab title="Categories">
-								<div class="pt-4 pb-6 px-4">
-									<div class="max-w-[240px] mx-auto">
-										<doughnut
-											:data="categoryBreakdownData"
-											:options="chartOptions"
-										/>
-									</div>
+						<!-- Estimation accuracy (only shown when time-tracked data exists) -->
+						<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-4 overflow-hidden rounded-lg border border-border-visible">
+							<div class="flex items-stretch">
+								<div class="flex items-center justify-center px-5 py-4" :class="estimationAccuracy.bgClass">
+									<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
 								</div>
-							</BaseTab>
-							<BaseTab title="Priorities">
-								<div class="pt-4 pb-6 px-4">
-									<div class="max-w-[240px] mx-auto">
-										<doughnut
-											:data="priorityBreakdownData"
-											:options="chartOptions"
-										/>
+								<div class="flex-1 px-4 py-3 text-left">
+									<div class="flex items-center gap-2">
+										<h5 class="font-bold font-rajdhani text-xs uppercase tracking-widest">Estimation Accuracy</h5>
+										<span class="text-xs text-text-secondary font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
 									</div>
+									<p class="text-sm text-text-secondary font-rajdhani mt-1 mb-0">
+										{{ estimationAccuracy.summary }}
+									</p>
 								</div>
-							</BaseTab>
-						</BaseTabs>
-					</div>
-				</div><!-- /right column -->
+							</div>
+						</div>
+					</div><!-- /left column -->
+
+					<!-- Right column: charts -->
+					<div class="lg:col-span-2">
+						<h5 class="text-start mb-3 font-bold font-rajdhani text-sm text-text-heading section-header uppercase tracking-widest">
+							Backlog Breakdown
+						</h5>
+						<div class="depth-panel depth-highlight rounded-lg border border-border-visible">
+							<BaseTabs fill>
+								<BaseTab title="Categories">
+									<div class="pt-4 pb-6 px-4">
+										<div class="max-w-[320px] mx-auto">
+											<doughnut
+												:data="categoryBreakdownData"
+												:options="chartOptions"
+											/>
+										</div>
+									</div>
+								</BaseTab>
+								<BaseTab title="Priorities">
+									<div class="pt-4 pb-6 px-4">
+										<div class="max-w-[320px] mx-auto">
+											<doughnut
+												:data="priorityBreakdownData"
+												:options="chartOptions"
+											/>
+										</div>
+									</div>
+								</BaseTab>
+							</BaseTabs>
+						</div>
+					</div><!-- /right column -->
 				</div><!-- /grid -->
 			</div>
 		</content-card>

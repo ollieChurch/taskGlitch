@@ -23,14 +23,14 @@
 						</div>
 
 						<!-- Tasks -->
-						<template v-else>
+						<div v-else class="lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-x-4">
 							<TaskCard
 								v-for="task in getPrioritisedTasks"
 								:key="`task-${task.id}`"
 								:task="task"
 								@editTask="openTaskModal()"
 							/>
-						</template>
+						</div>
 					</div>
 				</BaseTab>
 				<BaseTab title="Completed">
@@ -45,14 +45,14 @@
 						</div>
 
 						<!-- Completed tasks -->
-						<template v-else>
+						<div v-else class="lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:gap-x-4">
 							<TaskCard
 								v-for="task in completed"
 								:key="`completed-${task.id}`"
 								:task="task"
 								@editTask="openTaskModal()"
 							/>
-						</template>
+						</div>
 					</div>
 				</BaseTab>
 			</BaseTabs>

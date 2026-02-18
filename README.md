@@ -1,6 +1,10 @@
 # TaskGlitch
 
 ### Version
+0.14.1 - New emblem/favicon, viewport-locked desktop layout, internal scroll panels, 2-column dashboard\
+0.14.0 - Full dark sci-fi redesign, cyberpunk mode, Lucide icons, new transitions\
+0.13.0 - Dependency audit, friendly size labels, schedule-task sync, category change handling\
+0.12.0 - Schedule time tracking, active task highlighting, session summary, estimation accuracy\
 0.11.0 - Adds loading states, empty states, and fixes dashboard chart reactivity and colours\
 0.10.0 - Migrates to Vue 3, Tailwind CSS, Pinia, and Vite\
 0.9.0 - Adds patch notes modal to communicate changes to users\

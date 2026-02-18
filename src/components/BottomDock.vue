@@ -105,8 +105,13 @@ export default {
 
 @media (min-width: 768px) {
 	.dock-inner {
-		max-width: 720px;
-		margin: 0 auto;
+		margin: 0 1.5rem;
+	}
+}
+
+@media (min-width: 1280px) {
+	.dock-inner {
+		margin: 0 2.5rem;
 	}
 }
 

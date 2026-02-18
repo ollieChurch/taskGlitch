@@ -1,5 +1,15 @@
 export const patchNotes = [
 	{
+		version: '0.14.1',
+		changes: [
+			'New TG emblem and favicon replacing the old mascot',
+			'Desktop layout locks to viewport height — no more page scroll',
+			'Task lists and schedule scroll within their own panels on desktop',
+			'Dashboard uses a 2-column layout on wider screens',
+			'Content area widened to 720px for better use of screen space'
+		]
+	},
+	{
 		version: '0.14.0',
 		changes: [
 			'Full dark sci-fi redesign — angular panels, glowing accents, and a command-center aesthetic',
