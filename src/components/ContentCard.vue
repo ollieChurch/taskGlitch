@@ -1,8 +1,21 @@
 <template>
-	<div class="content-card depth-panel pt-2 pb-5 px-4 sm:my-5 sm:p-5 mx-auto">
+	<div class="content-card depth-panel pt-2 pb-5 px-4 sm:my-5 sm:p-5 mx-auto"
+		:class="{ 'content-card--narrow': narrow }">
 		<slot></slot>
 	</div>
 </template>
+
+<script>
+export default {
+	name: 'ContentCard',
+	props: {
+		narrow: {
+			type: Boolean,
+			default: false
+		}
+	}
+}
+</script>
 
 <style scoped>
 .content-card {
@@ -21,7 +34,9 @@
 
 @media (min-width: 768px) {
 	.content-card {
-		max-width: 720px;
+		max-width: none;
+		margin-left: 1.5rem;
+		margin-right: 1.5rem;
 		flex: 1;
 		min-height: 0;
 		display: flex;
@@ -29,6 +44,24 @@
 		overflow: hidden;
 		margin-top: 0.75rem;
 		margin-bottom: 0.75rem;
+	}
+
+	.content-card--narrow {
+		max-width: 540px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+@media (min-width: 1280px) {
+	.content-card {
+		margin-left: 2.5rem;
+		margin-right: 2.5rem;
+	}
+
+	.content-card--narrow {
+		margin-left: auto;
+		margin-right: auto;
 	}
 }
 </style>

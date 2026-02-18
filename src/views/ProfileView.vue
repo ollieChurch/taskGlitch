@@ -1,6 +1,7 @@
 <template>
+	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 	<content-card class="text-left">
-		<div class="flex items-center justify-between mb-3">
+		<div class="flex items-center justify-between mb-3 shrink-0">
 			<h1 class="text-left mb-0 font-rajdhani font-bold text-2xl text-text-heading">Profile</h1>
 			<button
 				@click="logout()"
@@ -9,96 +10,106 @@
 				Logout
 			</button>
 		</div>
-		<hr class="border-border-default" />
+		<hr class="border-border-default shrink-0" />
 
-		<!-- Account -->
-		<div v-if="user?.email" class="mt-3">
-			<div class="flex items-center justify-between mb-3">
-				<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Account</h3>
-			</div>
-			<div class="flex">
-				<div class="w-6/12 sm:w-5/12">
-					<p class="font-rajdhani text-text-secondary">Email</p>
-				</div>
-				<div>
-					<p class="font-rajdhani text-text-primary">{{ user.email }}</p>
-				</div>
-			</div>
-		</div>
-		<hr class="border-border-default" />
-
-		<!-- Display -->
-		<div class="mt-3">
-			<div class="flex items-center justify-between mb-3">
-				<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Display</h3>
-			</div>
-			<div class="flex items-center justify-between mb-4 pl-4">
-				<div>
-					<p class="font-rajdhani text-text-primary mb-0">Cyberpunk Mode</p>
-					<p class="font-rajdhani text-text-secondary text-sm mb-0">Neon glow, scan lines &amp; glitch effects</p>
-				</div>
-				<button
-					@click="toggleCyberpunkMode()"
-					:class="[
-						'relative w-12 h-6 rounded-full transition-colors duration-200',
-						isCyberpunkOn ? 'bg-accent' : 'bg-surface-hover'
-					]"
-				>
-					<span
-						:class="[
-							'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200',
-							isCyberpunkOn ? 'translate-x-6' : ''
-						]"
-					></span>
-				</button>
-			</div>
-		</div>
-		<hr class="border-border-default" />
-
-		<!-- Glitch Scheduling -->
-		<div class="mt-3">
-			<div class="flex items-center justify-between mb-3">
-				<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Glitch Scheduling</h3>
-				<a class="text-text-secondary hover:text-accent cursor-pointer transition-colors" @click="editSettings()">
-					<Pencil :size="18" />
-				</a>
-			</div>
-			<div
-				v-for="(settingsGroup, index) in Object.keys(
-					getAccountSettings
-				)"
-				:key="`${settingsGroup}-settingDisplay-${index}`"
-			>
-				<h5 class="font-rajdhani font-semibold text-text-primary" v-if="settingsGroup !== 'display'">{{ settingsGroup }}</h5>
-				<div class="mb-4" v-if="settingsGroup !== 'display'">
-					<div
-						v-for="setting in Object.keys(
-							getAccountSettings[settingsGroup]
-						)"
-						:key="`${setting}-${settingsGroup}-settingDisplay`"
-						class="flex"
-					>
-						<div class="w-6/12 sm:w-5/12 pl-4">
-							<p class="font-rajdhani text-text-secondary">{{ setting }}</p>
+		<div class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
+		<!-- 2-column grid on desktop: Account+Display | Scheduling -->
+		<div class="lg:grid lg:grid-cols-2 lg:gap-x-10">
+			<!-- Left column: Account + Display -->
+			<div>
+				<!-- Account -->
+				<div v-if="user?.email" class="mt-3">
+					<div class="flex items-center justify-between mb-3">
+						<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Account</h3>
+					</div>
+					<div class="flex">
+						<div class="w-6/12 sm:w-5/12">
+							<p class="font-rajdhani text-text-secondary">Email</p>
 						</div>
 						<div>
-							<p class="font-rajdhani text-text-primary">
-								{{
-									createSettingString(
-										getAccountSettings[settingsGroup][
-											setting
-										]
-									)
-								}}
-							</p>
+							<p class="font-rajdhani text-text-primary">{{ user.email }}</p>
+						</div>
+					</div>
+				</div>
+				<hr class="border-border-default" />
+
+				<!-- Display -->
+				<div class="mt-3">
+					<div class="flex items-center justify-between mb-3">
+						<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Display</h3>
+					</div>
+					<div class="flex items-center justify-between mb-4 pl-4">
+						<div>
+							<p class="font-rajdhani text-text-primary mb-0">Cyberpunk Mode</p>
+							<p class="font-rajdhani text-text-secondary text-sm mb-0">Neon glow, scan lines &amp; glitch effects</p>
+						</div>
+						<button
+							@click="toggleCyberpunkMode()"
+							:class="[
+								'relative w-12 h-6 rounded-full transition-colors duration-200',
+								isCyberpunkOn ? 'bg-accent' : 'bg-surface-hover'
+							]"
+						>
+							<span
+								:class="[
+									'absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200',
+									isCyberpunkOn ? 'translate-x-6' : ''
+								]"
+							></span>
+						</button>
+					</div>
+				</div>
+				<hr class="border-border-default lg:hidden" />
+			</div>
+
+			<!-- Right column: Glitch Scheduling -->
+			<div>
+				<div class="mt-3">
+					<div class="flex items-center justify-between mb-3">
+						<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Glitch Scheduling</h3>
+						<a class="text-text-secondary hover:text-accent cursor-pointer transition-colors" @click="editSettings()">
+							<Pencil :size="18" />
+						</a>
+					</div>
+					<div
+						v-for="(settingsGroup, index) in Object.keys(
+							getAccountSettings
+						)"
+						:key="`${settingsGroup}-settingDisplay-${index}`"
+					>
+						<h5 class="font-rajdhani font-semibold text-text-primary" v-if="settingsGroup !== 'display'">{{ settingsGroup }}</h5>
+						<div class="mb-4" v-if="settingsGroup !== 'display'">
+							<div
+								v-for="setting in Object.keys(
+									getAccountSettings[settingsGroup]
+								)"
+								:key="`${setting}-${settingsGroup}-settingDisplay`"
+								class="flex"
+							>
+								<div class="w-6/12 sm:w-5/12 pl-4">
+									<p class="font-rajdhani text-text-secondary">{{ setting }}</p>
+								</div>
+								<div>
+									<p class="font-rajdhani text-text-primary">
+										{{
+											createSettingString(
+												getAccountSettings[settingsGroup][
+													setting
+												]
+											)
+										}}
+									</p>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		</div><!-- /2-column grid -->
+
 		<hr class="border-border-default" />
 
-		<!-- Danger Zone -->
+		<!-- Danger Zone — full width -->
 		<h3 class="mb-4 mt-3 font-rajdhani font-bold text-xl text-app-danger">Danger Zone</h3>
 		<div class="flex justify-between items-center">
 			<h5 class="text-app-danger font-rajdhani font-semibold">
@@ -118,7 +129,9 @@
 		</p>
 
 		<settings-modal ref="settingsModalRef" :accountSettings="getAccountSettings" />
+		</div><!-- /scroll-panel -->
 	</content-card>
+	</div>
 </template>
 
 <script>

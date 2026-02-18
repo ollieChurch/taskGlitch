@@ -1,5 +1,5 @@
 <template>
-	<content-card>
+	<content-card :narrow="true">
 		<div v-if="userForgotPassword">
 			<div class="items-center mb-4">
 				<h1 class="mb-1 text-center pt-3 font-rajdhani font-bold text-2xl text-text-heading">

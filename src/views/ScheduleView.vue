@@ -20,37 +20,41 @@
 
 				<!-- Normal schedule view -->
 				<template v-else>
-					<div class="flex flex-wrap mb-3 gap-3 shrink-0">
-						<button
-							@click="openScheduleSetUp()"
-							class="btn-themed flex-1 bg-app-success text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
-						>
-							New Schedule
-						</button>
-						<button
-							@click="deleteSchedule()"
-							class="btn-themed flex-1 bg-app-danger text-white py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
-						>
-							Delete Schedule
-						</button>
-					</div>
-					<div class="flex flex-wrap gap-3 shrink-0">
-						<button
-							@click="reschedule()"
-							class="btn-themed flex-1 bg-app-warning text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
-						>
-							Reschedule
-						</button>
-						<button
-							class="btn-themed flex-1 bg-surface-hover text-text-secondary py-2 px-4 font-bold font-rajdhani opacity-50 cursor-not-allowed transition-all"
-							disabled
-						>
-							Export
-						</button>
+					<div class="max-w-3xl">
+						<div class="flex flex-wrap mb-3 gap-3 shrink-0">
+							<button
+								@click="openScheduleSetUp()"
+								class="btn-themed flex-1 bg-app-success text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
+							>
+								New Schedule
+							</button>
+							<button
+								@click="deleteSchedule()"
+								class="btn-themed flex-1 bg-app-danger text-white py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
+							>
+								Delete Schedule
+							</button>
+						</div>
+						<div class="flex flex-wrap gap-3 shrink-0">
+							<button
+								@click="reschedule()"
+								class="btn-themed flex-1 bg-app-warning text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
+							>
+								Reschedule
+							</button>
+							<button
+								class="btn-themed flex-1 bg-surface-hover text-text-secondary py-2 px-4 font-bold font-rajdhani opacity-50 cursor-not-allowed transition-all"
+								disabled
+							>
+								Export
+							</button>
+						</div>
 					</div>
 					<hr class="my-4 border-border-default shrink-0" />
 					<div class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
-						<task-schedule />
+						<div class="max-w-4xl">
+							<task-schedule />
+						</div>
 					</div>
 				</template>
 			</div>
