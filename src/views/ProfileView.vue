@@ -16,7 +16,7 @@
 		<!-- 2-column grid on desktop: Account+Display | Scheduling -->
 		<div class="lg:grid lg:grid-cols-2 lg:gap-x-10">
 			<!-- Left column: Account + Display -->
-			<div>
+			<div class="max-w-md">
 				<!-- Account -->
 				<div v-if="user?.email" class="mt-3">
 					<div class="flex items-center justify-between mb-3">
@@ -63,7 +63,7 @@
 			</div>
 
 			<!-- Right column: Glitch Scheduling -->
-			<div>
+			<div class="max-w-md">
 				<div class="mt-3">
 					<div class="flex items-center justify-between mb-3">
 						<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Glitch Scheduling</h3>
@@ -110,17 +110,19 @@
 		<hr class="border-border-default" />
 
 		<!-- Danger Zone — full width -->
-		<h3 class="mb-4 mt-3 font-rajdhani font-bold text-xl text-app-danger">Danger Zone</h3>
-		<div class="flex justify-between items-center">
-			<h5 class="text-app-danger font-rajdhani font-semibold">
-				Restore Default Settings
-			</h5>
-			<button
-				class="btn-themed bg-app-danger text-white px-4 py-2 font-bold font-rajdhani hover:brightness-110 transition-all"
-					@click="restoreDefaultSettings()"
-			>
-				Restore
-			</button>
+		<div class="max-w-lg">
+			<h3 class="mb-4 mt-3 font-rajdhani font-bold text-xl text-app-danger">Danger Zone</h3>
+			<div class="flex justify-between items-center">
+				<h5 class="text-app-danger font-rajdhani font-semibold">
+					Restore Default Settings
+				</h5>
+				<button
+					class="btn-themed bg-app-danger text-white px-4 py-2 font-bold font-rajdhani hover:brightness-110 transition-all"
+						@click="restoreDefaultSettings()"
+				>
+					Restore
+				</button>
+			</div>
 		</div>
 
 		<hr class="border-border-default mt-4" />

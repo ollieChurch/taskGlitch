@@ -20,7 +20,7 @@
 
 				<!-- Normal schedule view -->
 				<template v-else>
-					<div class="max-w-3xl">
+					<div class="max-w-3xl mx-auto">
 						<div class="flex flex-wrap mb-3 gap-3 shrink-0">
 							<button
 								@click="openScheduleSetUp()"
@@ -52,7 +52,7 @@
 					</div>
 					<hr class="my-4 border-border-default shrink-0" />
 					<div class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
-						<div class="max-w-4xl">
+						<div class="max-w-4xl mx-auto">
 							<task-schedule />
 						</div>
 					</div>

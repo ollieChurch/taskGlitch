@@ -6,7 +6,7 @@
 			:style="{ backgroundColor: categoryColor }"
 		></div>
 		<div class="flex items-center">
-			<div class="w-10/12 pr-4">
+			<div class="flex-1 min-w-0 pr-4">
 				<h5
 					:class="`text-left mb-1 font-rajdhani font-semibold text-text-heading ${
 						task.completedDateTime
@@ -74,7 +74,7 @@
 					</p>
 				</div>
 			</div>
-			<div class="w-2/12">
+			<div class="shrink-0">
 				<button
 					class="complete-btn btn-themed bg-surface-hover border border-border-default hover:bg-accent hover:text-text-inverse hover:border-accent text-text-secondary transition-all"
 					@click="handleMainAction(task)"
