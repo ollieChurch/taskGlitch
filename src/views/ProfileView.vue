@@ -139,12 +139,6 @@
 			>
 				What's new
 			</button>
-			<a
-				href="mailto:feedback@taskglitch.app"
-				class="text-xs text-text-secondary font-rajdhani hover:text-accent transition-colors"
-			>
-				Feedback
-			</a>
 		</div>
 		<p class="text-center text-xs text-text-secondary font-rajdhani mb-0 opacity-60">
 			v{{ store.appVersion }}
