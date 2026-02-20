@@ -1,10 +1,12 @@
 {
 	"name": "Task Glitch",
 	"short_name": "Task Glitch",
+	"description": "Intelligent task scheduling that auto-prioritises your backlog and generates optimised work sessions.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#0a0e17",
 	"theme_color": "#0a0e17",
+	"categories": ["productivity", "utilities"],
 	"icons": [
 		{
 			"src": "/icon-192.png",

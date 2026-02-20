@@ -26,9 +26,13 @@
 				<div v-if="task.completedDateTime" class="flex flex-wrap task-details opacity-60 text-sm text-text-secondary">
 					<a
 						class="sm:w-auto text-left cursor-pointer mr-3 hover:text-accent transition-colors"
+						:aria-label="`Edit task: ${task.name}`"
+						role="button"
+						tabindex="0"
 						@click="editTask(task)"
+						@keydown.enter="editTask(task)"
 					>
-						<Pencil :size="14" class="inline" />
+						<Pencil :size="14" class="inline" aria-hidden="true" />
 					</a>
 					<p class="sm:w-auto text-left mb-0">
 						<CheckCircle2 :size="14" class="inline" />
@@ -47,9 +51,13 @@
 				<div v-else class="flex flex-wrap task-details text-sm text-text-secondary">
 					<a
 						class="sm:w-auto text-left mb-0 cursor-pointer mr-3 hover:text-accent transition-colors"
+						:aria-label="`Edit task: ${task.name}`"
+						role="button"
+						tabindex="0"
 						@click="editTask(task)"
+						@keydown.enter="editTask(task)"
 					>
-						<Pencil :size="14" class="inline" />
+						<Pencil :size="14" class="inline" aria-hidden="true" />
 					</a>
 					<p class="sm:w-auto text-left mb-0 mr-3">
 						<Timer :size="14" class="inline" />
@@ -77,10 +85,11 @@
 			<div class="shrink-0">
 				<button
 					class="complete-btn btn-themed bg-surface-hover border border-border-default hover:bg-accent hover:text-text-inverse hover:border-accent text-text-secondary transition-all"
+					:aria-label="task.completedDateTime ? `Move '${task.name}' back to backlog` : `Mark '${task.name}' as complete`"
 					@click="handleMainAction(task)"
 				>
-					<Undo2 v-if="task.completedDateTime" :size="18" />
-					<CheckCircle2 v-else :size="18" />
+					<Undo2 v-if="task.completedDateTime" :size="18" aria-hidden="true" />
+					<CheckCircle2 v-else :size="18" aria-hidden="true" />
 				</button>
 			</div>
 		</div>

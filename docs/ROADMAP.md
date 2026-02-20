@@ -1,6 +1,6 @@
 # TaskGlitch Roadmap
 
-> Current version: **0.14.1**
+> Current version: **0.15.0**
 > Target: **1.0** release, then continued development toward an AI-ready platform
 
 ## Overview
@@ -38,11 +38,11 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
 | 0.14 | Design overhaul | [x] | [phase-2/v0.14-design-overhaul.md](requirements/phase-2/v0.14-design-overhaul.md) |
-| 0.15 | Onboarding / feature tutorial | [ ] | [phase-2/v0.14-onboarding.md](requirements/phase-2/v0.14-onboarding.md) |
-| 0.15 | Write website copy | [ ] | [phase-2/v0.14-website-copy.md](requirements/phase-2/v0.14-website-copy.md) |
-| 0.15 | Improve accessibility | [ ] | [phase-2/v0.15-accessibility.md](requirements/phase-2/v0.15-accessibility.md) |
-| 0.15 | Improve Lighthouse score | [ ] | [phase-2/v0.15-lighthouse.md](requirements/phase-2/v0.15-lighthouse.md) |
-| 0.15 | Footer polish | [ ] | [phase-2/v0.15-footer.md](requirements/phase-2/v0.15-footer.md) |
+| 0.15 | Onboarding / feature tutorial | [x] | [phase-2/v0.15-onboarding.md](requirements/phase-2/v0.15-onboarding.md) |
+| 0.15 | Write website copy | [x] | [phase-2/v0.15-website-copy.md](requirements/phase-2/v0.15-website-copy.md) |
+| 0.15 | Improve accessibility | [x] | [phase-2/v0.15-accessibility.md](requirements/phase-2/v0.15-accessibility.md) |
+| 0.15 | Improve Lighthouse score | [x] | [phase-2/v0.15-lighthouse.md](requirements/phase-2/v0.15-lighthouse.md) |
+| 0.15 | Footer polish | [x] | [phase-2/v0.15-footer.md](requirements/phase-2/v0.15-footer.md) |
 
 ## Phase 3: Core Feature Gaps (v0.16 - v0.18)
 

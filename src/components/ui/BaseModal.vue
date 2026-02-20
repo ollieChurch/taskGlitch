@@ -1,7 +1,8 @@
 <template>
 	<dialog
 		ref="dialogRef"
-		class="backdrop:bg-black/70 shadow-xl p-0 w-full max-w-lg m-auto border border-accent-dim bg-transparent rounded-xl overflow-hidden"
+		:class="['backdrop:bg-black/70 shadow-xl p-0 w-full m-auto border border-accent-dim bg-transparent rounded-xl max-h-[85vh] overflow-y-auto scroll-panel', sizeClass]"
+		aria-modal="true"
 		@close="onDialogClose"
 	>
 		<div class="depth-panel p-6">
@@ -13,9 +14,10 @@
 				<button
 					v-if="!hideHeaderClose"
 					@click="close"
+					aria-label="Close modal"
 					class="text-text-secondary hover:text-accent text-2xl leading-none ml-4 transition-colors"
 				>
-					<X :size="20" />
+					<X :size="20" aria-hidden="true" />
 				</button>
 			</div>
 

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
 	state: () => ({
-		appVersion: '0.14.2',
+		appVersion: '0.15.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -106,6 +106,8 @@ export const useAppStore = defineStore('app', {
 		},
 		pendingScheduleUpdate: null,
 		addTaskTrigger: 0,
+		patchNotesTrigger: 0,
+		onboardingTrigger: 0,
 		debug: false
 	}),
 
@@ -270,6 +272,14 @@ export const useAppStore = defineStore('app', {
 
 		triggerAddTask() {
 			this.addTaskTrigger++
+		},
+
+		triggerPatchNotes() {
+			this.patchNotesTrigger++
+		},
+
+		triggerOnboarding() {
+			this.onboardingTrigger++
 		}
 	}
 })

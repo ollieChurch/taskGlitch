@@ -1,15 +1,38 @@
 <template>
-	<BaseModal ref="modalRef" title="" :hideHeaderClose="true" :showDefaultFooter="false">
-		<h5 class="mb-4 font-rajdhani font-semibold text-lg text-text-heading">Task Glitch has been upgraded.</h5>
-		<ul class="divide-y divide-border-default" v-if="changes.length > 0">
+	<BaseModal ref="modalRef" title="" :hideHeaderClose="true" :showDefaultFooter="false" size="lg">
+		<h5 class="mb-4 font-rajdhani font-semibold text-lg text-text-heading">
+			{{ showChangelog ? "What's new in Task Glitch" : 'Task Glitch has been upgraded.' }}
+		</h5>
+
+		<!-- Upgrade mode: flat list of changes since last login -->
+		<ul class="divide-y divide-border-default" v-if="!showChangelog && changes.length > 0">
 			<li
 				v-for="(change, index) in changes"
 				:key="`patchNotes-change-${index}`"
-				class="py-2 text-text-primary"
+				class="py-2 text-text-primary font-rajdhani"
 			>
 				{{ change }}
 			</li>
 		</ul>
+
+		<!-- Changelog mode: versioned sections -->
+		<div v-if="showChangelog" class="space-y-4 max-h-96 overflow-y-auto scroll-panel pr-1">
+			<div
+				v-for="version in allNotes"
+				:key="`version-${version.version}`"
+			>
+				<p class="font-wallpoet text-accent text-sm mb-2">v{{ version.version }}</p>
+				<ul class="divide-y divide-border-default">
+					<li
+						v-for="(change, index) in version.changes"
+						:key="`changelog-${version.version}-${index}`"
+						class="py-1.5 text-sm text-text-primary font-rajdhani"
+					>
+						{{ change }}
+					</li>
+				</ul>
+			</div>
+		</div>
 
 		<template #footer>
 			<button
@@ -32,29 +55,51 @@ export default {
 
 	data() {
 		return {
-			changes: []
+			changes: [],
+			allNotes: [...patchNotes],
+			forceChangelog: false
+		}
+	},
+
+	watch: {
+		lastVersion(newVal) {
+			if (newVal) {
+				this.changes = []
+				this.getChanges()
+			}
+		}
+	},
+
+	computed: {
+		showChangelog() {
+			return this.forceChangelog || !this.lastVersion
 		}
 	},
 
 	created() {
-		this.getChanges()
+		if (this.lastVersion) {
+			this.getChanges()
+		}
 	},
 
 	methods: {
-		show() {
+		show(mode) {
+			if (mode === 'changelog') {
+				this.forceChangelog = true
+			} else {
+				this.forceChangelog = false
+			}
 			this.$refs.modalRef.show()
 		},
 		getChanges() {
-			const indexOfUserVersion = patchNotes.findIndex(
+			const notesCopy = [...patchNotes]
+			const indexOfUserVersion = notesCopy.findIndex(
 				x => x.version == this.lastVersion
 			)
 
 			if (indexOfUserVersion == -1) return
 
-			const changesSinceLastLogin = patchNotes.splice(
-				0,
-				indexOfUserVersion
-			)
+			const changesSinceLastLogin = notesCopy.slice(0, indexOfUserVersion)
 
 			changesSinceLastLogin.forEach(version => {
 				version.changes.forEach(change => this.changes.push(change))

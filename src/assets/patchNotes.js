@@ -1,5 +1,17 @@
 export const patchNotes = [
 	{
+		version: '0.15.0',
+		changes: [
+			'New onboarding tour for first-time users — get up to speed in under a minute',
+			'Footer now links to the onboarding guide, what\'s new, and feedback',
+			'Landing page redesign for logged-out visitors — see how Task Glitch works before signing up',
+			'Accessibility improvements: skip-to-content link, ARIA labels on all icon buttons, better keyboard navigation',
+			'Added Open Graph and Twitter Card meta tags for better social sharing',
+			'Improved SEO with descriptive page title and meta description',
+			'PWA manifest updated with app description and categories'
+		]
+	},
+	{
 		version: '0.14.1',
 		changes: [
 			'New TG emblem and favicon replacing the old mascot',

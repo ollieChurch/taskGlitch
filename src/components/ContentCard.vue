@@ -20,7 +20,7 @@ export default {
 <style scoped>
 .content-card {
 	max-width: 575px;
-	min-height: 100vh;
+	min-height: calc(100vh - 7rem);
 	position: relative;
 	border: 1px solid var(--color-border-visible);
 }

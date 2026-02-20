@@ -126,7 +126,21 @@
 		</div>
 
 		<hr class="border-border-default mt-4" />
-		<p class="text-center text-xs text-text-secondary font-rajdhani mt-4 mb-0 uppercase tracking-widest">
+		<div class="flex flex-wrap items-center justify-center gap-4 mt-4 mb-2">
+			<button
+				class="text-xs text-text-secondary font-rajdhani hover:text-accent transition-colors"
+				@click="store.triggerOnboarding()"
+			>
+				How it works
+			</button>
+			<button
+				class="text-xs text-text-secondary font-rajdhani hover:text-accent transition-colors"
+				@click="store.triggerPatchNotes()"
+			>
+				What's new
+			</button>
+		</div>
+		<p class="text-center text-xs text-text-secondary font-rajdhani mb-0 opacity-60">
 			v{{ store.appVersion }}
 		</p>
 

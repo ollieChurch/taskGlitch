@@ -35,7 +35,15 @@ const routes = [
 
 const router = createRouter({
     history: createWebHistory(),
-    routes: routes
+    routes: routes,
+    scrollBehavior() {
+        return { top: 0 }
+    }
+})
+
+router.afterEach(() => {
+    const main = document.getElementById('main-content')
+    if (main) main.scrollTop = 0
 })
 
 export default router

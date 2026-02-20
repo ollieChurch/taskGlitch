@@ -16,7 +16,7 @@ TaskGlitch is a progressive web app for intelligent task scheduling. Users add t
 
 ## Current Version
 
-**0.10.0** — Vue 3 migration complete with modern UI.
+**0.15.0** — UX & Onboarding complete. Includes onboarding modal, landing page redesign, footer polish, accessibility improvements, and SEO/Open Graph meta tags.
 
 ## Project Structure
 
@@ -43,7 +43,8 @@ src/
 │   ├── HeaderNav.vue           # Navigation
 │   ├── FilterWidget.vue        # Task filtering
 │   ├── GlitchExplained.vue     # Onboarding explainer
-│   ├── PatchNotesModal.vue     # Version updates
+│   ├── OnboardingModal.vue     # Welcome modal for new users
+│   ├── PatchNotesModal.vue     # Version updates / changelog
 │   ├── NotificationBanner.vue  # Alert banner
 │   ├── ContentCard.vue         # Page layout wrapper
 │   ├── PageFooter.vue          # Footer

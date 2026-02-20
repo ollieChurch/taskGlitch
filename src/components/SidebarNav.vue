@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<!-- Top bar: logo only -->
-		<div class="top-bar sticky top-0 z-40 flex items-center justify-center px-4 py-3 bg-surface-raised border-b border-border-visible">
+		<div class="top-bar fixed top-0 left-0 right-0 z-40 flex items-center justify-center px-4 py-3 bg-surface-raised border-b border-border-visible md:static">
 			<a href="/" class="font-wallpoet italic text-lg no-underline text-accent">
 				Task Glitch
 			</a>
