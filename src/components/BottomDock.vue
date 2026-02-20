@@ -1,5 +1,5 @@
 <template>
-	<nav v-if="user" class="bottom-dock fixed bottom-0 left-0 right-0 z-40 border-t border-border-visible md:static md:shrink-0">
+	<nav v-if="user" aria-label="Main navigation" class="bottom-dock fixed bottom-0 left-0 right-0 z-40 border-t border-border-visible md:static md:shrink-0">
 		<div class="dock-inner flex items-end justify-around px-2">
 			<!-- Dashboard -->
 			<router-link

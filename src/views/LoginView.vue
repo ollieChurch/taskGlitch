@@ -1,178 +1,212 @@
 <template>
-	<content-card :narrow="true">
-		<div v-if="userForgotPassword">
-			<div class="items-center mb-4">
-				<h1 class="mb-1 text-center pt-3 font-rajdhani font-bold text-2xl text-text-heading">
-					Forgotten your password?
-				</h1>
-				<p class="mb-0 text-center sm:text-left font-rajdhani text-text-primary">
-					Let us know your email and if your are already registered
-					with Task Glitch we will drop you a message.
-				</p>
+	<!-- Scrollable landing page for logged-out visitors -->
+	<div class="min-h-full overflow-y-auto">
+
+		<!-- Hero section -->
+		<section class="py-10 px-4 text-center border-b border-border-visible">
+			<div class="flex justify-center mb-4">
+				<glitch-emblem :size="72" />
 			</div>
-			<form @submit.prevent="() => forgotPassword()">
-				<div class="flex flex-wrap items-center text-start mt-4">
-					<label for="forgotten-password-email" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
-						Email
-					</label>
-					<div class="w-full sm:w-9/12">
+			<h1 class="font-wallpoet text-3xl sm:text-4xl text-accent mb-3">
+				Task Glitch
+			</h1>
+			<p class="font-rajdhani text-xl text-text-primary max-w-md mx-auto mb-3">
+				Stop juggling. Start shipping.
+			</p>
+			<p class="font-rajdhani text-text-secondary max-w-sm mx-auto mb-0">
+				Intelligent task scheduling that scores your backlog and builds you
+				an optimised work session — automatically.
+			</p>
+		</section>
+
+		<!-- How it works -->
+		<section class="py-8 px-4 border-b border-border-visible">
+			<h2 class="font-rajdhani font-bold text-sm text-text-secondary uppercase tracking-widest text-center mb-6">
+				How it works
+			</h2>
+			<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto">
+				<div class="depth-panel p-4 text-left">
+					<p class="font-wallpoet text-accent text-sm mb-1">01</p>
+					<h3 class="font-rajdhani font-bold text-text-heading mb-1">Add your tasks</h3>
+					<p class="font-rajdhani text-sm text-text-secondary mb-0">
+						Drop tasks into your backlog with a priority, size estimate, and optional deadline.
+					</p>
+				</div>
+				<div class="depth-panel p-4 text-left">
+					<p class="font-wallpoet text-accent text-sm mb-1">02</p>
+					<h3 class="font-rajdhani font-bold text-text-heading mb-1">Auto-prioritise</h3>
+					<p class="font-rajdhani text-sm text-text-secondary mb-0">
+						The scoring algorithm ranks everything by urgency, age, and deadline proximity.
+					</p>
+				</div>
+				<div class="depth-panel p-4 text-left">
+					<p class="font-wallpoet text-accent text-sm mb-1">03</p>
+					<h3 class="font-rajdhani font-bold text-text-heading mb-1">Glitch It!</h3>
+					<p class="font-rajdhani text-sm text-text-secondary mb-0">
+						Generate a focused work session with your highest-priority tasks and built-in breaks.
+					</p>
+				</div>
+				<div class="depth-panel p-4 text-left">
+					<p class="font-wallpoet text-accent text-sm mb-1">04</p>
+					<h3 class="font-rajdhani font-bold text-text-heading mb-1">Track progress</h3>
+					<p class="font-rajdhani text-sm text-text-secondary mb-0">
+						Complete tasks, watch your dashboard stats grow, and see how accurate your estimates are.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Login / Register -->
+		<section class="py-8 px-4">
+			<div v-if="userForgotPassword" class="max-w-sm mx-auto depth-panel p-6">
+				<h2 class="mb-1 text-center font-rajdhani font-bold text-2xl text-text-heading">
+					Reset your password
+				</h2>
+				<p class="mb-4 text-center font-rajdhani text-text-secondary text-sm">
+					Enter your email and we'll send you a reset link if your account exists.
+				</p>
+				<form @submit.prevent="() => forgotPassword()">
+					<div class="mb-4">
+						<label for="forgotten-password-email" class="block font-rajdhani font-semibold text-text-secondary mb-1">
+							Email
+						</label>
 						<input
 							id="forgotten-password-email"
 							v-model="email"
-							placeholder="email"
+							placeholder="you@example.com"
 							type="email"
+							autocomplete="email"
 							class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 						/>
 					</div>
-				</div>
-				<div class="flex flex-col mx-auto gap-3 mt-5 w-3/4">
-					<button
-						type="submit"
-						class="btn-themed bg-app-warning text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
-					>
-						Send Request
-					</button>
-					<button
-						type="button"
-						class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
-						@click="setUserForgotPassword()"
-					>
-						Back
-					</button>
-				</div>
-			</form>
-		</div>
-		<div v-else>
-			<div class="items-center mb-4">
-				<div class="flex flex-wrap items-center">
-					<div class="w-full order-1 sm:order-2 sm:w-9/12">
-						<h1
-							class="mb-1 text-center sm:text-left pt-3 font-rajdhani font-bold text-2xl text-text-heading"
+					<div class="flex flex-col gap-3">
+						<button
+							type="submit"
+							class="btn-themed bg-app-warning text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
 						>
-							Welcome to Task Glitch
-						</h1>
-						<p class="mb-0 text-center sm:text-left font-rajdhani text-text-primary">
-							Intelligent task scheduling that prioritises your backlog
-							and generates optimised work sessions. Add tasks, set
-							deadlines, and let the algorithm do the rest.
-						</p>
+							Send Reset Link
+						</button>
+						<button
+							type="button"
+							class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+							@click="setUserForgotPassword()"
+						>
+							Back to Login
+						</button>
 					</div>
-					<div
-						class="w-full px-5 py-3 sm:py-0 sm:px-0 order-first sm:order-3 sm:w-3/12 flex justify-center"
-					>
-						<glitch-emblem :size="100" />
-					</div>
-				</div>
+				</form>
 			</div>
 
-			<BaseTabs pills fill>
-				<BaseTab title="Login">
-					<form @submit.prevent="() => login()">
-						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="login-email" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
-								Email
-							</label>
-							<div class="w-full sm:w-9/12">
+			<div v-else class="max-w-sm mx-auto depth-panel p-6">
+				<h2 class="mb-4 text-center font-rajdhani font-bold text-xl text-text-heading">
+					Get started free
+				</h2>
+
+				<BaseTabs pills fill>
+					<BaseTab title="Login">
+						<form @submit.prevent="() => login()">
+							<div class="mb-3">
+								<label for="login-email" class="block font-rajdhani font-semibold text-text-secondary mb-1">
+									Email
+								</label>
 								<input
 									id="login-email"
 									v-model="email"
-									placeholder="email"
+									placeholder="you@example.com"
 									type="email"
+									autocomplete="email"
 									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
-						</div>
-						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="login-password" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
-								Password
-							</label>
-							<div class="w-full sm:w-9/12">
+							<div class="mb-4">
+								<label for="login-password" class="block font-rajdhani font-semibold text-text-secondary mb-1">
+									Password
+								</label>
 								<input
 									id="login-password"
 									v-model="password"
 									placeholder="password"
 									type="password"
+									autocomplete="current-password"
 									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
-						</div>
-						<div class="flex flex-col mx-auto gap-3 mt-5 w-3/4">
-							<button
-								type="submit"
-								class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
-									>
-								Login
-							</button>
-							<button
-								type="button"
-								class="btn-themed bg-app-warning text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
-										@click="setUserForgotPassword()"
-							>
-								Forgot Your Password?
-							</button>
-						</div>
-					</form>
-				</BaseTab>
-				<BaseTab title="Sign Up">
-					<form @submit.prevent="() => register()">
-						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="register-email" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
-								Email
-							</label>
-							<div class="w-full sm:w-9/12">
+							<div class="flex flex-col gap-3">
+								<button
+									type="submit"
+									class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+								>
+									Login
+								</button>
+								<button
+									type="button"
+									class="btn-themed bg-app-warning text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+									@click="setUserForgotPassword()"
+								>
+									Forgot Password?
+								</button>
+							</div>
+						</form>
+					</BaseTab>
+					<BaseTab title="Sign Up">
+						<form @submit.prevent="() => register()">
+							<div class="mb-3">
+								<label for="register-email" class="block font-rajdhani font-semibold text-text-secondary mb-1">
+									Email
+								</label>
 								<input
 									id="register-email"
 									v-model="email"
-									placeholder="email"
+									placeholder="you@example.com"
 									type="email"
+									autocomplete="email"
 									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
-						</div>
-						<div class="flex flex-wrap items-center text-start mt-4">
-							<label for="register-password" class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary">
-								Password
-							</label>
-							<div class="w-full sm:w-9/12">
+							<div class="mb-3">
+								<label for="register-password" class="block font-rajdhani font-semibold text-text-secondary mb-1">
+									Password
+								</label>
 								<input
 									id="register-password"
 									v-model="password"
 									placeholder="password"
 									type="password"
+									autocomplete="new-password"
 									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
-						</div>
-						<div class="flex flex-wrap items-center text-start mt-4">
-							<label
-								for="register-confirmPassword"
-								class="w-full sm:w-3/12 font-rajdhani font-semibold text-text-secondary"
-							>
-								Confirm Password
-							</label>
-							<div class="w-full sm:w-9/12">
+							<div class="mb-4">
+								<label
+									for="register-confirmPassword"
+									class="block font-rajdhani font-semibold text-text-secondary mb-1"
+								>
+									Confirm Password
+								</label>
 								<input
 									id="register-confirmPassword"
 									v-model="confirmPassword"
 									placeholder="confirm password"
 									type="password"
+									autocomplete="new-password"
 									class="w-full border border-border-default bg-surface-base text-text-primary rounded px-3 py-2 text-lg font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
 								/>
 							</div>
-						</div>
-						<div class="flex flex-col mx-auto gap-3 mt-5 w-3/4">
-							<button
-								type="submit"
-								class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
-									>
-								Register
-							</button>
-						</div>
-					</form>
-				</BaseTab>
-			</BaseTabs>
-		</div>
-	</content-card>
+							<div class="flex flex-col gap-3">
+								<button
+									type="submit"
+									class="btn-themed bg-accent text-text-inverse py-2 px-4 text-lg font-rajdhani font-semibold hover:brightness-110 transition-all"
+								>
+									Create Account
+								</button>
+							</div>
+						</form>
+					</BaseTab>
+				</BaseTabs>
+			</div>
+		</section>
+
+	</div>
 </template>
 
 <script>
@@ -184,7 +218,6 @@ import {
 } from 'firebase/auth'
 import { useAppStore } from '@/stores/app'
 import { logger } from '@/utils/logger'
-import ContentCard from '@/components/ContentCard.vue'
 import BaseTabs from '@/components/ui/BaseTabs.vue'
 import BaseTab from '@/components/ui/BaseTab.vue'
 import GlitchEmblem from '@/components/GlitchEmblem.vue'
@@ -193,7 +226,6 @@ export default {
 	name: 'LoginView',
 
 	components: {
-		ContentCard,
 		BaseTabs,
 		BaseTab,
 		GlitchEmblem

@@ -1,16 +1,7 @@
 <template>
 	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 		<content-card>
-			<div class="flex items-center justify-between mb-3 shrink-0">
-				<h1 class="text-left mb-0 font-rajdhani font-bold text-sm text-text-heading uppercase tracking-widest">Tasks</h1>
-				<button
-					class="btn-themed bg-accent text-text-inverse px-4 py-2 font-rajdhani font-semibold hover:brightness-110 transition-all"
-					@click="addTask()"
-				>
-					Add Task
-				</button>
-			</div>
-			<BaseTabs pills fill class="pt-2">
+			<BaseTabs pills fill sticky>
 				<BaseTab title="Backlog">
 					<div class="pt-2 md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
 						<!-- Loading state -->

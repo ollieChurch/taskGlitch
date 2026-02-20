@@ -1,5 +1,6 @@
 <template>
 	<div id="app" class="flex flex-col min-h-screen md:h-screen md:overflow-hidden">
+		<a href="#main-content" class="skip-link">Skip to main content</a>
 		<sidebar-nav />
 		<notification-banner
 			v-if="store.notification.visible"
@@ -8,15 +9,12 @@
 			:dismissible="true"
 			@dismiss="store.hideNotification()"
 		/>
-		<main class="flex-1 min-h-0 pb-16 md:pb-0 md:overflow-hidden">
-			<router-view v-slot="{ Component }">
-				<transition name="page" mode="out-in">
-					<component :is="Component" />
-				</transition>
-			</router-view>
+		<main id="main-content" class="flex-1 min-h-0 pt-12 pb-16 md:pt-0 md:pb-0 md:overflow-hidden">
+			<router-view />
 		</main>
 		<bottom-dock />
-		<patch-notes-modal ref="patchNotesModalRef" v-if="lastVersion" :lastVersion="lastVersion" />
+		<patch-notes-modal ref="patchNotesModalRef" :lastVersion="lastVersion" />
+		<onboarding-modal ref="onboardingModalRef" />
 		<base-modal
 			ref="categoryPromptModalRef"
 			:hideHeaderClose="true"
@@ -58,7 +56,9 @@ import { useCyberpunkMode } from '@/composables/useCyberpunkMode'
 import { logger } from '@/utils/logger'
 import SidebarNav from './components/SidebarNav.vue'
 import BottomDock from './components/BottomDock.vue'
+
 import PatchNotesModal from './components/PatchNotesModal.vue'
+import OnboardingModal from './components/OnboardingModal.vue'
 import NotificationBanner from './components/NotificationBanner.vue'
 import BaseModal from './components/ui/BaseModal.vue'
 
@@ -67,6 +67,7 @@ export default {
 		SidebarNav,
 		BottomDock,
 		PatchNotesModal,
+		OnboardingModal,
 		NotificationBanner,
 		BaseModal
 	},
@@ -81,7 +82,8 @@ export default {
 	data() {
 		return {
 			lastVersion: null,
-			notificationTimer: null
+			notificationTimer: null,
+			onboardingShown: false
 		}
 	},
 
@@ -106,6 +108,22 @@ export default {
 					}
 				})
 			}
+		},
+
+		'store.patchNotesTrigger'() {
+			this.$nextTick(() => {
+				if (this.$refs.patchNotesModalRef) {
+					this.$refs.patchNotesModalRef.show('changelog')
+				}
+			})
+		},
+
+		'store.onboardingTrigger'() {
+			this.$nextTick(() => {
+				if (this.$refs.onboardingModalRef) {
+					this.$refs.onboardingModalRef.show()
+				}
+			})
 		}
 	},
 
@@ -263,21 +281,4 @@ export default {
 	}
 }
 
-/* Route transition — fade + slight rise on enter, fast leave */
-.page-enter-active {
-	transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.page-leave-active {
-	transition: opacity 0.12s ease;
-}
-
-.page-enter-from {
-	opacity: 0;
-	transform: translateY(8px);
-}
-
-.page-leave-to {
-	opacity: 0;
-}
 </style>
