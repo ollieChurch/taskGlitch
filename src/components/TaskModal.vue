@@ -19,7 +19,19 @@
 				<Trash2 :size="16" />
 			</button>
 		</template>
-		<form ref="taskForm">
+		<div v-if="task.blocked" class="mb-3 px-3 py-2 rounded border border-app-warning bg-app-warning/10 flex items-start gap-2">
+				<Ban :size="14" class="text-app-warning shrink-0 mt-0.5" aria-hidden="true" />
+				<div class="flex-1">
+					<p class="text-xs font-rajdhani font-semibold text-app-warning uppercase tracking-widest mb-1">Blocked</p>
+					<input
+						v-model="task.blockedReason"
+						type="text"
+						placeholder="Reason (optional)"
+						class="w-full bg-transparent border-0 border-b border-app-warning/50 text-text-primary text-sm font-rajdhani focus:outline-none focus:border-app-warning px-0 py-0.5"
+					/>
+				</div>
+			</div>
+			<form ref="taskForm">
 			<div class="mb-3">
 				<label for="task" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Task</label>
 				<input
@@ -132,10 +144,10 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import { logger } from '@/utils/logger'
 import BaseModal from './ui/BaseModal.vue'
-import { Trash2, X } from 'lucide-vue-next'
+import { Trash2, X, Ban } from 'lucide-vue-next'
 
 export default {
-	components: { BaseModal, Trash2, X },
+	components: { BaseModal, Trash2, X, Ban },
 
 	setup() {
 		const store = useAppStore()

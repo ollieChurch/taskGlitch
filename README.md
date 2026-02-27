@@ -1,6 +1,7 @@
 # TaskGlitch
 
 ### Version
+0.17.0 - Blocked tasks: flag, visual treatment, excluded from scheduling, filter support\
 0.16.0 - Filter & search backlog/completed, completion fade animation, undo toast\
 0.15.0 - Onboarding modal, landing page redesign, footer polish, accessibility, SEO/OG meta tags\
 0.14.1 - New emblem/favicon, viewport-locked desktop layout, internal scroll panels, 2-column dashboard\

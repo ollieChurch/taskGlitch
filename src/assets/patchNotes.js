@@ -1,5 +1,15 @@
 export const patchNotes = [
 	{
+		version: '0.17.0',
+		changes: [
+			'Mark any task as blocked with one click — blocked tasks are visually distinct and skip to the bottom of the backlog',
+			'Blocked tasks are never included when generating a schedule',
+			'Add an optional reason when blocking a task, editable via the task edit modal',
+			'Filter the backlog by status — show only active or only blocked tasks',
+			'Blocked task count shown at the top of the backlog when any tasks are blocked'
+		]
+	},
+	{
 		version: '0.16.0',
 		changes: [
 			'Search your backlog instantly — find tasks by name or description',

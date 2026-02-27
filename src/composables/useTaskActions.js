@@ -99,6 +99,7 @@ export function useTaskActions() {
 		const breakLength = store.account.settings?.breaks?.length ?? store.defaultSettings.breaks.length
 		const taskType = store.taskType
 
+		const eligibleTasks = tasks.filter(t => !t.blocked)
 		const schedule = []
 		let totalTaskTime = 0
 		let currentTaskIndex = 0
@@ -106,9 +107,9 @@ export function useTaskActions() {
 
 		while (
 			totalTaskTime < sessionInMins &&
-			currentTaskIndex < tasks.length
+			currentTaskIndex < eligibleTasks.length
 		) {
-			const task = tasks[currentTaskIndex]
+			const task = eligibleTasks[currentTaskIndex]
 			const taskLength = task.sizing
 
 			if (totalTaskTime + taskLength <= sessionInMins) {
@@ -308,6 +309,25 @@ export function useTaskActions() {
 		return true
 	}
 
+	async function toggleBlockTask(task, reason = null) {
+		const db = getDatabase(store.app)
+		const listRef = ref(db, `tasks/${store.user.uid}/${task.id}`)
+
+		const plainTask = JSON.parse(JSON.stringify(task))
+		if (plainTask.blocked) {
+			plainTask.blocked = false
+			plainTask.blockedReason = null
+			plainTask.blockedAt = null
+		} else {
+			plainTask.blocked = true
+			plainTask.blockedReason = reason
+			plainTask.blockedAt = new Date().toJSON()
+		}
+
+		await set(listRef, plainTask)
+		logger.log('toggled block:', plainTask)
+	}
+
 	async function removeTaskFromSchedule(taskId) {
 		const schedule = store.schedule
 		if (!schedule?.tasks) return false
@@ -337,6 +357,7 @@ export function useTaskActions() {
 		findTaskInSchedule,
 		syncTaskToSchedule,
 		applyScheduleUpdate,
-		removeTaskFromSchedule
+		removeTaskFromSchedule,
+		toggleBlockTask
 	}
 }

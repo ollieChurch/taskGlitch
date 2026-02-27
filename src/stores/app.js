@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
 	state: () => ({
-		appVersion: '0.16.0',
+		appVersion: '0.17.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -137,6 +137,8 @@ export const useAppStore = defineStore('app', {
 			if (state.tasks) {
 				const tasksArray = state.tasks ?? []
 				return Object.values(tasksArray).sort((a, b) => {
+					if (a.blocked && !b.blocked) return 1
+					if (!a.blocked && b.blocked) return -1
 					return a.score - b.score
 				})
 			}

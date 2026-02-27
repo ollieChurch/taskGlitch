@@ -12,6 +12,11 @@
 							:showDateRange="false"
 						/>
 
+						<!-- Blocked count -->
+						<p v-if="blockedCount > 0 && !isLoadingTasks" class="text-xs font-rajdhani font-semibold text-app-warning mb-2">
+							<Ban :size="12" class="inline mr-1" aria-hidden="true" />{{ blockedCount }} task{{ blockedCount === 1 ? '' : 's' }} blocked
+						</p>
+
 						<!-- Loading state -->
 						<skeleton-loader v-if="isLoadingTasks" :lines="4" height="4.5rem" />
 
@@ -37,7 +42,7 @@
 									v-for="task in filteredTasks"
 									:key="`task-${task.id}`"
 									:task="task"
-									@editTask="store.triggerAddTask()"
+									@openDetail="openTaskDetail"
 									@taskCompleted="onTaskCompleted"
 								/>
 							</TransitionGroup>
@@ -79,7 +84,7 @@
 									v-for="task in filteredCompleted"
 									:key="`completed-${task.id}`"
 									:task="task"
-									@editTask="store.triggerAddTask()"
+									@openDetail="openTaskDetail"
 								/>
 							</TransitionGroup>
 						</template>
@@ -87,6 +92,7 @@
 				</BaseTab>
 			</BaseTabs>
 		</content-card>
+		<TaskDetailModal ref="taskDetailRef" />
 		<Toast
 			:visible="toastVisible"
 			:message="toastMessage"
@@ -106,6 +112,8 @@ import BaseTabs from '@/components/ui/BaseTabs.vue'
 import BaseTab from '@/components/ui/BaseTab.vue'
 import FilterWidget from '@/components/FilterWidget.vue'
 import Toast from '@/components/ui/Toast.vue'
+import TaskDetailModal from '@/components/TaskDetailModal.vue'
+import { Ban } from 'lucide-vue-next'
 
 export default {
 	name: 'TaskView',
@@ -113,6 +121,8 @@ export default {
 	components: {
 		ContentCard,
 		TaskCard,
+		TaskDetailModal,
+		Ban,
 		SkeletonLoader,
 		BaseTabs,
 		BaseTab,
@@ -137,6 +147,7 @@ export default {
 				priorities: [],
 				categories: [],
 				sizes: [],
+				blocked: '',
 				deadline: ''
 			},
 			completedFilters: {
@@ -144,6 +155,7 @@ export default {
 				priorities: [],
 				categories: [],
 				sizes: [],
+				blocked: '',
 				deadline: '',
 				completedAfter: '',
 				completedBefore: ''
@@ -193,18 +205,27 @@ export default {
 			return this.countActiveFilters(this.completedFilters)
 		},
 
+		blockedCount() {
+			return this.getPrioritisedTasks.filter(t => t.blocked).length
+		},
+
 		toastMessage() {
 			return this.toastTask ? `"${this.toastTask.name}" completed` : 'Task completed'
 		}
 	},
 
 	methods: {
+		openTaskDetail(task) {
+			this.$refs.taskDetailRef.show(task)
+		},
+
 		countActiveFilters(filters) {
 			let count = 0
 			if (filters.search) count++
 			if (filters.priorities?.length) count++
 			if (filters.categories?.length) count++
 			if (filters.sizes?.length) count++
+			if (filters.blocked) count++
 			if (filters.deadline) count++
 			if (filters.completedAfter) count++
 			if (filters.completedBefore) count++
@@ -235,6 +256,10 @@ export default {
 				if (filters.sizes?.length > 0) {
 					if (!filters.sizes.includes(task.sizing)) return false
 				}
+
+				// Blocked status
+				if (filters.blocked === 'active' && task.blocked) return false
+				if (filters.blocked === 'blocked' && !task.blocked) return false
 
 				// Deadline
 				if (filters.deadline) {
