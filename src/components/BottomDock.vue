@@ -75,15 +75,7 @@ export default {
 
 	methods: {
 		handleAddTask() {
-			// If not on a page with TaskModal, navigate to Tasks first
-			const currentPath = this.$route.path
-			if (currentPath !== '/' && currentPath !== '/dashboard') {
-				this.$router.push('/')
-			}
-			// Trigger the add task modal via store
-			this.$nextTick(() => {
-				this.store.triggerAddTask()
-			})
+			this.store.triggerAddTask()
 		}
 	}
 }

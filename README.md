@@ -1,6 +1,8 @@
 # TaskGlitch
 
 ### Version
+0.16.0 - Filter & search backlog/completed, completion fade animation, undo toast\
+0.15.0 - Onboarding modal, landing page redesign, footer polish, accessibility, SEO/OG meta tags\
 0.14.1 - New emblem/favicon, viewport-locked desktop layout, internal scroll panels, 2-column dashboard\
 0.14.0 - Full dark sci-fi redesign, cyberpunk mode, Lucide icons, new transitions\
 0.13.0 - Dependency audit, friendly size labels, schedule-task sync, category change handling\

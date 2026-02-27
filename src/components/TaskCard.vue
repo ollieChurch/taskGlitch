@@ -104,7 +104,7 @@ import { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Pencil, Timer, AlertCircl
 
 export default {
 	props: ['task'],
-	emits: ['editTask'],
+	emits: ['editTask', 'taskCompleted'],
 	components: { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Pencil, Timer, AlertCircle, Target, Undo2 },
 
 	setup() {
@@ -153,6 +153,7 @@ export default {
 		async handleMainAction(task) {
 			const moveTo = task.completedDateTime ? 'tasks' : 'completed'
 			if (moveTo === 'completed') {
+				this.$emit('taskCompleted', { ...task })
 				await this.removeTaskFromSchedule(task.id)
 			}
 			this.moveTask(task, moveTo)

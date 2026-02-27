@@ -15,6 +15,7 @@
 		<bottom-dock />
 		<patch-notes-modal ref="patchNotesModalRef" :lastVersion="lastVersion" />
 		<onboarding-modal ref="onboardingModalRef" />
+		<task-modal ref="taskModalRef" />
 		<base-modal
 			ref="categoryPromptModalRef"
 			:hideHeaderClose="true"
@@ -59,6 +60,7 @@ import BottomDock from './components/BottomDock.vue'
 
 import PatchNotesModal from './components/PatchNotesModal.vue'
 import OnboardingModal from './components/OnboardingModal.vue'
+import TaskModal from './components/TaskModal.vue'
 import NotificationBanner from './components/NotificationBanner.vue'
 import BaseModal from './components/ui/BaseModal.vue'
 
@@ -68,6 +70,7 @@ export default {
 		BottomDock,
 		PatchNotesModal,
 		OnboardingModal,
+		TaskModal,
 		NotificationBanner,
 		BaseModal
 	},
@@ -107,6 +110,12 @@ export default {
 						this.$refs.categoryPromptModalRef.show()
 					}
 				})
+			}
+		},
+
+		'store.addTaskTrigger'() {
+			if (this.$refs.taskModalRef) {
+				this.$refs.taskModalRef.show()
 			}
 		},
 

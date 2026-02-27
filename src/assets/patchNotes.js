@@ -1,5 +1,16 @@
 export const patchNotes = [
 	{
+		version: '0.16.0',
+		changes: [
+			'Search your backlog instantly — find tasks by name or description',
+			'Filter tasks by priority, category, size, and deadline status',
+			'Filters combine (AND logic) and show an active count badge',
+			'Completed tab gains the same search and filter controls, plus a completion date range filter',
+			'Completing a task now fades it out smoothly instead of disappearing abruptly',
+			'Undo toast appears for 5 seconds after completing a task — click Undo to bring it back'
+		]
+	},
+	{
 		version: '0.15.0',
 		changes: [
 			'New onboarding tour for first-time users — get up to speed in under a minute',
