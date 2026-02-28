@@ -129,4 +129,114 @@ describe('useAppStore', () => {
 			expect(store.completed[2].id).toBe('a') // oldest
 		})
 	})
+
+	describe('getDependencyBlockedIds', () => {
+		it('returns an empty set when there are no tasks', () => {
+			expect(store.getDependencyBlockedIds.size).toBe(0)
+		})
+
+		it('returns an empty set when no tasks have dependsOn', () => {
+			store.setTasks({
+				a: { id: 'a', name: 'A' },
+				b: { id: 'b', name: 'B' }
+			})
+			expect(store.getDependencyBlockedIds.size).toBe(0)
+		})
+
+		it('returns an empty set when dependsOn is empty', () => {
+			store.setTasks({ a: { id: 'a', name: 'A', dependsOn: [] } })
+			expect(store.getDependencyBlockedIds.size).toBe(0)
+		})
+
+		it('includes a task whose dependency is not yet completed', () => {
+			store.setTasks({
+				a: { id: 'a', name: 'A' },
+				b: { id: 'b', name: 'B', dependsOn: ['a'] }
+			})
+			expect(store.getDependencyBlockedIds.has('b')).toBe(true)
+			expect(store.getDependencyBlockedIds.has('a')).toBe(false)
+		})
+
+		it('does not include a task whose dependency is completed', () => {
+			store.setTasks({
+				b: { id: 'b', name: 'B', dependsOn: ['a'] }
+			})
+			store.setCompleted({
+				a: { id: 'a', name: 'A', completedDateTime: new Date().toJSON() }
+			})
+			expect(store.getDependencyBlockedIds.has('b')).toBe(false)
+		})
+
+		it('includes a task with multiple deps when at least one is unmet', () => {
+			store.setTasks({
+				b: { id: 'b', name: 'B' },
+				c: { id: 'c', name: 'C', dependsOn: ['a', 'b'] }
+			})
+			store.setCompleted({
+				a: { id: 'a', name: 'A', completedDateTime: new Date().toJSON() }
+			})
+			// a is complete but b is still active — C is still blocked
+			expect(store.getDependencyBlockedIds.has('c')).toBe(true)
+		})
+
+		it('does not include a task when all its deps are completed', () => {
+			store.setTasks({
+				c: { id: 'c', name: 'C', dependsOn: ['a', 'b'] }
+			})
+			store.setCompleted({
+				a: { id: 'a', name: 'A', completedDateTime: new Date().toJSON() },
+				b: { id: 'b', name: 'B', completedDateTime: new Date().toJSON() }
+			})
+			expect(store.getDependencyBlockedIds.has('c')).toBe(false)
+		})
+	})
+
+	describe('getPrioritisedTasks', () => {
+		it('sorts by score ascending', () => {
+			store.setTasks({
+				a: { id: 'a', score: 50 },
+				b: { id: 'b', score: 10 },
+				c: { id: 'c', score: 30 }
+			})
+			const ids = store.getPrioritisedTasks.map(t => t.id)
+			expect(ids).toEqual(['b', 'c', 'a'])
+		})
+
+		it('pushes manually blocked tasks to the bottom', () => {
+			store.setTasks({
+				a: { id: 'a', score: 100, blocked: false },
+				b: { id: 'b', score: 1, blocked: true },
+				c: { id: 'c', score: 50, blocked: false }
+			})
+			const ids = store.getPrioritisedTasks.map(t => t.id)
+			expect(ids[ids.length - 1]).toBe('b')
+		})
+
+		it('pushes dependency-blocked tasks to the bottom', () => {
+			store.setTasks({
+				a: { id: 'a', score: 100 },
+				b: { id: 'b', score: 1, dependsOn: ['a'] },
+				c: { id: 'c', score: 50 }
+			})
+			const ids = store.getPrioritisedTasks.map(t => t.id)
+			// b has lowest score but is dep-blocked, should sort to bottom
+			expect(ids[ids.length - 1]).toBe('b')
+		})
+
+		it('dep-blocked task rises back up when its dependency is completed', () => {
+			store.setTasks({
+				a: { id: 'a', score: 100 },
+				b: { id: 'b', score: 1, dependsOn: ['a'] }
+			})
+			// Before completion: b is dep-blocked despite lower score
+			expect(store.getPrioritisedTasks.map(t => t.id)).toEqual(['a', 'b'])
+
+			// After completing a: b is no longer dep-blocked and should sort first
+			store.setCompleted({
+				a: { id: 'a', completedDateTime: new Date().toJSON() }
+			})
+			store.setTasks({ b: { id: 'b', score: 1, dependsOn: ['a'] } })
+			expect(store.getPrioritisedTasks.map(t => t.id)).toEqual(['b'])
+		})
+	})
 })

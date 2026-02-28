@@ -97,6 +97,23 @@
 					</div>
 				</div>
 
+				<!-- Status (blocked) -->
+				<div class="mb-3">
+					<p class="text-xs font-rajdhani font-semibold text-text-secondary uppercase tracking-widest mb-1.5 text-left">Status</p>
+					<div class="flex flex-wrap gap-1.5">
+						<button
+							v-for="opt in statusOptions"
+							:key="opt.value"
+							@click="update('blocked', filters.blocked === opt.value ? '' : opt.value)"
+							class="btn-themed px-2.5 py-0.5 text-xs font-rajdhani font-semibold border transition-all"
+							:class="filters.blocked === opt.value
+								? 'bg-accent-dim border-accent-dim text-text-heading'
+								: 'bg-surface-base border-border-visible text-text-secondary hover:border-accent-dim'"
+							:aria-pressed="filters.blocked === opt.value"
+						>{{ opt.label }}</button>
+					</div>
+				</div>
+
 				<!-- Deadline -->
 				<div class="mb-3">
 					<p class="text-xs font-rajdhani font-semibold text-text-secondary uppercase tracking-widest mb-1.5 text-left">Deadline</p>
@@ -187,6 +204,10 @@ export default {
 	data() {
 		return {
 			panelOpen: false,
+			statusOptions: [
+				{ label: 'Active only', value: 'active' },
+				{ label: 'Blocked only', value: 'blocked' }
+			],
 			deadlineOptions: [
 				{ label: 'Has deadline', value: 'has' },
 				{ label: 'No deadline', value: 'none' },
@@ -203,6 +224,7 @@ export default {
 			if (this.filters.priorities?.length) count++
 			if (this.filters.categories?.length) count++
 			if (this.filters.sizes?.length) count++
+			if (this.filters.blocked) count++
 			if (this.filters.deadline) count++
 			if (this.filters.completedAfter) count++
 			if (this.filters.completedBefore) count++
@@ -229,6 +251,7 @@ export default {
 				priorities: [],
 				categories: [],
 				sizes: [],
+				blocked: '',
 				deadline: ''
 			}
 			if (this.showDateRange) {

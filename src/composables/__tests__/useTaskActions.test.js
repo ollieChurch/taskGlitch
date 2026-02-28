@@ -170,6 +170,137 @@ describe('useTaskActions', () => {
 			expect(result.tasks).toHaveLength(0)
 			expect(result.totalTaskTime).toBe(0)
 		})
+
+		it('excludes manually blocked tasks', () => {
+			const tasks = [
+				{ id: 'a', name: 'A', sizing: 30, type: 'userTask', blocked: false },
+				{ id: 'b', name: 'B', sizing: 30, type: 'userTask', blocked: true },
+				{ id: 'c', name: 'C', sizing: 30, type: 'userTask', blocked: false }
+			]
+			const result = actions.getScheduleTasks(tasks, 120, false)
+
+			const ids = result.tasks.map(t => t.id)
+			expect(ids).toContain('a')
+			expect(ids).not.toContain('b')
+			expect(ids).toContain('c')
+		})
+
+		it('schedules both prerequisite and dependent when both are active (same session)', () => {
+			// A and B both active; B depends on A — both should be scheduled with A first
+			store.setTasks({
+				a: { id: 'a', name: 'A', sizing: 30, type: 'userTask' },
+				b: { id: 'b', name: 'B', sizing: 30, type: 'userTask', dependsOn: ['a'] }
+			})
+
+			const tasks = store.getPrioritisedTasks
+			const result = actions.getScheduleTasks(tasks, 120, false)
+
+			const ids = result.tasks.map(t => t.id)
+			expect(ids).toContain('a')
+			expect(ids).toContain('b')
+		})
+
+		it('excludes dependent when its prerequisite is manually blocked (not schedulable)', () => {
+			// A is manually blocked so excluded; B depends on A so B is also excluded
+			store.setTasks({
+				a: { id: 'a', name: 'A', sizing: 30, type: 'userTask', blocked: true },
+				b: { id: 'b', name: 'B', sizing: 30, type: 'userTask', dependsOn: ['a'] }
+			})
+
+			const tasks = store.getPrioritisedTasks
+			const result = actions.getScheduleTasks(tasks, 120, false)
+
+			const ids = result.tasks.map(t => t.id)
+			expect(ids).not.toContain('a')
+			expect(ids).not.toContain('b')
+		})
+
+		it('includes dependent when its prerequisite is already completed', () => {
+			store.setTasks({
+				b: { id: 'b', name: 'B', sizing: 30, type: 'userTask', dependsOn: ['a'] }
+			})
+			store.setCompleted({
+				a: { id: 'a', name: 'A', sizing: 30, type: 'userTask', completedDateTime: new Date().toJSON() }
+			})
+
+			const tasks = store.getPrioritisedTasks
+			const result = actions.getScheduleTasks(tasks, 60, false)
+
+			expect(result.tasks.map(t => t.id)).toContain('b')
+		})
+
+		it('schedules prerequisite before dependent task', () => {
+			store.setTasks({
+				a: { id: 'a', name: 'A', sizing: 30, type: 'userTask', score: 10 },
+				b: { id: 'b', name: 'B', sizing: 30, type: 'userTask', score: 5, dependsOn: ['a'] }
+			})
+
+			// Pass tasks in score order (B first since lower score = higher priority),
+			// but B depends on A so A must appear first after topo sort
+			const tasks = store.getPrioritisedTasks
+			const result = actions.getScheduleTasks(tasks, 120, false)
+
+			const ids = result.tasks.filter(t => t.type === 'userTask').map(t => t.id)
+			expect(ids.indexOf('a')).toBeLessThan(ids.indexOf('b'))
+		})
+
+		it('handles a chain A -> B -> C in correct order', () => {
+			store.setTasks({
+				a: { id: 'a', name: 'A', sizing: 30, type: 'userTask', score: 10 },
+				b: { id: 'b', name: 'B', sizing: 30, type: 'userTask', score: 5, dependsOn: ['a'] },
+				c: { id: 'c', name: 'C', sizing: 30, type: 'userTask', score: 1, dependsOn: ['b'] }
+			})
+
+			const tasks = store.getPrioritisedTasks
+			const result = actions.getScheduleTasks(tasks, 180, false)
+
+			const ids = result.tasks.map(t => t.id)
+			expect(ids.indexOf('a')).toBeLessThan(ids.indexOf('b'))
+			expect(ids.indexOf('b')).toBeLessThan(ids.indexOf('c'))
+		})
+	})
+
+	describe('detectCircularDependency', () => {
+		const makeTask = (id, dependsOn = []) => ({ id, name: id, dependsOn })
+
+		it('returns false when there are no deps', () => {
+			const tasks = [makeTask('a'), makeTask('b')]
+			expect(actions.detectCircularDependency('a', [], tasks)).toBe(false)
+		})
+
+		it('returns false for a valid dependency (B depends on A)', () => {
+			const tasks = [makeTask('a'), makeTask('b')]
+			expect(actions.detectCircularDependency('b', ['a'], tasks)).toBe(false)
+		})
+
+		it('returns true for a direct self-dependency', () => {
+			const tasks = [makeTask('a')]
+			expect(actions.detectCircularDependency('a', ['a'], tasks)).toBe(true)
+		})
+
+		it('returns true for a two-task cycle (A->B, B->A)', () => {
+			// A already depends on B; now trying to make B depend on A
+			const tasks = [makeTask('a', ['b']), makeTask('b')]
+			expect(actions.detectCircularDependency('b', ['a'], tasks)).toBe(true)
+		})
+
+		it('returns true for an indirect cycle in a chain (A->B->C, C->A)', () => {
+			// A->B->C already exists; trying to add C depends on A
+			const tasks = [makeTask('a'), makeTask('b', ['a']), makeTask('c', ['b'])]
+			expect(actions.detectCircularDependency('a', ['c'], tasks)).toBe(true)
+		})
+
+		it('returns false for a valid diamond dependency (A->B, A->C, both->D)', () => {
+			const tasks = [makeTask('a'), makeTask('b', ['a']), makeTask('c', ['a']), makeTask('d')]
+			// Making D depend on B and C is not circular
+			expect(actions.detectCircularDependency('d', ['b', 'c'], tasks)).toBe(false)
+		})
+
+		it('returns false when proposedDeps do not reach the task', () => {
+			const tasks = [makeTask('a'), makeTask('b'), makeTask('c', ['b'])]
+			// C depends on B; B has no deps; making A depend on C is fine
+			expect(actions.detectCircularDependency('a', ['c'], tasks)).toBe(false)
+		})
 	})
 
 	describe('scorePriority', () => {

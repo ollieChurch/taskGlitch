@@ -52,8 +52,8 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 |---------|------|--------|--------------|
 | 0.16 | Filter & search backlog | [x] | [phase-3/v0.16-filter-search.md](requirements/phase-3/v0.16-filter-search.md) |
 | 0.16 | Improve backlog-to-completed transition | [x] | [phase-3/v0.16-completion-transition.md](requirements/phase-3/v0.16-completion-transition.md) |
-| 0.17 | Flag blocked tasks | [ ] | [phase-3/v0.17-blocked-tasks.md](requirements/phase-3/v0.17-blocked-tasks.md) |
-| 0.17 | Task dependencies | [ ] | [phase-3/v0.17-task-dependencies.md](requirements/phase-3/v0.17-task-dependencies.md) |
+| 0.17 | Flag blocked tasks | [x] | [phase-3/v0.17-blocked-tasks.md](requirements/phase-3/v0.17-blocked-tasks.md) |
+| 0.17 | Task dependencies | [x] | [phase-3/v0.17-task-dependencies.md](requirements/phase-3/v0.17-task-dependencies.md) |
 | 0.18 | Repeating tasks | [ ] | [phase-3/v0.18-repeating-tasks.md](requirements/phase-3/v0.18-repeating-tasks.md) |
 
 ---

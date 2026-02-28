@@ -19,7 +19,19 @@
 				<Trash2 :size="16" />
 			</button>
 		</template>
-		<form ref="taskForm">
+		<div v-if="task.blocked" class="mb-3 px-3 py-2 rounded border border-app-warning bg-app-warning/10 flex items-start gap-2">
+				<Ban :size="14" class="text-app-warning shrink-0 mt-0.5" aria-hidden="true" />
+				<div class="flex-1">
+					<p class="text-xs font-rajdhani font-semibold text-app-warning uppercase tracking-widest mb-1">Blocked</p>
+					<input
+						v-model="task.blockedReason"
+						type="text"
+						placeholder="Reason (optional)"
+						class="w-full bg-transparent border-0 border-b border-app-warning/50 text-text-primary text-sm font-rajdhani focus:outline-none focus:border-app-warning px-0 py-0.5"
+					/>
+				</div>
+			</div>
+			<form ref="taskForm">
 			<div class="mb-3">
 				<label for="task" class="block mb-1 font-rajdhani font-semibold text-text-secondary">Task</label>
 				<input
@@ -122,6 +134,23 @@
 					</div>
 				</div>
 			</div>
+		<div class="mt-3">
+			<label class="block mb-1 font-rajdhani font-semibold text-text-secondary">Depends On</label>
+			<Multiselect
+				v-model="task.dependsOn"
+				:options="dependsOnOptions"
+				mode="tags"
+				:searchable="true"
+				:close-on-select="false"
+				label="label"
+				value-prop="value"
+				:object="false"
+				placeholder="Select prerequisite tasks"
+			/>
+			<p v-if="valid.dependsOn === false" class="text-app-danger text-sm mt-1">
+				Circular dependency detected — this would create a loop.
+			</p>
+		</div>
 		</form>
 	</BaseModal>
 </template>
@@ -132,15 +161,17 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import { logger } from '@/utils/logger'
 import BaseModal from './ui/BaseModal.vue'
-import { Trash2, X } from 'lucide-vue-next'
+import { Trash2, X, Ban } from 'lucide-vue-next'
+import Multiselect from '@vueform/multiselect'
+import '@vueform/multiselect/themes/default.css'
 
 export default {
-	components: { BaseModal, Trash2, X },
+	components: { BaseModal, Trash2, X, Ban, Multiselect },
 
 	setup() {
 		const store = useAppStore()
-		const { createGuid, scorePriority, rescoreActiveBacklog, removeTask, syncTaskToSchedule, applyScheduleUpdate, removeTaskFromSchedule } = useTaskActions()
-		return { store, createGuid, scorePriority, rescoreActiveBacklog, removeTask, syncTaskToSchedule, applyScheduleUpdate, removeTaskFromSchedule }
+		const { createGuid, scorePriority, rescoreActiveBacklog, removeTask, syncTaskToSchedule, applyScheduleUpdate, removeTaskFromSchedule, detectCircularDependency, cleanupDependsOn } = useTaskActions()
+		return { store, createGuid, scorePriority, rescoreActiveBacklog, removeTask, syncTaskToSchedule, applyScheduleUpdate, removeTaskFromSchedule, detectCircularDependency, cleanupDependsOn }
 	},
 
 	created() {
@@ -159,12 +190,14 @@ export default {
 				targetDateTime: null,
 				deadline: null,
 				isHardDeadline: false,
+				dependsOn: [],
 				score: 0,
 				type: 'userTask'
 			},
 			valid: {
 				task: null,
-				category: null
+				category: null,
+				dependsOn: null
 			}
 		}
 	},
@@ -210,6 +243,12 @@ export default {
 
 		getCategories() {
 			return this.store.getCategories
+		},
+
+		dependsOnOptions() {
+			return this.store.getPrioritisedTasks
+				.filter(t => t.id !== this.task.id)
+				.map(t => ({ value: t.id, label: t.name }))
 		}
 	},
 
@@ -231,6 +270,17 @@ export default {
 
 		handleOk() {
 			if (this.isFormValid()) {
+				if (this.task.dependsOn?.length > 0) {
+					const hasCycle = this.detectCircularDependency(
+						this.task.id, this.task.dependsOn, this.store.getPrioritisedTasks
+					)
+					if (hasCycle) {
+						this.valid.dependsOn = false
+						return
+					}
+				}
+				this.valid.dependsOn = null
+
 				if (!this.task.createdDateTime) {
 					this.task.createdDateTime = new Date().toString()
 				}
@@ -298,6 +348,7 @@ export default {
 		async deleteTask(task) {
 			const wasInSchedule = await this.removeTaskFromSchedule(task.id)
 			this.removeTask(task, 'tasks')
+			this.cleanupDependsOn(task.id)
 			if (wasInSchedule) {
 				this.store.showNotification({
 					title: 'Schedule Updated',
