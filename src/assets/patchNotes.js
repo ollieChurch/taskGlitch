@@ -6,7 +6,12 @@ export const patchNotes = [
 			'Blocked tasks are never included when generating a schedule',
 			'Add an optional reason when blocking a task, editable via the task edit modal',
 			'Filter the backlog by status — show only active or only blocked tasks',
-			'Blocked task count shown at the top of the backlog when any tasks are blocked'
+			'Blocked task count shown at the top of the backlog when any tasks are blocked',
+			'Set task dependencies — a task is automatically blocked until all its prerequisites are completed',
+			'Task cards show "Blocked by: Task A, Task B" when dependencies are unmet',
+			'The scheduler respects dependencies — prerequisites are always scheduled before dependents',
+			'Circular dependencies are detected and prevented when saving a task',
+			'Deleting a prerequisite task automatically cleans up dependency references'
 		]
 	},
 	{

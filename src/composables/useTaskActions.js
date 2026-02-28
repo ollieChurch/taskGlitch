@@ -81,6 +81,78 @@ export function useTaskActions() {
 		logger.log(`removed from ${list}: `, task)
 	}
 
+	async function cleanupDependsOn(deletedTaskId) {
+		const db = getDatabase(store.app)
+		const backlog = JSON.parse(JSON.stringify(store.tasks))
+		for (const t of backlog) {
+			if (t.dependsOn?.includes(deletedTaskId)) {
+				t.dependsOn = t.dependsOn.filter(id => id !== deletedTaskId)
+				const taskRef = ref(db, `tasks/${store.user.uid}/${t.id}`)
+				await set(taskRef, t)
+				logger.log(`cleaned dependsOn for task: ${t.name}`)
+			}
+		}
+	}
+
+	function detectCircularDependency(taskId, proposedDeps, allTasks) {
+		const taskMap = {}
+		for (const t of allTasks) {
+			taskMap[t.id] = t
+		}
+
+		function canReach(currentId, targetId, visited) {
+			if (currentId === targetId) return true
+			if (visited.has(currentId)) return false
+			visited.add(currentId)
+			const current = taskMap[currentId]
+			if (!current?.dependsOn?.length) return false
+			return current.dependsOn.some(depId => canReach(depId, targetId, new Set(visited)))
+		}
+
+		return proposedDeps.some(depId => canReach(depId, taskId, new Set()))
+	}
+
+	function topologicalSort(tasks) {
+		const taskIdSet = new Set(tasks.map(t => t.id))
+		const inDegree = {}
+		const adjList = {}
+
+		for (const t of tasks) {
+			inDegree[t.id] = inDegree[t.id] ?? 0
+			adjList[t.id] = adjList[t.id] ?? []
+			const activeDeps = (t.dependsOn ?? []).filter(id => taskIdSet.has(id))
+			inDegree[t.id] += activeDeps.length
+			for (const depId of activeDeps) {
+				adjList[depId] = adjList[depId] ?? []
+				adjList[depId].push(t.id)
+			}
+		}
+
+		const taskMap = Object.fromEntries(tasks.map(t => [t.id, t]))
+		const queue = tasks.filter(t => inDegree[t.id] === 0)
+		const sorted = []
+
+		while (queue.length > 0) {
+			const current = queue.shift()
+			sorted.push(current)
+			for (const dependentId of (adjList[current.id] ?? [])) {
+				inDegree[dependentId]--
+				if (inDegree[dependentId] === 0) {
+					queue.push(taskMap[dependentId])
+				}
+			}
+		}
+
+		if (sorted.length < tasks.length) {
+			const sortedIds = new Set(sorted.map(t => t.id))
+			for (const t of tasks) {
+				if (!sortedIds.has(t.id)) sorted.push(t)
+			}
+		}
+
+		return sorted
+	}
+
 	async function saveScheduleToDatabase(schedule) {
 		const db = getDatabase(store.app)
 		const scheduleRef = ref(
@@ -99,7 +171,28 @@ export function useTaskActions() {
 		const breakLength = store.account.settings?.breaks?.length ?? store.defaultSettings.breaks.length
 		const taskType = store.taskType
 
-		const eligibleTasks = tasks.filter(t => !t.blocked)
+		// Exclude manually blocked tasks, then resolve which remaining tasks are
+		// schedulable. A task is schedulable if all unmet deps are also schedulable
+		// in this session (allowing A and B to both be scheduled with A first).
+		const manuallyEligible = tasks.filter(t => !t.blocked)
+		const completedIds = new Set(store.completed.map(t => t.id))
+		let candidateIds = new Set(manuallyEligible.map(t => t.id))
+
+		let changed = true
+		while (changed) {
+			changed = false
+			for (const t of manuallyEligible) {
+				if (!candidateIds.has(t.id)) continue
+				const unmetDeps = (t.dependsOn ?? []).filter(id => !completedIds.has(id))
+				if (unmetDeps.some(id => !candidateIds.has(id))) {
+					candidateIds.delete(t.id)
+					changed = true
+				}
+			}
+		}
+
+		const eligible = manuallyEligible.filter(t => candidateIds.has(t.id))
+		const eligibleTasks = topologicalSort(eligible)
 		const schedule = []
 		let totalTaskTime = 0
 		let currentTaskIndex = 0
@@ -309,6 +402,15 @@ export function useTaskActions() {
 		return true
 	}
 
+	async function clearTaskDependencies(task) {
+		const db = getDatabase(store.app)
+		const listRef = ref(db, `tasks/${store.user.uid}/${task.id}`)
+		const plainTask = JSON.parse(JSON.stringify(task))
+		plainTask.dependsOn = []
+		await set(listRef, plainTask)
+		logger.log('cleared dependencies:', plainTask)
+	}
+
 	async function toggleBlockTask(task, reason = null) {
 		const db = getDatabase(store.app)
 		const listRef = ref(db, `tasks/${store.user.uid}/${task.id}`)
@@ -358,6 +460,9 @@ export function useTaskActions() {
 		syncTaskToSchedule,
 		applyScheduleUpdate,
 		removeTaskFromSchedule,
-		toggleBlockTask
+		toggleBlockTask,
+		clearTaskDependencies,
+		detectCircularDependency,
+		cleanupDependsOn
 	}
 }

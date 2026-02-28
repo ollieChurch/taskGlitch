@@ -135,10 +135,13 @@ export const useAppStore = defineStore('app', {
 
 		getPrioritisedTasks(state) {
 			if (state.tasks) {
+				const depBlockedIds = this.getDependencyBlockedIds
 				const tasksArray = state.tasks ?? []
 				return Object.values(tasksArray).sort((a, b) => {
-					if (a.blocked && !b.blocked) return 1
-					if (!a.blocked && b.blocked) return -1
+					const aBlocked = a.blocked || depBlockedIds.has(a.id)
+					const bBlocked = b.blocked || depBlockedIds.has(b.id)
+					if (aBlocked && !bBlocked) return 1
+					if (!aBlocked && bBlocked) return -1
 					return a.score - b.score
 				})
 			}
@@ -153,6 +156,20 @@ export const useAppStore = defineStore('app', {
 				})
 			}
 			return []
+		},
+
+		getDependencyBlockedIds(state) {
+			if (!state.tasks) return new Set()
+			const completedIds = new Set(state.completed.map(t => t.id))
+			const blockedIds = new Set()
+			for (const task of Object.values(state.tasks)) {
+				if (task.dependsOn?.length > 0) {
+					if (task.dependsOn.some(id => !completedIds.has(id))) {
+						blockedIds.add(task.id)
+					}
+				}
+			}
+			return blockedIds
 		},
 
 		getUpdateScheduleStatus(state) {
