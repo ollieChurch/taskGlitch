@@ -1,5 +1,18 @@
 export const patchNotes = [
 	{
+		version: '0.18.0',
+		changes: [
+			'Create repeating tasks — set a daily, weekly, or monthly recurrence pattern on any task',
+			'When you complete a recurring task, the next instance is automatically added to your backlog',
+			'Weekly recurrence lets you pick specific days of the week (e.g. Mon, Wed, Fri)',
+			'Monthly recurrence lets you choose the day of the month',
+			'Set a recurrence end date or a maximum number of occurrences',
+			'Opt into "catch up missed instances" mode — creates all skipped occurrences when completing a late task',
+			'Recurring task cards show a repeat icon with a summary of the pattern',
+			'Deleting a recurring task offers a choice: skip this instance (next occurrence still created) or stop all future recurrences'
+		]
+	},
+	{
 		version: '0.17.0',
 		changes: [
 			'Mark any task as blocked with one click — blocked tasks are visually distinct and skip to the bottom of the backlog',

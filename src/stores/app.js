@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
 	state: () => ({
-		appVersion: '0.17.0',
+		appVersion: '0.18.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},
@@ -124,38 +124,38 @@ export const useAppStore = defineStore('app', {
 			return state.loading.schedule
 		},
 
-		getCategories(state) {
-			if (state.tasks) {
-				const tasks = Object.values(state.tasks)
-				return Array.from(new Set(tasks.map(x => x.category)))
-			} else {
-				return []
-			}
+		getVisibleTasks(state) {
+			if (!state.tasks || !state.tasks.length) return []
+			const startOfToday = new Date()
+			startOfToday.setHours(0, 0, 0, 0)
+			return state.tasks.filter(task => {
+				if (task.recurrenceParentId && task.targetDateTime) {
+					return new Date(task.targetDateTime) <= startOfToday
+				}
+				return true
+			})
 		},
 
-		getPrioritisedTasks(state) {
-			if (state.tasks) {
-				const depBlockedIds = this.getDependencyBlockedIds
-				const tasksArray = state.tasks ?? []
-				return Object.values(tasksArray).sort((a, b) => {
-					const aBlocked = a.blocked || depBlockedIds.has(a.id)
-					const bBlocked = b.blocked || depBlockedIds.has(b.id)
-					if (aBlocked && !bBlocked) return 1
-					if (!aBlocked && bBlocked) return -1
-					return a.score - b.score
-				})
-			}
-			return []
+		getCategories() {
+			const tasks = this.getVisibleTasks
+			return Array.from(new Set(tasks.map(x => x.category)))
 		},
 
-		getTasksInCreatedOrder(state) {
-			if (state.tasks) {
-				const tasksArray = state.tasks ?? []
-				return Object.values(tasksArray).sort((a, b) => {
-					return new Date(a.createdDateTime) - new Date(b.createdDateTime)
-				})
-			}
-			return []
+		getPrioritisedTasks() {
+			const depBlockedIds = this.getDependencyBlockedIds
+			return [...this.getVisibleTasks].sort((a, b) => {
+				const aBlocked = a.blocked || depBlockedIds.has(a.id)
+				const bBlocked = b.blocked || depBlockedIds.has(b.id)
+				if (aBlocked && !bBlocked) return 1
+				if (!aBlocked && bBlocked) return -1
+				return a.score - b.score
+			})
+		},
+
+		getTasksInCreatedOrder() {
+			return [...this.getVisibleTasks].sort((a, b) => {
+				return new Date(a.createdDateTime) - new Date(b.createdDateTime)
+			})
 		},
 
 		getDependencyBlockedIds(state) {
