@@ -118,9 +118,12 @@
 				<div class="flex items-center schedule-item">
 					<p
 						class="w-3/12 text-left mb-0 shrink-0"
-						:class="isSimpleSchedule ? 'text-lg' : 'text-2xl'"
+						:class="[
+							isSimpleSchedule ? 'text-lg' : 'text-2xl',
+							task.completed ? 'text-text-secondary/50' : ''
+						]"
 					>
-						{{ task.time }}
+						{{ task.completed ? '' : task.time }}
 					</p>
 					<div
 						class="my-2 p-2 rounded-lg shadow-sm border w-9/12"
@@ -183,6 +186,7 @@ import { GripHorizontal, X, Undo2, CheckCircle2, AlertTriangle } from 'lucide-vu
 export default {
 	components: { VueDraggable, GripHorizontal, X, Undo2, CheckCircle2, AlertTriangle },
 	props: ['isSimpleSchedule'],
+	emits: ['scheduleChanged'],
 
 	setup() {
 		const store = useAppStore()
@@ -211,6 +215,15 @@ export default {
 			if (schedule && schedule.tasks) {
 				const startDateTime = new Date(schedule.start)
 				let taskTime = new Date(startDateTime)
+				const now = new Date()
+				const scheduleStarted = now >= startDateTime
+				const isPaused = !!schedule.paused
+
+				// Single pass: compute display times, active task, and first-remaining marker together
+				// so slot positions and active detection can never drift out of sync
+				let activeTaskId = null
+				let activeSlotFound = false
+				let firstRemainingFound = false
 
 				schedule.tasks.forEach(task => {
 					if (
@@ -232,28 +245,26 @@ export default {
 							timeStyle: 'short'
 						})
 						task.date = taskTime.toDateString()
+
+						// Check active status using the same slot position as the display time
+						if (scheduleStarted && !isPaused && !activeSlotFound) {
+							const slotEnd = new Date(taskTime.getTime() + task.sizing * 60000)
+							if (now >= taskTime && now < slotEnd) {
+								activeSlotFound = true
+								if (!task.completed && (task.type == null || task.type === this.taskType.userTask)) {
+									activeTaskId = task.id
+								}
+							}
+						}
+
 						taskTime = new Date(
 							taskTime.setMinutes(
 								taskTime.getMinutes() + task.sizing
 							)
 						)
 					}
-				})
 
-				// Derive active task and first remaining marker
-				let activeFound = false
-				let firstRemainingFound = false
-				schedule.tasks.forEach(task => {
-					if (
-						!activeFound &&
-						!task.completed &&
-						(task.type == null || task.type === this.taskType.userTask)
-					) {
-						task.isActive = true
-						activeFound = true
-					} else {
-						task.isActive = false
-					}
+					task.isActive = task.id === activeTaskId
 
 					// Mark the first non-completed task for divider placement
 					if (!firstRemainingFound && !task.completed) {
@@ -348,6 +359,12 @@ export default {
 
 					// Persist timing data to schedule in Firebase
 					this.updateSchedule(this.scheduleDetails)
+
+					// Notify parent to auto-reschedule
+					this.$emit('scheduleChanged')
+				} else {
+					// Undoing a completion — also needs reschedule
+					this.$emit('scheduleChanged')
 				}
 
 				const list = task.completed ? 'tasks' : 'completed'

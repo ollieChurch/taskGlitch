@@ -20,40 +20,51 @@
 
 				<!-- Normal schedule view -->
 				<template v-else>
-					<div class="max-w-3xl mx-auto">
-						<div class="flex flex-wrap mb-3 gap-3 shrink-0">
+					<div class="shrink-0 mt-2 mb-4">
+						<!-- Primary action -->
+						<div class="flex justify-center mb-3">
 							<button
-								@click="openScheduleSetUp()"
-								class="btn-themed flex-1 bg-app-success text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
+								@click="togglePause()"
+								class="btn-themed flex items-center gap-2 w-full max-w-xs py-2.5 justify-center font-bold font-rajdhani text-sm transition-all"
+								:class="isPaused
+									? 'bg-app-success text-text-inverse hover:brightness-110'
+									: 'bg-surface-hover border border-border-visible text-text-primary hover:border-accent-dim'"
 							>
-								New Schedule
-							</button>
-							<button
-								@click="deleteSchedule()"
-								class="btn-themed flex-1 bg-app-danger text-white py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
-							>
-								Delete Schedule
+								<Pause v-if="!isPaused" :size="16" />
+								<Play v-else :size="16" />
+								{{ isPaused ? 'Resume Schedule' : 'Pause Schedule' }}
 							</button>
 						</div>
-						<div class="flex flex-wrap gap-3 shrink-0">
+
+						<!-- Secondary actions — proper touch targets -->
+						<div class="flex justify-center gap-2">
 							<button
 								@click="reschedule()"
-								class="btn-themed flex-1 bg-app-warning text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
+								class="btn-themed flex items-center gap-1.5 px-3 py-2 text-xs font-rajdhani font-semibold bg-surface-hover border border-border-visible text-text-secondary hover:border-accent-dim hover:text-text-primary transition-all"
 							>
+								<RefreshCw :size="12" />
 								Reschedule
 							</button>
 							<button
-								class="btn-themed flex-1 bg-surface-hover text-text-secondary py-2 px-4 font-bold font-rajdhani opacity-50 cursor-not-allowed transition-all"
-								disabled
+								@click="openScheduleSetUp()"
+								class="btn-themed flex items-center gap-1.5 px-3 py-2 text-xs font-rajdhani font-semibold bg-surface-hover border border-border-visible text-text-secondary hover:border-accent-dim hover:text-text-primary transition-all"
 							>
-								Export
+								<Plus :size="12" />
+								New
+							</button>
+							<button
+								@click="deleteSchedule()"
+								class="btn-themed flex items-center gap-1.5 px-3 py-2 text-xs font-rajdhani font-semibold bg-surface-hover border border-border-visible text-text-secondary hover:border-app-danger hover:text-app-danger transition-all"
+							>
+								<Trash2 :size="12" />
+								Delete
 							</button>
 						</div>
 					</div>
-					<hr class="my-4 border-border-default shrink-0" />
+					<hr class="border-border-default shrink-0" />
 					<div class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
-						<div class="max-w-4xl mx-auto">
-							<task-schedule />
+						<div class="max-w-4xl mx-auto pt-4">
+							<task-schedule @scheduleChanged="onScheduleChanged" />
 						</div>
 					</div>
 				</template>
@@ -72,6 +83,7 @@ import TaskSchedule from '@/components/TaskSchedule.vue'
 import ScheduleComplete from '@/components/ScheduleComplete.vue'
 import ContentCard from '@/components/ContentCard.vue'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
+import { Pause, Play, RefreshCw, Plus, Trash2 } from 'lucide-vue-next'
 
 export default {
 	name: 'ScheduleView',
@@ -82,7 +94,12 @@ export default {
 		GlitchExplained,
 		TaskSchedule,
 		ScheduleComplete,
-		SkeletonLoader
+		SkeletonLoader,
+		Pause,
+		Play,
+		RefreshCw,
+		Plus,
+		Trash2
 	},
 
 	setup() {
@@ -106,6 +123,10 @@ export default {
 
 		schedule() {
 			return this.store.schedule
+		},
+
+		isPaused() {
+			return !!this.schedule?.paused
 		},
 
 		maintainFinish() {
@@ -171,7 +192,20 @@ export default {
 			this.saveScheduleToDatabase({})
 		},
 
-		reschedule() {
+		togglePause() {
+			if (this.isPaused) {
+				// Resume: reschedule remaining tasks from now, clear paused state
+				this.reschedule({ clearPause: true })
+			} else {
+				// Pause: store paused state
+				const updated = JSON.parse(JSON.stringify(this.schedule))
+				updated.paused = true
+				updated.pausedAt = new Date().toISOString()
+				this.saveScheduleToDatabase(updated)
+			}
+		},
+
+		reschedule({ clearPause } = {}) {
 			// Split current schedule into completed user tasks and remaining user tasks
 			// Snapshot display times on completed tasks so they survive the start time change
 			const completedTasks = this.schedule.tasks.filter(
@@ -233,10 +267,22 @@ export default {
 				tasks: [...completedTasks, ...scheduledRemaining.tasks],
 				start: calculatedTimes.start.toString(),
 				finish: calculatedTimes.finish.toString(),
-				includeBreaks: this.schedule.includeBreaks
+				includeBreaks: this.schedule.includeBreaks,
+				paused: clearPause ? false : (this.schedule.paused || false),
+				pausedAt: clearPause ? null : (this.schedule.pausedAt || null)
 			}
 
 			this.saveScheduleToDatabase(scheduleDetails)
+		},
+
+		onScheduleChanged() {
+			// Auto-reschedule after a task is completed or undone
+			// Use nextTick to let the store update from moveTask first
+			this.$nextTick(() => {
+				if (!this.isScheduleComplete) {
+					this.reschedule()
+				}
+			})
 		}
 	}
 }
