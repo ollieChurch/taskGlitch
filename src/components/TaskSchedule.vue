@@ -222,9 +222,15 @@ export default {
 				// Single pass: compute display times, active task, and first-remaining marker together
 				// so slot positions and active detection can never drift out of sync
 				let activeTaskId = null
-				let activeSlotFound = false
 				let firstRemainingFound = false
 
+				// Two-pass approach: first compute completed status, then determine active task.
+				// The active task is the first non-completed user task whose time slot contains
+				// "now", OR (after a reschedule) simply the first non-completed user task if the
+				// schedule has started — since completed tasks may still occupy early time slots
+				// before their completion triggered a reschedule.
+
+				// Pre-compute completed status for all tasks
 				schedule.tasks.forEach(task => {
 					if (
 						task.type == null ||
@@ -234,7 +240,50 @@ export default {
 							x => x.id === task.id
 						)
 					}
+				})
 
+				// Determine active task: first non-completed user task whose slot is current.
+				// After a reschedule, completed tasks without stored times still occupy early
+				// slots, pushing remaining tasks into future slots that "now" hasn't reached yet.
+				// In that case, fall back to the first non-completed user task.
+				if (scheduleStarted && !isPaused) {
+					let slotTime = new Date(startDateTime)
+					let hasCompletedInSlots = false
+
+					for (const task of schedule.tasks) {
+						if (task.completed && task.completedTime) {
+							// Completed with stored time — doesn't consume schedule slots
+							continue
+						}
+
+						if (task.completed) {
+							hasCompletedInSlots = true
+						}
+
+						const isUserTask = task.type == null || task.type === this.taskType.userTask
+						const slotEnd = new Date(slotTime.getTime() + task.sizing * 60000)
+
+						if (!activeTaskId && isUserTask && !task.completed && now >= slotTime && now < slotEnd) {
+							activeTaskId = task.id
+						}
+
+						slotTime = new Date(slotTime.getTime() + task.sizing * 60000)
+					}
+
+					// Fallback: only when completed tasks occupy early slots (pushing remaining
+					// tasks into future slots that "now" hasn't reached). Without completed tasks
+					// in slots, no match means the schedule has overrun — no task should be active.
+					if (!activeTaskId && hasCompletedInSlots) {
+						const firstRemaining = schedule.tasks.find(
+							t => !t.completed && (t.type == null || t.type === this.taskType.userTask)
+						)
+						if (firstRemaining) {
+							activeTaskId = firstRemaining.id
+						}
+					}
+				}
+
+				schedule.tasks.forEach(task => {
 					if (task.completed && task.completedTime) {
 						// Completed task with stored time — preserve it
 						task.time = task.completedTime
@@ -245,17 +294,6 @@ export default {
 							timeStyle: 'short'
 						})
 						task.date = taskTime.toDateString()
-
-						// Check active status using the same slot position as the display time
-						if (scheduleStarted && !isPaused && !activeSlotFound) {
-							const slotEnd = new Date(taskTime.getTime() + task.sizing * 60000)
-							if (now >= taskTime && now < slotEnd) {
-								activeSlotFound = true
-								if (!task.completed && (task.type == null || task.type === this.taskType.userTask)) {
-									activeTaskId = task.id
-								}
-							}
-						}
 
 						taskTime = new Date(
 							taskTime.setMinutes(

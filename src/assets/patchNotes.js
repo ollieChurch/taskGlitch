@@ -1,5 +1,13 @@
 export const patchNotes = [
 	{
+		version: '0.19.0',
+		changes: [
+			'When a rescheduled session has spare time, you\'re prompted to add the top-priority backlog task that fits',
+			'The suggestion also appears when all scheduled tasks are completed with time remaining',
+			'Schedule pause/play, auto-reschedule on task completion, and in-progress indicator fixes from the previous update'
+		]
+	},
+	{
 		version: '0.18.0',
 		changes: [
 			'Create repeating tasks — set a daily, weekly, or monthly recurrence pattern on any task',

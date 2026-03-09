@@ -165,6 +165,20 @@ describe('TaskSchedule', () => {
 			const details = wrapper.vm.scheduleDetails
 			expect(details.tasks).toHaveLength(0)
 		})
+
+		it('marks no tasks as active when schedule starts in the future', () => {
+			// Schedule starts 30 minutes from now
+			const schedule = makeSchedule([
+				{ type: null },
+				{ type: null }
+			], 30)
+
+			const { wrapper } = mountSchedule(schedule)
+			const details = wrapper.vm.scheduleDetails
+
+			expect(details.tasks[0].isActive).toBe(false)
+			expect(details.tasks[1].isActive).toBe(false)
+		})
 	})
 
 	describe('scheduleDetails computed — time calculation', () => {

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
 	state: () => ({
-		appVersion: '0.18.0',
+		appVersion: '0.19.0',
 		completed: [],
 		tasks: [],
 		taskToPatch: {},

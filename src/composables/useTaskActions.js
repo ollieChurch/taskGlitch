@@ -568,6 +568,19 @@ export function useTaskActions() {
 		logger.log('toggled block:', plainTask)
 	}
 
+	function findTaskToSuggest(availableSpace, excludeIds, categories) {
+		const depBlockedIds = store.getDependencyBlockedIds
+		const prioritised = store.getPrioritisedTasks
+
+		return prioritised.find(task => {
+			if (excludeIds.has(task.id)) return false
+			if (task.blocked || depBlockedIds.has(task.id)) return false
+			if (task.sizing > availableSpace) return false
+			if (categories?.length > 0 && !categories.includes(task.category)) return false
+			return true
+		}) || null
+	}
+
 	async function removeTaskFromSchedule(taskId) {
 		const schedule = store.schedule
 		if (!schedule?.tasks) return false
@@ -597,6 +610,7 @@ export function useTaskActions() {
 		findTaskInSchedule,
 		syncTaskToSchedule,
 		applyScheduleUpdate,
+		findTaskToSuggest,
 		removeTaskFromSchedule,
 		toggleBlockTask,
 		clearTaskDependencies,

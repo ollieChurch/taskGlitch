@@ -10,9 +10,38 @@
 				@createSchedule="openScheduleSetUp()"
 			/>
 			<div v-else class="md:flex-1 md:min-h-0 md:flex md:flex-col">
+				<!-- Suggest adding a task after reschedule -->
+				<div v-if="suggestedTask" class="depth-panel p-4 my-3 rounded-lg border border-accent-dim">
+					<p class="font-rajdhani font-semibold text-text-heading text-sm mb-2">Time available — add another task?</p>
+					<div class="flex items-center gap-2 mb-3">
+						<span class="inline-flex items-center">
+							<Zap v-if="suggestedTask.priority === 0" :size="14" style="color: #dc3546" />
+							<ArrowUp v-else-if="suggestedTask.priority === 1" :size="14" style="color: #ffc107" />
+							<Minus v-else-if="suggestedTask.priority === 2" :size="14" style="color: #1a8754" />
+							<ArrowDown v-else :size="14" style="color: #a78bfa" />
+						</span>
+						<span class="font-rajdhani text-text-primary">{{ suggestedTask.name }}</span>
+						<span class="text-xs font-rajdhani text-text-secondary">({{ store.getSizeLabel(suggestedTask.sizing) }})</span>
+					</div>
+					<div class="flex gap-2">
+						<button
+							@click="acceptSuggestion()"
+							class="btn-themed flex-1 bg-app-success text-text-inverse py-1.5 px-3 text-sm font-rajdhani font-semibold hover:brightness-110 transition-all"
+						>
+							Add to Schedule
+						</button>
+						<button
+							@click="dismissSuggestion()"
+							class="btn-themed flex-1 bg-surface-hover text-text-primary border border-border-default py-1.5 px-3 text-sm font-rajdhani font-semibold hover:border-accent-dim transition-all"
+						>
+							No Thanks
+						</button>
+					</div>
+				</div>
+
 				<!-- Schedule complete celebration -->
 				<schedule-complete
-					v-if="isScheduleComplete"
+					v-if="isScheduleComplete && !suggestedTask"
 					:summary="scheduleSummary"
 					@clearSchedule="deleteSchedule()"
 					@newSchedule="openScheduleSetUp()"
@@ -83,7 +112,7 @@ import TaskSchedule from '@/components/TaskSchedule.vue'
 import ScheduleComplete from '@/components/ScheduleComplete.vue'
 import ContentCard from '@/components/ContentCard.vue'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
-import { Pause, Play, RefreshCw, Plus, Trash2 } from 'lucide-vue-next'
+import { Pause, Play, RefreshCw, Plus, Trash2, Zap, ArrowUp, Minus, ArrowDown } from 'lucide-vue-next'
 
 export default {
 	name: 'ScheduleView',
@@ -99,13 +128,23 @@ export default {
 		Play,
 		RefreshCw,
 		Plus,
-		Trash2
+		Trash2,
+		Zap,
+		ArrowUp,
+		Minus,
+		ArrowDown
 	},
 
 	setup() {
 		const store = useAppStore()
-		const { pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks } = useTaskActions()
-		return { store, pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks }
+		const { pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks, findTaskToSuggest } = useTaskActions()
+		return { store, pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks, findTaskToSuggest }
+	},
+
+	data() {
+		return {
+			suggestedTask: null
+		}
 	},
 
 	created() {
@@ -206,6 +245,8 @@ export default {
 		},
 
 		reschedule({ clearPause } = {}) {
+			this.suggestedTask = null
+
 			// Split current schedule into completed user tasks and remaining user tasks
 			// Snapshot display times on completed tasks so they survive the start time change
 			const completedTasks = this.schedule.tasks.filter(
@@ -226,11 +267,6 @@ export default {
 				}
 			)
 
-			// If all tasks are completed, do nothing
-			if (remainingTasks.length === 0) {
-				return
-			}
-
 			const now = new Date()
 			const startDateTime = new Date(this.schedule.start)
 			const isStartTimeInPast = now > startDateTime
@@ -246,12 +282,33 @@ export default {
 				this.maintainFinish ? this.schedule.finish : null
 			)
 
+			// If all tasks are completed, check if there's space for a suggestion
+			if (remainingTasks.length === 0) {
+				this.checkForSuggestion(calculatedTimes.sessionInMins, completedTasks)
+				return
+			}
+
 			// Schedule remaining tasks with fresh breaks
 			const scheduledRemaining = this.getScheduleTasks(
 				remainingTasks,
 				calculatedTimes.sessionInMins,
 				this.schedule.includeBreaks
 			)
+
+			// Check for available space after scheduling remaining tasks
+			const availableSpace = calculatedTimes.sessionInMins - scheduledRemaining.totalTaskTime
+			if (availableSpace > 0) {
+				const scheduledIds = new Set([
+					...completedTasks.map(t => t.id),
+					...scheduledRemaining.tasks.map(t => t.id)
+				])
+				const suggestion = this.findTaskToSuggest(
+					availableSpace,
+					scheduledIds,
+					this.schedule.categoriesToInclude
+				)
+				this.suggestedTask = suggestion
+			}
 
 			// Set actualStartTime on the first remaining user task
 			const firstRemainingUserTask = scheduledRemaining.tasks.find(
@@ -275,12 +332,57 @@ export default {
 			this.saveScheduleToDatabase(scheduleDetails)
 		},
 
+		checkForSuggestion(sessionInMins, completedTasks) {
+			const completedIds = new Set(completedTasks.map(t => t.id))
+			const suggestion = this.findTaskToSuggest(
+				sessionInMins,
+				completedIds,
+				this.schedule.categoriesToInclude
+			)
+			this.suggestedTask = suggestion
+		},
+
+		acceptSuggestion() {
+			if (!this.suggestedTask) return
+
+			// Add the suggested task to the current schedule and reschedule
+			const updatedSchedule = JSON.parse(JSON.stringify(this.schedule))
+			updatedSchedule.tasks.push(JSON.parse(JSON.stringify(this.suggestedTask)))
+			this.saveScheduleToDatabase(updatedSchedule)
+
+			this.suggestedTask = null
+
+			// Reschedule to properly slot the new task with breaks
+			this.$nextTick(() => {
+				this.reschedule()
+			})
+		},
+
+		dismissSuggestion() {
+			this.suggestedTask = null
+		},
+
 		onScheduleChanged() {
 			// Auto-reschedule after a task is completed or undone
 			// Use nextTick to let the store update from moveTask first
 			this.$nextTick(() => {
 				if (!this.isScheduleComplete) {
 					this.reschedule()
+				} else {
+					// All tasks completed — check for suggestion before showing complete screen
+					const now = new Date()
+					const finishTime = new Date(this.schedule.finish)
+					const remainingMins = Math.floor((finishTime - now) / 1000 / 60)
+
+					if (remainingMins > 0) {
+						const scheduledIds = new Set(this.schedule.tasks.map(t => t.id))
+						const suggestion = this.findTaskToSuggest(
+							remainingMins,
+							scheduledIds,
+							this.schedule.categoriesToInclude
+						)
+						this.suggestedTask = suggestion
+					}
 				}
 			})
 		}
