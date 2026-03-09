@@ -1,7 +1,7 @@
 <template>
 	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 		<content-card>
-			<BaseTabs pills fill sticky>
+			<BaseTabs pills fill sticky :initialTab="initialTab">
 				<BaseTab title="Backlog">
 					<div class="pt-2 md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
 						<FilterWidget
@@ -138,10 +138,12 @@ export default {
 
 	created() {
 		this.pageCheck()
+		this.applyQueryFilters()
 	},
 
 	data() {
 		return {
+			initialTab: this.$route?.query?.tab === 'completed' ? 1 : 0,
 			backlogFilters: {
 				search: '',
 				priorities: [],
@@ -314,6 +316,18 @@ export default {
 			clearTimeout(this.toastTimer)
 			this.toastTimer = null
 			this.toastTask = null
+		},
+
+		applyQueryFilters() {
+			const query = this.$route?.query
+			if (!query) return
+
+			if (query.priority !== undefined) {
+				this.backlogFilters.priorities = [Number(query.priority)]
+			}
+			if (query.category) {
+				this.backlogFilters.categories = [query.category]
+			}
 		}
 	}
 }

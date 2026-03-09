@@ -30,7 +30,7 @@
 				<!-- Stat Counters — full width row -->
 				<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
 					<!-- Active Tasks -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
+					<router-link :to="{ name: 'tasks', query: { tab: 'backlog' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block">
 						<ListTodo :size="18" class="mx-auto mb-1 text-accent" />
 						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
 							{{ activeTaskCount }}
@@ -38,21 +38,21 @@
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
 							Active
 						</p>
-					</div>
+					</router-link>
 
-					<!-- Completed Tasks -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
+					<!-- Completed Tasks (last 7 days) -->
+					<router-link :to="{ name: 'tasks', query: { tab: 'completed' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block">
 						<CheckCircle2 :size="18" class="mx-auto mb-1 text-app-success" />
 						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
-							{{ completedTaskCount }}
+							{{ completedLast7Days }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
-							Completed
+							Done This Week
 						</p>
-					</div>
+					</router-link>
 
 					<!-- Categories -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
+					<button @click="scrollToBreakdown" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block w-full">
 						<FolderOpen :size="18" class="mx-auto mb-1 text-app-info" />
 						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
 							{{ categoryCount }}
@@ -60,10 +60,10 @@
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
 							Categories
 						</p>
-					</div>
+					</button>
 
 					<!-- Schedule Status -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
+					<router-link :to="{ name: 'schedule' }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block">
 						<Radio
 							:size="18"
 							class="mx-auto mb-1"
@@ -75,96 +75,114 @@
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
 							Schedule
 						</p>
+					</router-link>
+				</div>
+
+				<!-- Spotlights — side by side on desktop -->
+				<div class="md:grid md:grid-cols-2 md:gap-4 mb-4">
+					<div v-if="highestPriorityTask.length">
+						<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
+							<Crosshair :size="12" class="text-accent" />
+							<span class="font-bold font-rajdhani text-xs text-accent uppercase tracking-widest">
+								Recommended
+							</span>
+						</div>
+						<task-card
+							:task="highestPriorityTask[0]"
+							@openDetail="openTaskDetail"
+							class="!mt-0"
+						/>
+					</div>
+
+					<div v-if="oldestTask.length">
+						<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
+							<Clock :size="12" class="text-app-warning" />
+							<span class="font-bold font-rajdhani text-xs text-app-warning uppercase tracking-widest">
+								Oldest Task
+							</span>
+						</div>
+						<task-card
+							:task="oldestTask[0]"
+							@openDetail="openTaskDetail"
+							class="!mt-0"
+						/>
 					</div>
 				</div>
 
-				<!-- 2-column layout: spotlights + charts -->
-				<div class="md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-5">
-					<!-- Left column: spotlights, accuracy -->
-					<div class="lg:col-span-3">
-						<!-- Spotlight: Recommended Task -->
-						<div v-if="highestPriorityTask.length" class="mb-4">
-							<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
-								<Crosshair :size="12" class="text-accent" />
-								<span class="font-bold font-rajdhani text-xs text-accent uppercase tracking-widest">
-									Recommended
-								</span>
-							</div>
-							<task-card
-								:task="highestPriorityTask[0]"
-								@editTask="openTaskModal()"
-								class="!mt-0"
-							/>
+				<!-- Estimation accuracy — full width -->
+				<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-4 overflow-hidden rounded-lg border border-border-visible">
+					<div class="flex items-stretch">
+						<div class="flex items-center justify-center px-5 py-4" :class="estimationAccuracy.bgClass">
+							<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
 						</div>
-
-						<!-- Spotlight: Oldest Task -->
-						<div v-if="oldestTask.length" class="mb-4">
-							<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
-								<Clock :size="12" class="text-app-warning" />
-								<span class="font-bold font-rajdhani text-xs text-app-warning uppercase tracking-widest">
-									Oldest Task
-								</span>
+						<div class="flex-1 px-4 py-3 text-left">
+							<div class="flex items-center gap-2">
+								<h5 class="font-bold font-rajdhani text-xs uppercase tracking-widest">Estimation Accuracy</h5>
+								<span class="text-xs text-text-secondary font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
 							</div>
-							<task-card
-								:task="oldestTask[0]"
-								@editTask="openTaskModal()"
-								class="!mt-0"
-							/>
+							<p class="text-sm text-text-secondary font-rajdhani mt-1 mb-0">
+								{{ estimationAccuracy.summary }}
+							</p>
 						</div>
+					</div>
+				</div>
 
-						<!-- Estimation accuracy (only shown when time-tracked data exists) -->
-						<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-4 overflow-hidden rounded-lg border border-border-visible">
-							<div class="flex items-stretch">
-								<div class="flex items-center justify-center px-5 py-4" :class="estimationAccuracy.bgClass">
-									<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
-								</div>
-								<div class="flex-1 px-4 py-3 text-left">
-									<div class="flex items-center gap-2">
-										<h5 class="font-bold font-rajdhani text-xs uppercase tracking-widest">Estimation Accuracy</h5>
-										<span class="text-xs text-text-secondary font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
-									</div>
-									<p class="text-sm text-text-secondary font-rajdhani mt-1 mb-0">
-										{{ estimationAccuracy.summary }}
-									</p>
-								</div>
-							</div>
-						</div>
-					</div><!-- /left column -->
-
-					<!-- Right column: charts -->
-					<div class="lg:col-span-2">
-						<h5 class="text-start mb-3 font-bold font-rajdhani text-sm text-text-heading section-header uppercase tracking-widest">
-							Backlog Breakdown
+				<!-- Breakdowns — side by side on desktop -->
+				<div ref="breakdownRef" class="md:grid md:grid-cols-2 md:gap-4">
+					<!-- Priority Breakdown -->
+					<div class="mb-4 md:mb-0">
+						<h5 class="text-start mb-2 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
+							By Priority
 						</h5>
-						<div class="depth-panel depth-highlight rounded-lg border border-border-visible">
-							<BaseTabs fill>
-								<BaseTab title="Categories">
-									<div class="pt-4 pb-6 px-4">
-										<div class="max-w-[320px] mx-auto">
-											<doughnut
-												:data="categoryBreakdownData"
-												:options="chartOptions"
-											/>
-										</div>
-									</div>
-								</BaseTab>
-								<BaseTab title="Priorities">
-									<div class="pt-4 pb-6 px-4">
-										<div class="max-w-[320px] mx-auto">
-											<doughnut
-												:data="priorityBreakdownData"
-												:options="chartOptions"
-											/>
-										</div>
-									</div>
-								</BaseTab>
-							</BaseTabs>
+						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-3">
+							<router-link
+								v-for="item in priorityBreakdown"
+								:key="item.label"
+								:to="{ name: 'tasks', query: { tab: 'backlog', priority: item.value } }"
+								class="breakdown-row group flex items-center gap-3 py-1.5"
+							>
+								<span class="text-xs font-rajdhani font-semibold text-text-secondary w-16 text-left truncate shrink-0 group-hover:text-text-heading transition-colors">{{ item.label }}</span>
+								<div class="flex-1 h-5 bg-surface-base rounded-sm overflow-hidden border border-border-visible/50">
+									<div
+										class="h-full rounded-sm transition-all duration-500 bar-glow"
+										:style="{ width: item.percent + '%', backgroundColor: item.color }"
+									/>
+								</div>
+								<span class="text-xs font-rajdhani font-bold text-text-heading w-6 text-right shrink-0">{{ item.count }}</span>
+							</router-link>
 						</div>
-					</div><!-- /right column -->
-				</div><!-- /grid -->
+					</div>
+
+					<!-- Category Breakdown -->
+					<div>
+						<h5 class="text-start mb-2 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
+							By Category
+						</h5>
+						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-3">
+							<div v-if="categoryBreakdown.length === 0" class="py-3 text-center text-text-secondary font-rajdhani text-sm">
+								No categories yet
+							</div>
+							<router-link
+								v-for="item in categoryBreakdown"
+								:key="item.label"
+								:to="{ name: 'tasks', query: { tab: 'backlog', category: item.label } }"
+								class="breakdown-row group flex items-center gap-3 py-1.5"
+							>
+								<span class="text-xs font-rajdhani font-semibold text-text-secondary w-16 text-left truncate shrink-0 group-hover:text-text-heading transition-colors">{{ item.label }}</span>
+								<div class="flex-1 h-5 bg-surface-base rounded-sm overflow-hidden border border-border-visible/50">
+									<div
+										class="h-full rounded-sm transition-all duration-500 bar-glow"
+										:style="{ width: item.percent + '%', backgroundColor: item.color }"
+									/>
+								</div>
+								<span class="text-xs font-rajdhani font-bold text-text-heading w-6 text-right shrink-0">{{ item.count }}</span>
+							</router-link>
+						</div>
+					</div>
+				</div>
 			</div>
 		</content-card>
-		<task-modal ref="taskModalRef" />
+		<TaskDetailModal ref="taskDetailRef" />
 	</div>
 </template>
 
@@ -173,15 +191,9 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import ContentCard from '@/components/ContentCard.vue'
 import TaskCard from '@/components/TaskCard.vue'
-import TaskModal from '@/components/TaskModal.vue'
+import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
-import BaseTabs from '@/components/ui/BaseTabs.vue'
-import BaseTab from '@/components/ui/BaseTab.vue'
 import { ListTodo, CheckCircle2, FolderOpen, Radio, Crosshair, Clock } from 'lucide-vue-next'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-import { Doughnut } from 'vue-chartjs'
-
-ChartJS.register(ArcElement, Tooltip, Legend)
 
 export default {
 	name: 'DashboardView',
@@ -189,11 +201,8 @@ export default {
 	components: {
 		ContentCard,
 		TaskCard,
-		TaskModal,
-		Doughnut,
+		TaskDetailModal,
 		SkeletonLoader,
-		BaseTabs,
-		BaseTab,
 		ListTodo,
 		CheckCircle2,
 		FolderOpen,
@@ -208,52 +217,8 @@ export default {
 		return { store, pageCheck }
 	},
 
-	data() {
-		return {
-			chartOptions: {
-				responsive: true,
-				maintainAspectRatio: true,
-				plugins: {
-					legend: {
-						position: 'bottom',
-						labels: {
-							color: '#94a3b8',
-							font: {
-								family: 'Rajdhani',
-								size: 12
-							},
-							padding: 12,
-							usePointStyle: true,
-							pointStyleWidth: 10
-						}
-					},
-					tooltip: {
-						backgroundColor: '#1a2332',
-						titleColor: '#f1f5f9',
-						bodyColor: '#e2e8f0',
-						borderColor: '#1e293b',
-						borderWidth: 1,
-						titleFont: {
-							family: 'Rajdhani',
-							weight: 'bold'
-						},
-						bodyFont: {
-							family: 'Rajdhani'
-						}
-					}
-				}
-			}
-		}
-	},
-
 	created() {
 		this.pageCheck()
-	},
-
-	watch: {
-		'store.addTaskTrigger'() {
-			this.addTask()
-		}
 	},
 
 	computed: {
@@ -269,8 +234,14 @@ export default {
 			return this.store.getPrioritisedTasks.length
 		},
 
-		completedTaskCount() {
-			return this.store.completed.length
+		completedLast7Days() {
+			const sevenDaysAgo = new Date()
+			sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+			sevenDaysAgo.setHours(0, 0, 0, 0)
+			return this.store.completed.filter(t => {
+				if (!t.completedDateTime) return false
+				return new Date(t.completedDateTime) >= sevenDaysAgo
+			}).length
 		},
 
 		categoryCount() {
@@ -294,20 +265,8 @@ export default {
 			return tasks.length > 0 ? [tasks[0]] : []
 		},
 
-		getCategories() {
-			return this.store.getCategories
-		},
-
 		getPrioritisedTasks() {
 			return this.store.getPrioritisedTasks
-		},
-
-		getPriorityNames() {
-			return this.store.getPriorityNames
-		},
-
-		priorities() {
-			return this.store.priorities
 		},
 
 		estimationAccuracy() {
@@ -340,56 +299,69 @@ export default {
 			return { percentage: Math.max(0, percentage), taskCount: tracked.length, summary, bgClass }
 		},
 
-		categoryBreakdownData() {
-			const labels = []
-			const data = []
-			const backgroundColor = []
+		categoryBreakdown() {
+			const categories = this.store.getCategories
+			const tasks = this.getPrioritisedTasks
 			const palette = this.store.categoryPalette
+			const total = tasks.length || 1
 
-			this.getCategories.forEach((category, index) => {
-				labels.push(category)
-				const tasksInCategory = this.getPrioritisedTasks.filter(
-					x => x.category == category
-				)
-				data.push(tasksInCategory.length)
-				backgroundColor.push(palette[index % palette.length])
-			})
-
-			return {
-				labels,
-				datasets: [{ data, backgroundColor }]
-			}
+			return categories.map((category, index) => {
+				const count = tasks.filter(x => x.category === category).length
+				return {
+					label: category,
+					count,
+					percent: Math.round((count / total) * 100),
+					color: palette[index % palette.length]
+				}
+			}).sort((a, b) => b.count - a.count)
 		},
 
-		priorityBreakdownData() {
-			const labels = []
-			const data = []
-			const backgroundColor = []
+		priorityBreakdown() {
+			const tasks = this.getPrioritisedTasks
+			const total = tasks.length || 1
 
-			this.getPriorityNames.forEach(priority => {
-				labels.push(priority.charAt(0).toUpperCase() + priority.slice(1))
-				const tasksInPriority = this.getPrioritisedTasks.filter(
-					x => x.priority == this.priorities[priority].value
-				)
-				data.push(tasksInPriority.length)
-				backgroundColor.push(this.priorities[priority].color)
+			return this.store.getPriorityNames.map(name => {
+				const priority = this.store.priorities[name]
+				const count = tasks.filter(x => x.priority === priority.value).length
+				return {
+					label: name.charAt(0).toUpperCase() + name.slice(1),
+					value: priority.value,
+					count,
+					percent: Math.round((count / total) * 100),
+					color: priority.color
+				}
 			})
-
-			return {
-				labels,
-				datasets: [{ data, backgroundColor }]
-			}
 		}
 	},
 
 	methods: {
-		addTask() {
-			this.$refs.taskModalRef.show()
+		openTaskDetail(task) {
+			this.$refs.taskDetailRef.show(task)
 		},
 
-		openTaskModal() {
-			this.$refs.taskModalRef.show()
+		scrollToBreakdown() {
+			this.$refs.breakdownRef?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 		}
 	}
 }
 </script>
+
+<style scoped>
+.stat-counter-link {
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.breakdown-row {
+	text-decoration: none;
+}
+
+.breakdown-row:hover .bar-glow {
+	box-shadow: 0 0 8px currentColor;
+	filter: brightness(1.2);
+}
+
+.bar-glow {
+	transition: width 0.5s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+</style>

@@ -21,7 +21,8 @@
       "WebFetch(domain:v6.vite.dev)",
       "Bash(node:*)",
       "Bash(npm run test:*)",
-      "Bash(npm run test:unit:*)"
+      "Bash(npm run test:unit:*)",
+      "Bash(node -e \"console.log\\(require\\(''./package.json''\\).version\\)\")"
     ]
   }
 }
