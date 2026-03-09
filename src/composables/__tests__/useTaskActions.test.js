@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useAppStore } from '@/stores/app'
+import { set } from 'firebase/database'
 
 // Mock vue-router since useTaskActions calls useRouter()
 vi.mock('vue-router', () => ({
@@ -429,6 +430,479 @@ describe('useTaskActions', () => {
 
 			// Should use the same formula (priorityScore + 30 - createdDateScore)
 			expect(farScore).toBe(noDeadlineScore)
+		})
+
+		it('uses effective deadline when recurrence.deadlineDays is set', () => {
+			const today = new Date()
+			today.setHours(0, 0, 0, 0)
+
+			// Task with targetDateTime = today, deadlineDays = 3 → effective deadline 3 days out
+			const taskWithDeadlineDays = {
+				priority: 2,
+				createdDateTime: new Date().toJSON(),
+				targetDateTime: today.toISOString(),
+				isHardDeadline: false,
+				recurrence: { type: 'daily', interval: 1, deadlineDays: 3 }
+			}
+
+			// Task with targetDateTime = 3 days out, no deadlineDays
+			const threeDaysOut = new Date(today)
+			threeDaysOut.setDate(threeDaysOut.getDate() + 3)
+			const taskWithDirectDeadline = {
+				priority: 2,
+				createdDateTime: new Date().toJSON(),
+				targetDateTime: threeDaysOut.toISOString(),
+				isHardDeadline: false
+			}
+
+			const scoreWithDays = actions.scorePriority(taskWithDeadlineDays)
+			const scoreWithDirect = actions.scorePriority(taskWithDirectDeadline)
+
+			// Both should have similar scores since effective deadline is the same
+			expect(scoreWithDays).toBeCloseTo(scoreWithDirect, 1)
+		})
+
+		it('ignores deadlineDays when null', () => {
+			const tomorrow = new Date()
+			tomorrow.setDate(tomorrow.getDate() + 1)
+
+			const taskNullDeadlineDays = {
+				priority: 2,
+				createdDateTime: new Date().toJSON(),
+				targetDateTime: tomorrow.toISOString(),
+				isHardDeadline: false,
+				recurrence: { type: 'daily', interval: 1, deadlineDays: null }
+			}
+
+			const taskNoRecurrence = {
+				priority: 2,
+				createdDateTime: new Date().toJSON(),
+				targetDateTime: tomorrow.toISOString(),
+				isHardDeadline: false
+			}
+
+			const scoreNull = actions.scorePriority(taskNullDeadlineDays)
+			const scoreNone = actions.scorePriority(taskNoRecurrence)
+
+			expect(scoreNull).toBe(scoreNone)
+		})
+	})
+
+	describe('calculateNextOccurrence', () => {
+		// Use a fixed Monday as the reference date
+		const monday = new Date('2026-03-02T00:00:00.000Z') // Monday
+
+		it('daily interval=1 returns the next day', () => {
+			const result = actions.calculateNextOccurrence({ type: 'daily', interval: 1 }, monday)
+			const next = new Date(result)
+			expect(next.getUTCDate()).toBe(3) // Tuesday
+		})
+
+		it('daily interval=3 returns 3 days ahead', () => {
+			const result = actions.calculateNextOccurrence({ type: 'daily', interval: 3 }, monday)
+			const next = new Date(result)
+			expect(next.getUTCDate()).toBe(5) // Thursday
+		})
+
+		it('weekly on a single day returns the next occurrence of that day', () => {
+			// From Monday, next Wednesday (day 3)
+			const result = actions.calculateNextOccurrence(
+				{ type: 'weekly', interval: 1, daysOfWeek: [3] }, // Wednesday
+				monday
+			)
+			const next = new Date(result)
+			expect(next.getDay()).toBe(3) // Wednesday
+			expect(next > monday).toBe(true)
+		})
+
+		it('weekly on multiple days returns the soonest upcoming day', () => {
+			// From Monday, soonest of Wed(3) and Fri(5) should be Wednesday
+			const result = actions.calculateNextOccurrence(
+				{ type: 'weekly', interval: 1, daysOfWeek: [3, 5] },
+				monday
+			)
+			const next = new Date(result)
+			expect(next.getDay()).toBe(3) // Wednesday is soonest
+		})
+
+		it('weekly interval=2 returns at least 8 days ahead', () => {
+			const result = actions.calculateNextOccurrence(
+				{ type: 'weekly', interval: 2, daysOfWeek: [1] }, // Monday
+				monday
+			)
+			const next = new Date(result)
+			const diffDays = (next - monday) / (1000 * 60 * 60 * 24)
+			expect(diffDays).toBeGreaterThanOrEqual(8) // at least next week +1
+			expect(next.getDay()).toBe(1) // still a Monday
+		})
+
+		it('monthly interval=1 returns the same day next month', () => {
+			const result = actions.calculateNextOccurrence(
+				{ type: 'monthly', interval: 1, dayOfMonth: 15 },
+				new Date('2026-03-10')
+			)
+			const next = new Date(result)
+			expect(next.getMonth()).toBe(3) // April (0-indexed)
+			expect(next.getDate()).toBe(15)
+		})
+
+		it('monthly caps to last day of month when dayOfMonth overflows', () => {
+			// dayOfMonth=31 in April (30 days) should give April 30
+			const result = actions.calculateNextOccurrence(
+				{ type: 'monthly', interval: 1, dayOfMonth: 31 },
+				new Date('2026-03-10')
+			)
+			const next = new Date(result)
+			expect(next.getMonth()).toBe(3) // April
+			expect(next.getDate()).toBe(30) // last day of April
+		})
+
+		it('monthly handles day 31 from Jan to Feb correctly', () => {
+			// Jan 31 + 1 month with dayOfMonth=31 → Feb 28 (not March 31)
+			const result = actions.calculateNextOccurrence(
+				{ type: 'monthly', interval: 1, dayOfMonth: 31 },
+				new Date('2026-01-31')
+			)
+			const next = new Date(result)
+			expect(next.getMonth()).toBe(1) // February
+			expect(next.getDate()).toBe(28) // last day of Feb 2026
+		})
+
+		it('monthly handles day 29 from Jan to Feb in non-leap year', () => {
+			const result = actions.calculateNextOccurrence(
+				{ type: 'monthly', interval: 1, dayOfMonth: 29 },
+				new Date('2026-01-15')
+			)
+			const next = new Date(result)
+			expect(next.getMonth()).toBe(1) // February
+			expect(next.getDate()).toBe(28) // 2026 is not a leap year
+		})
+	})
+
+	describe('shouldCreateNextInstance', () => {
+		it('returns true when there are no end conditions', () => {
+			const task = {
+				recurrence: { endDate: null, endAfterCount: null },
+				recurrenceCount: 0
+			}
+			expect(actions.shouldCreateNextInstance(task)).toBe(true)
+		})
+
+		it('returns false when endDate has passed', () => {
+			const task = {
+				recurrence: { endDate: new Date('2020-01-01').toISOString(), endAfterCount: null },
+				recurrenceCount: 0
+			}
+			expect(actions.shouldCreateNextInstance(task)).toBe(false)
+		})
+
+		it('returns true when endDate is in the future', () => {
+			const future = new Date()
+			future.setFullYear(future.getFullYear() + 1)
+			const task = {
+				recurrence: { endDate: future.toISOString(), endAfterCount: null },
+				recurrenceCount: 0
+			}
+			expect(actions.shouldCreateNextInstance(task)).toBe(true)
+		})
+
+		it('returns false when endAfterCount has been reached', () => {
+			const task = {
+				recurrence: { endDate: null, endAfterCount: 3 },
+				recurrenceCount: 3
+			}
+			expect(actions.shouldCreateNextInstance(task)).toBe(false)
+		})
+
+		it('returns true when recurrenceCount is below endAfterCount', () => {
+			const task = {
+				recurrence: { endDate: null, endAfterCount: 3 },
+				recurrenceCount: 2
+			}
+			expect(actions.shouldCreateNextInstance(task)).toBe(true)
+		})
+
+		it('returns false when recurrence is null', () => {
+			const task = { recurrence: null }
+			expect(actions.shouldCreateNextInstance(task)).toBe(false)
+		})
+	})
+
+	describe('buildRecurringInstance', () => {
+		const baseTask = {
+			id: 'original-id',
+			name: 'Daily standup',
+			priority: 1,
+			sizing: 30,
+			category: 'Work',
+			isHardDeadline: false,
+			recurrence: { type: 'daily', interval: 1, endDate: null, endAfterCount: null, catchUpMissed: false },
+			recurrenceParentId: null,
+			recurrenceCount: 0,
+			createdDateTime: new Date('2026-03-01').toJSON(),
+			targetDateTime: new Date('2026-03-02').toJSON()
+		}
+
+		it('generates a new unique id', () => {
+			const instance = actions.buildRecurringInstance(baseTask, new Date('2026-03-03').toISOString())
+			expect(instance.id).not.toBe(baseTask.id)
+			expect(typeof instance.id).toBe('string')
+		})
+
+		it('sets recurrenceParentId to the original task id on first recurrence', () => {
+			const instance = actions.buildRecurringInstance(baseTask, new Date('2026-03-03').toISOString())
+			expect(instance.recurrenceParentId).toBe('original-id')
+		})
+
+		it('preserves recurrenceParentId from parent on subsequent recurrences', () => {
+			const secondTask = { ...baseTask, id: 'instance-1', recurrenceParentId: 'original-id', recurrenceCount: 1 }
+			const instance = actions.buildRecurringInstance(secondTask, new Date('2026-03-04').toISOString())
+			expect(instance.recurrenceParentId).toBe('original-id')
+		})
+
+		it('increments recurrenceCount', () => {
+			const instance = actions.buildRecurringInstance(baseTask, new Date('2026-03-03').toISOString())
+			expect(instance.recurrenceCount).toBe(1)
+		})
+
+		it('copies name, priority, sizing, category, and recurrence from parent', () => {
+			const instance = actions.buildRecurringInstance(baseTask, new Date('2026-03-03').toISOString())
+			expect(instance.name).toBe(baseTask.name)
+			expect(instance.priority).toBe(baseTask.priority)
+			expect(instance.sizing).toBe(baseTask.sizing)
+			expect(instance.category).toBe(baseTask.category)
+			expect(instance.recurrence).toEqual(baseTask.recurrence)
+		})
+
+		it('resets completion and blocking fields', () => {
+			const instance = actions.buildRecurringInstance(baseTask, new Date('2026-03-03').toISOString())
+			expect(instance.completedDateTime).toBeNull()
+			expect(instance.actualStartTime).toBeNull()
+			expect(instance.actualDuration).toBeNull()
+			expect(instance.blocked).toBe(false)
+			expect(instance.blockedReason).toBeNull()
+			expect(instance.dependsOn).toEqual([])
+		})
+
+		it('sets the provided targetDateTime', () => {
+			const target = new Date('2026-03-03').toISOString()
+			const instance = actions.buildRecurringInstance(baseTask, target)
+			expect(instance.targetDateTime).toBe(target)
+		})
+
+		it('does not copy isHardDeadline when no deadlineDays', () => {
+			const hardDeadlineTask = { ...baseTask, isHardDeadline: true }
+			const instance = actions.buildRecurringInstance(hardDeadlineTask, new Date('2026-03-03').toISOString())
+			expect(instance.isHardDeadline).toBe(false)
+		})
+
+		it('copies deadlineIsHard when deadlineDays is set', () => {
+			const taskWithDeadline = {
+				...baseTask,
+				recurrence: { ...baseTask.recurrence, deadlineDays: 5, deadlineIsHard: true }
+			}
+			const instance = actions.buildRecurringInstance(taskWithDeadline, new Date('2026-03-03').toISOString())
+			expect(instance.isHardDeadline).toBe(true)
+		})
+
+		it('sets isHardDeadline false when deadlineDays set but deadlineIsHard false', () => {
+			const taskWithDeadline = {
+				...baseTask,
+				recurrence: { ...baseTask.recurrence, deadlineDays: 3, deadlineIsHard: false }
+			}
+			const instance = actions.buildRecurringInstance(taskWithDeadline, new Date('2026-03-03').toISOString())
+			expect(instance.isHardDeadline).toBe(false)
+		})
+	})
+
+	describe('moveTask recurrence', () => {
+		const makeRecurringTask = (overrides = {}) => ({
+			id: 'task-1',
+			name: 'Daily standup',
+			priority: 1,
+			sizing: 30,
+			category: 'Work',
+			isHardDeadline: false,
+			blocked: false,
+			dependsOn: [],
+			recurrence: { type: 'daily', interval: 1, endDate: null, endAfterCount: null, catchUpMissed: false },
+			recurrenceParentId: null,
+			recurrenceCount: 0,
+			createdDateTime: new Date().toJSON(),
+			targetDateTime: new Date().toJSON(),
+			completedDateTime: null,
+			actualStartTime: null,
+			actualDuration: null,
+			score: 10,
+			type: 'userTask',
+			...overrides
+		})
+
+		beforeEach(() => {
+			vi.mocked(set).mockClear()
+			store.user = { uid: 'user-1' }
+		})
+
+		it('calls set twice when completing a recurring task (once for new instance, once for completed task)', async () => {
+			const task = makeRecurringTask()
+			store.setTasks({ 'task-1': task })
+
+			await actions.moveTask(task, 'completed')
+
+			// set called for: new instance + completed task
+			expect(vi.mocked(set).mock.calls.length).toBeGreaterThanOrEqual(2)
+		})
+
+		it('does not create a new instance when endAfterCount has been reached', async () => {
+			const task = makeRecurringTask({
+				recurrence: { type: 'daily', interval: 1, endDate: null, endAfterCount: 2, catchUpMissed: false },
+				recurrenceCount: 2
+			})
+			store.setTasks({ 'task-1': task })
+
+			vi.mocked(set).mockClear()
+			await actions.moveTask(task, 'completed')
+
+			// set should only be called once: for the completed task itself (not a new instance)
+			const taskWriteCalls = vi.mocked(set).mock.calls
+			// The completed task write goes to 'completed/...' path
+			// Verify no write went to 'tasks/...' with a new id
+			const tasksWrites = taskWriteCalls.filter(call => {
+				const refArg = call[0]
+				return refArg && String(refArg).includes?.('tasks')
+			})
+			// Should have no new task instance writes (rescoreActiveBacklog may write but store.tasks will be empty)
+			expect(vi.mocked(set).mock.calls.length).toBe(1) // only the completed task
+		})
+
+		it('does not create a new instance for non-recurring tasks', async () => {
+			const task = makeRecurringTask({ recurrence: null })
+			store.setTasks({ 'task-1': task })
+
+			vi.mocked(set).mockClear()
+			await actions.moveTask(task, 'completed')
+
+			// Only one set call: the completed task
+			expect(vi.mocked(set).mock.calls.length).toBe(1)
+		})
+	})
+
+	describe('getVisibleTasks', () => {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+
+		const yesterday = new Date(today)
+		yesterday.setDate(yesterday.getDate() - 1)
+
+		const tomorrow = new Date(today)
+		tomorrow.setDate(tomorrow.getDate() + 1)
+
+		const makeTask = (overrides = {}) => ({
+			id: 'task-1',
+			name: 'Test task',
+			priority: 1,
+			sizing: 30,
+			category: 'Work',
+			score: 10,
+			type: 'userTask',
+			blocked: false,
+			dependsOn: [],
+			recurrence: null,
+			recurrenceParentId: null,
+			recurrenceCount: 0,
+			createdDateTime: new Date().toJSON(),
+			targetDateTime: null,
+			completedDateTime: null,
+			...overrides
+		})
+
+		it('shows tasks with no recurrence', () => {
+			store.setTasks({ 'task-1': makeTask() })
+			expect(store.getVisibleTasks).toHaveLength(1)
+		})
+
+		it('shows recurring tasks with today targetDateTime', () => {
+			store.setTasks({
+				'task-1': makeTask({
+					recurrenceParentId: 'parent-1',
+					targetDateTime: today.toISOString()
+				})
+			})
+			expect(store.getVisibleTasks).toHaveLength(1)
+		})
+
+		it('shows recurring tasks with past targetDateTime', () => {
+			store.setTasks({
+				'task-1': makeTask({
+					recurrenceParentId: 'parent-1',
+					targetDateTime: yesterday.toISOString()
+				})
+			})
+			expect(store.getVisibleTasks).toHaveLength(1)
+		})
+
+		it('hides recurring tasks with future targetDateTime', () => {
+			store.setTasks({
+				'task-1': makeTask({
+					recurrenceParentId: 'parent-1',
+					targetDateTime: tomorrow.toISOString()
+				})
+			})
+			expect(store.getVisibleTasks).toHaveLength(0)
+		})
+
+		it('shows the original recurring task even with future targetDateTime', () => {
+			store.setTasks({
+				'task-1': makeTask({
+					recurrenceParentId: null,
+					targetDateTime: tomorrow.toISOString(),
+					recurrence: { type: 'daily', interval: 1 }
+				})
+			})
+			expect(store.getVisibleTasks).toHaveLength(1)
+		})
+
+		it('cascades to getPrioritisedTasks', () => {
+			store.setTasks({
+				'visible': makeTask({ id: 'visible', score: 5 }),
+				'hidden': makeTask({
+					id: 'hidden',
+					score: 1,
+					recurrenceParentId: 'parent-1',
+					targetDateTime: tomorrow.toISOString()
+				})
+			})
+			const ids = store.getPrioritisedTasks.map(t => t.id)
+			expect(ids).toContain('visible')
+			expect(ids).not.toContain('hidden')
+		})
+
+		it('cascades to getCategories', () => {
+			store.setTasks({
+				'visible': makeTask({ id: 'visible', category: 'Work' }),
+				'hidden': makeTask({
+					id: 'hidden',
+					category: 'Hidden Category',
+					recurrenceParentId: 'parent-1',
+					targetDateTime: tomorrow.toISOString()
+				})
+			})
+			expect(store.getCategories).toContain('Work')
+			expect(store.getCategories).not.toContain('Hidden Category')
+		})
+
+		it('cascades to getTasksInCreatedOrder', () => {
+			store.setTasks({
+				'visible': makeTask({ id: 'visible' }),
+				'hidden': makeTask({
+					id: 'hidden',
+					recurrenceParentId: 'parent-1',
+					targetDateTime: tomorrow.toISOString()
+				})
+			})
+			const ids = store.getTasksInCreatedOrder.map(t => t.id)
+			expect(ids).toContain('visible')
+			expect(ids).not.toContain('hidden')
 		})
 	})
 })

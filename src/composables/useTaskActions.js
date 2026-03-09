@@ -64,6 +64,34 @@ export function useTaskActions() {
 				break
 		}
 
+		// Auto-create next recurrence instance when completing a recurring task
+		if (list === 'completed' && plainTask.recurrence && shouldCreateNextInstance(plainTask)) {
+			const today = new Date()
+			const nextDate = calculateNextOccurrence(plainTask.recurrence, today)
+			let datesToCreate = [nextDate]
+
+			if (
+				plainTask.recurrence.catchUpMissed &&
+				plainTask.targetDateTime &&
+				new Date(plainTask.targetDateTime) < today
+			) {
+				const missed = getMissedOccurrences(plainTask)
+				datesToCreate = [...missed, nextDate]
+			}
+
+			for (const targetDate of datesToCreate) {
+				const newInstance = buildRecurringInstance(plainTask, targetDate)
+				const instanceRef = ref(db, `tasks/${store.user.uid}/${newInstance.id}`)
+				await set(instanceRef, newInstance)
+			}
+
+			const nextLabel = new Date(nextDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+			store.showNotification({
+				title: 'Next occurrence created',
+				text: `"${plainTask.name}" will repeat on ${nextLabel}`
+			})
+		}
+
 		await set(listRef, plainTask)
 		removeTask(task, removeFromList)
 		logger.log('moved task: ', plainTask)
@@ -322,8 +350,17 @@ export function useTaskActions() {
 		const createdDateDiffDays = Math.ceil((todayDate - new Date(task.createdDateTime)) / millisecsToDays)
 		const createdDateScore = (createdDateDiffDays / (task.priority + 0.5)) * 0.1
 
-		if (task.targetDateTime) {
-			const deadlineDiffDays = Math.ceil((new Date(task.targetDateTime) - todayDate) / millisecsToDays)
+		// Compute effective deadline: for recurring children with deadlineDays,
+		// the real deadline is targetDateTime + deadlineDays
+		let effectiveDeadline = task.targetDateTime
+		if (task.recurrence?.deadlineDays != null && task.targetDateTime) {
+			const base = new Date(task.targetDateTime)
+			base.setDate(base.getDate() + task.recurrence.deadlineDays)
+			effectiveDeadline = base.toISOString()
+		}
+
+		if (effectiveDeadline) {
+			const deadlineDiffDays = Math.ceil((new Date(effectiveDeadline) - todayDate) / millisecsToDays)
 			const deadlineModifier = task.isHardDeadline ? 0.25 : 0.5
 
 			if (deadlineDiffDays > 60) {
@@ -334,6 +371,107 @@ export function useTaskActions() {
 		} else {
 			return priorityScore + 30 - createdDateScore
 		}
+	}
+
+	function calculateNextOccurrence(recurrence, fromDate = new Date()) {
+		const from = new Date(fromDate)
+		from.setHours(0, 0, 0, 0)
+
+		if (recurrence.type === 'daily') {
+			const next = new Date(from)
+			next.setDate(next.getDate() + recurrence.interval)
+			return next.toISOString()
+		}
+
+		if (recurrence.type === 'weekly') {
+			// Minimum days ahead: at least 1, with extra weeks for interval > 1
+			const minDaysAhead = (recurrence.interval - 1) * 7 + 1
+			const candidate = new Date(from)
+			candidate.setDate(candidate.getDate() + minDaysAhead)
+
+			for (let i = 0; i < 7; i++) {
+				if (recurrence.daysOfWeek.includes(candidate.getDay())) {
+					return candidate.toISOString()
+				}
+				candidate.setDate(candidate.getDate() + 1)
+			}
+
+			// Fallback if daysOfWeek is empty or all days scanned
+			const fallback = new Date(from)
+			fallback.setDate(fallback.getDate() + recurrence.interval * 7)
+			return fallback.toISOString()
+		}
+
+		if (recurrence.type === 'monthly') {
+			const next = new Date(from)
+			// Set day to 1 first to avoid month overflow (e.g., Jan 31 + 1 month → Mar 3)
+			next.setDate(1)
+			next.setMonth(next.getMonth() + recurrence.interval)
+			next.setDate(recurrence.dayOfMonth)
+
+			// Handle month overflow (e.g., dayOfMonth=31 in February → last day of Feb)
+			if (next.getDate() !== recurrence.dayOfMonth) {
+				next.setDate(0)
+			}
+
+			return next.toISOString()
+		}
+	}
+
+	function shouldCreateNextInstance(task) {
+		const r = task.recurrence
+		if (!r) return false
+
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+
+		if (r.endDate && today >= new Date(r.endDate)) return false
+		if (r.endAfterCount != null && (task.recurrenceCount ?? 0) >= r.endAfterCount) return false
+
+		return true
+	}
+
+	function getMissedOccurrences(task) {
+		const today = new Date()
+		today.setHours(0, 0, 0, 0)
+
+		const missed = []
+		let current = new Date(calculateNextOccurrence(task.recurrence, new Date(task.targetDateTime)))
+
+		while (current <= today) {
+			missed.push(current.toISOString())
+			current = new Date(calculateNextOccurrence(task.recurrence, current))
+		}
+
+		return missed
+	}
+
+	function buildRecurringInstance(task, targetDateTime) {
+		const newInstance = {
+			id: createGuid(),
+			createdDateTime: new Date().toJSON(),
+			targetDateTime,
+			name: task.name,
+			priority: task.priority,
+			sizing: task.sizing,
+			category: task.category,
+			isHardDeadline: task.recurrence?.deadlineDays != null
+				? (task.recurrence.deadlineIsHard ?? false)
+				: false,
+			recurrence: task.recurrence,
+			recurrenceParentId: task.recurrenceParentId ?? task.id,
+			recurrenceCount: (task.recurrenceCount ?? 0) + 1,
+			blocked: false,
+			blockedReason: null,
+			blockedAt: null,
+			dependsOn: [],
+			completedDateTime: null,
+			actualStartTime: null,
+			actualDuration: null,
+			type: 'userTask'
+		}
+		newInstance.score = scorePriority(newInstance)
+		return newInstance
 	}
 
 	function findTaskInSchedule(taskId) {
@@ -463,6 +601,10 @@ export function useTaskActions() {
 		toggleBlockTask,
 		clearTaskDependencies,
 		detectCircularDependency,
-		cleanupDependsOn
+		cleanupDependsOn,
+		calculateNextOccurrence,
+		shouldCreateNextInstance,
+		getMissedOccurrences,
+		buildRecurringInstance
 	}
 }

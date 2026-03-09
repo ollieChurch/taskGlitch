@@ -40,10 +40,14 @@
 						<Timer :size="14" class="inline" />
 						{{ store.getSizeLabel(task.sizing) }}
 					</p>
-					<p class="sm:flex-1 text-left mb-0" v-if="task.targetDateTime">
+					<p class="text-left mb-0 mr-3" v-if="effectiveDeadline">
 						<AlertCircle v-if="task.isHardDeadline" :size="14" class="inline" />
 						<Target v-else :size="14" class="inline" />
-						{{ new Date(task.targetDateTime).toLocaleDateString('en-uk', { day: 'numeric', year: 'numeric', month: 'short' }) }}
+						{{ new Date(effectiveDeadline).toLocaleDateString('en-uk', { day: 'numeric', year: 'numeric', month: 'short' }) }}
+					</p>
+					<p v-if="task.recurrence" class="text-left mb-0 text-accent">
+						<Repeat :size="14" class="inline" aria-hidden="true" />
+						{{ recurrenceLabel }}
 					</p>
 					<p v-if="task.blocked" class="w-full text-left mb-0 mt-0.5 text-app-warning text-xs">
 						{{ task.blockedReason || 'Blocked' }}
@@ -71,12 +75,12 @@
 import { markRaw } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
-import { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Timer, AlertCircle, Target, Undo2, Ban } from 'lucide-vue-next'
+import { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Timer, AlertCircle, Target, Undo2, Ban, Repeat } from 'lucide-vue-next'
 
 export default {
 	props: ['task'],
 	emits: ['openDetail', 'taskCompleted'],
-	components: { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Timer, AlertCircle, Target, Undo2, Ban },
+	components: { Zap, ArrowUp, Minus, ArrowDown, CheckCircle2, Timer, AlertCircle, Target, Undo2, Ban, Repeat },
 
 	setup() {
 		const store = useAppStore()
@@ -124,6 +128,29 @@ export default {
 			return this.task.dependsOn
 				.filter(id => !completedIds.has(id))
 				.map(id => this.store.getPrioritisedTasks.find(t => t.id === id)?.name ?? 'Unknown task')
+		},
+
+		effectiveDeadline() {
+			if (!this.task.recurrenceParentId) return this.task.targetDateTime
+			if (this.task.recurrence?.deadlineDays != null && this.task.targetDateTime) {
+				const base = new Date(this.task.targetDateTime)
+				base.setDate(base.getDate() + this.task.recurrence.deadlineDays)
+				return base.toISOString()
+			}
+			return null
+		},
+
+		recurrenceLabel() {
+			const r = this.task.recurrence
+			if (!r) return ''
+			const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+			if (r.type === 'daily') return r.interval === 1 ? 'Daily' : `Every ${r.interval} days`
+			if (r.type === 'weekly') {
+				const names = (r.daysOfWeek ?? []).map(d => days[d]).join(', ')
+				return r.interval === 1 ? `Weekly${names ? ' on ' + names : ''}` : `Every ${r.interval} weeks${names ? ' on ' + names : ''}`
+			}
+			if (r.type === 'monthly') return r.interval === 1 ? `Monthly on the ${r.dayOfMonth}th` : `Every ${r.interval} months`
+			return 'Repeats'
 		}
 	},
 
