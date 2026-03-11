@@ -11,14 +11,14 @@
 				v-for="(settingsGroup, index) in Object.keys(settings)"
 				:key="`settingsModal-${settingsGroup}-${index}`"
 			>
-				<h5 class="mb-4 font-rajdhani font-semibold text-text-heading">{{ settingsGroup }}</h5>
+				<h5 class="mb-4 font-rajdhani font-semibold text-text-heading">{{ groupLabel(settingsGroup) }}</h5>
 				<div
 					v-for="(setting, settingIndex) in Object.keys(settings[settingsGroup])"
 					:key="`settingsModal-${settingsGroup}-${setting}-${settingIndex}`"
 					class="flex justify-between gap-4 items-center mb-3"
 				>
 					<div>
-						<p class="mb-0 font-rajdhani text-text-primary">{{ setting }}</p>
+						<p class="mb-0 font-rajdhani text-text-primary">{{ settingLabel(settingsGroup, setting) }}</p>
 						<small class="text-text-secondary">{{
 							typeof accountSettings[settingsGroup][setting] == 'number'
 								? 'time in minutes'
@@ -56,6 +56,7 @@
 import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import BaseModal from './ui/BaseModal.vue'
+import { settingLabels } from '@/assets/settingLabels'
 
 export default {
 	name: 'SettingsModal',
@@ -82,6 +83,12 @@ export default {
 	methods: {
 		show() {
 			this.$refs.modalRef.show()
+		},
+		groupLabel(group) {
+			return settingLabels._groups[group] ?? group
+		},
+		settingLabel(group, setting) {
+			return settingLabels[group]?.[setting] ?? setting
 		},
 		setUpData() {
 			const excludedGroups = ['display', 'dataManagement']

@@ -62,9 +62,9 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 
 | Version | Item | Status | Requirements |
 |---------|------|--------|--------------|
-| 0.19 | Dashboard overhaul | [ ] | [phase-3b/v0.19-dashboard-overhaul.md](requirements/phase-3b/v0.19-dashboard-overhaul.md) |
-| 0.19 | Schedule fixes & enhancements | [ ] | [phase-3b/v0.19-schedule-fixes.md](requirements/phase-3b/v0.19-schedule-fixes.md) |
-| 0.19 | UI polish & responsive fixes | [ ] | [phase-3b/v0.19-ui-polish.md](requirements/phase-3b/v0.19-ui-polish.md) |
+| 0.19 | Dashboard overhaul | [x] | [phase-3b/v0.19-dashboard-overhaul.md](requirements/phase-3b/v0.19-dashboard-overhaul.md) |
+| 0.19 | Schedule fixes & enhancements | [x] | [phase-3b/v0.19-schedule-fixes.md](requirements/phase-3b/v0.19-schedule-fixes.md) |
+| 0.19 | UI polish & responsive fixes | [x] | [phase-3b/v0.19-ui-polish.md](requirements/phase-3b/v0.19-ui-polish.md) |
 | 0.19 | Backlog & estimation improvements | [x] | [phase-3b/v0.19-backlog-estimation.md](requirements/phase-3b/v0.19-backlog-estimation.md) |
 
 ---

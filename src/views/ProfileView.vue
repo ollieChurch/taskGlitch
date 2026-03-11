@@ -1,12 +1,13 @@
 <template>
 	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 	<content-card class="text-left">
-		<div class="flex items-center justify-between mb-3 shrink-0">
+		<div class="flex items-center justify-between mt-2 mb-4 shrink-0">
 			<h1 class="text-left mb-0 font-rajdhani font-bold text-2xl text-text-heading">Profile</h1>
 			<button
 				@click="logout()"
-				class="btn-themed bg-app-warning text-text-inverse px-4 py-2 font-rajdhani font-semibold hover:brightness-110 transition-all"
-				>
+				class="btn-themed flex items-center gap-1.5 bg-surface-hover border border-border-visible text-text-secondary px-4 py-2 text-sm font-rajdhani font-semibold hover:border-app-danger hover:text-app-danger transition-all"
+			>
+				<LogOut :size="14" />
 				Logout
 			</button>
 		</div>
@@ -22,7 +23,7 @@
 					<div class="flex items-center justify-between mb-3">
 						<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Account</h3>
 					</div>
-					<div class="flex">
+					<div class="flex pl-4">
 						<div class="w-6/12 sm:w-5/12">
 							<p class="font-rajdhani text-text-secondary">Email</p>
 						</div>
@@ -104,13 +105,11 @@
 						</a>
 					</div>
 					<div
-						v-for="(settingsGroup, index) in Object.keys(
-							getAccountSettings
-						)"
+						v-for="(settingsGroup, index) in visibleSettingGroups"
 						:key="`${settingsGroup}-settingDisplay-${index}`"
 					>
-						<h5 class="font-rajdhani font-semibold text-text-primary" v-if="settingsGroup !== 'display' && settingsGroup !== 'dataManagement'">{{ settingsGroup }}</h5>
-						<div class="mb-4" v-if="settingsGroup !== 'display' && settingsGroup !== 'dataManagement'">
+						<h5 class="font-rajdhani font-semibold text-text-primary">{{ settingGroupLabel(settingsGroup) }}</h5>
+						<div class="mb-4">
 							<div
 								v-for="setting in Object.keys(
 									getAccountSettings[settingsGroup]
@@ -119,15 +118,13 @@
 								class="flex"
 							>
 								<div class="w-6/12 sm:w-5/12 pl-4">
-									<p class="font-rajdhani text-text-secondary">{{ setting }}</p>
+									<p class="font-rajdhani text-text-secondary">{{ settingLabel(settingsGroup, setting) }}</p>
 								</div>
 								<div>
 									<p class="font-rajdhani text-text-primary">
 										{{
 											createSettingString(
-												getAccountSettings[settingsGroup][
-													setting
-												]
+												getAccountSettings[settingsGroup][setting]
 											)
 										}}
 									</p>
@@ -141,38 +138,45 @@
 
 		<hr class="border-border-default" />
 
-		<!-- Danger Zone — full width -->
-		<div class="max-w-lg">
-			<h3 class="mb-4 mt-3 font-rajdhani font-bold text-xl text-app-danger">Danger Zone</h3>
-			<div class="flex justify-between items-center">
-				<h5 class="text-app-danger font-rajdhani font-semibold">
-					Restore Default Settings
-				</h5>
+		<!-- Help & Info -->
+		<div class="flex flex-wrap items-center justify-center gap-3 my-4">
+			<button
+				class="btn-themed flex items-center gap-1.5 bg-surface-hover border border-border-visible text-text-secondary px-3 py-1.5 text-sm font-rajdhani font-semibold hover:border-accent-dim hover:text-text-primary transition-all"
+				@click="store.triggerOnboarding()"
+			>
+				<HelpCircle :size="14" />
+				How it works
+			</button>
+			<button
+				class="btn-themed flex items-center gap-1.5 bg-surface-hover border border-border-visible text-text-secondary px-3 py-1.5 text-sm font-rajdhani font-semibold hover:border-accent-dim hover:text-text-primary transition-all"
+				@click="store.triggerPatchNotes()"
+			>
+				<Sparkles :size="14" />
+				What's new
+			</button>
+		</div>
+
+		<hr class="border-border-default" />
+
+		<!-- Danger Zone -->
+		<div class="mt-3 mb-2 border border-app-danger/30 rounded-lg p-4">
+			<h3 class="mb-3 font-rajdhani font-bold text-sm uppercase tracking-widest text-app-danger">Danger Zone</h3>
+			<div class="flex items-center justify-between gap-4">
+				<div>
+					<p class="font-rajdhani font-semibold text-text-primary mb-0">Restore Default Settings</p>
+					<p class="font-rajdhani text-text-secondary text-sm mb-0">Reset all scheduling preferences to their defaults</p>
+				</div>
 				<button
-					class="btn-themed bg-app-danger text-white px-4 py-2 font-bold font-rajdhani hover:brightness-110 transition-all"
-						@click="restoreDefaultSettings()"
+					class="btn-themed flex items-center gap-1.5 shrink-0 border border-app-danger/50 text-app-danger bg-transparent px-4 py-2 text-sm font-semibold font-rajdhani hover:bg-app-danger hover:text-white transition-all"
+					@click="restoreDefaultSettings()"
 				>
+					<RotateCcw :size="14" />
 					Restore
 				</button>
 			</div>
 		</div>
 
-		<hr class="border-border-default mt-4" />
-		<div class="flex flex-wrap items-center justify-center gap-4 mt-4 mb-2">
-			<button
-				class="text-xs text-text-secondary font-rajdhani hover:text-accent transition-colors"
-				@click="store.triggerOnboarding()"
-			>
-				How it works
-			</button>
-			<button
-				class="text-xs text-text-secondary font-rajdhani hover:text-accent transition-colors"
-				@click="store.triggerPatchNotes()"
-			>
-				What's new
-			</button>
-		</div>
-		<p class="text-center text-xs text-text-secondary font-rajdhani mb-0 opacity-60">
+		<p class="text-center text-xs text-text-secondary font-rajdhani mb-0 mt-4 opacity-60">
 			v{{ store.appVersion }}
 		</p>
 
@@ -188,7 +192,8 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import ContentCard from '@/components/ContentCard.vue'
 import SettingsModal from '@/components/SettingsModal.vue'
-import { Pencil } from 'lucide-vue-next'
+import { Pencil, LogOut, HelpCircle, Sparkles, RotateCcw } from 'lucide-vue-next'
+import { settingLabels } from '@/assets/settingLabels'
 
 export default {
 	name: 'ProfileView',
@@ -196,7 +201,11 @@ export default {
 	components: {
 		ContentCard,
 		SettingsModal,
-		Pencil
+		Pencil,
+		LogOut,
+		HelpCircle,
+		Sparkles,
+		RotateCcw
 	},
 
 	setup() {
@@ -231,6 +240,12 @@ export default {
 
 		savedRetentionDays() {
 			return this.store.getAccountSettings?.dataManagement?.completedRetentionDays ?? 90
+		},
+
+		visibleSettingGroups() {
+			return Object.keys(this.getAccountSettings).filter(
+				g => g !== 'display' && g !== 'dataManagement'
+			)
 		}
 	},
 
@@ -242,6 +257,14 @@ export default {
 		restoreDefaultSettings() {
 			this.store.setAccountSettings(this.store.defaultSettings)
 			this.saveAccountToDatabase(this.store.account)
+		},
+
+		settingGroupLabel(group) {
+			return settingLabels._groups[group] ?? group
+		},
+
+		settingLabel(group, setting) {
+			return settingLabels[group]?.[setting] ?? setting
 		},
 
 		createSettingString(settingValue) {

@@ -2,8 +2,8 @@
 	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 		<content-card>
 			<!-- Command Center Header -->
-			<h1 class="text-left mb-2 font-rajdhani font-bold text-sm text-text-heading section-header uppercase tracking-widest shrink-0">Command Center</h1>
-			<hr class="accent-divider mb-4 mt-2 shrink-0" />
+			<h1 class="text-left mt-2 mb-2 font-rajdhani font-bold text-sm text-text-heading section-header uppercase tracking-widest shrink-0">Command Center</h1>
+			<hr class="accent-divider mb-5 mt-2 shrink-0" />
 
 			<!-- Loading state -->
 			<div v-if="isLoading">
@@ -28,11 +28,11 @@
 			<!-- Data loaded -->
 			<div v-else class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
 				<!-- Stat Counters — full width row -->
-				<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+				<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
 					<!-- Active Tasks -->
-					<router-link :to="{ name: 'tasks', query: { tab: 'backlog' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block">
-						<ListTodo :size="18" class="mx-auto mb-1 text-accent" />
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
+					<router-link :to="{ name: 'tasks', query: { tab: 'backlog' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block">
+						<ListTodo :size="18" class="mx-auto mb-2 text-accent" />
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
 							{{ activeTaskCount }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
@@ -41,9 +41,9 @@
 					</router-link>
 
 					<!-- Completed Tasks (last 7 days) -->
-					<router-link :to="{ name: 'tasks', query: { tab: 'completed' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block">
-						<CheckCircle2 :size="18" class="mx-auto mb-1 text-app-success" />
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
+					<router-link :to="{ name: 'tasks', query: { tab: 'completed' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block">
+						<CheckCircle2 :size="18" class="mx-auto mb-2 text-app-success" />
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
 							{{ completedLast7Days }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
@@ -52,9 +52,9 @@
 					</router-link>
 
 					<!-- Categories -->
-					<button @click="scrollToBreakdown" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block w-full">
-						<FolderOpen :size="18" class="mx-auto mb-1 text-app-info" />
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
+					<button @click="scrollToBreakdown" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block w-full">
+						<FolderOpen :size="18" class="mx-auto mb-2 text-app-info" />
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
 							{{ categoryCount }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
@@ -63,13 +63,13 @@
 					</button>
 
 					<!-- Schedule Status -->
-					<router-link :to="{ name: 'schedule' }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg p-3 text-center block">
+					<router-link :to="{ name: 'schedule' }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block">
 						<Radio
 							:size="18"
-							class="mx-auto mb-1"
+							class="mx-auto mb-2"
 							:class="scheduleStatus.active ? 'text-app-success animate-pulse' : 'text-text-secondary'"
 						/>
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
 							{{ scheduleStatus.label }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
@@ -79,9 +79,9 @@
 				</div>
 
 				<!-- Spotlights — side by side on desktop -->
-				<div class="md:grid md:grid-cols-2 md:gap-4 mb-4">
+				<div class="md:grid md:grid-cols-2 md:gap-4 mb-6 space-y-4 md:space-y-0">
 					<div v-if="highestPriorityTask.length">
-						<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
+						<div class="spotlight-label flex items-center gap-2 mb-2 pl-3">
 							<Crosshair :size="12" class="text-accent" />
 							<span class="font-bold font-rajdhani text-xs text-accent uppercase tracking-widest">
 								Recommended
@@ -95,7 +95,7 @@
 					</div>
 
 					<div v-if="oldestTask.length">
-						<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
+						<div class="spotlight-label flex items-center gap-2 mb-2 pl-3">
 							<Clock :size="12" class="text-app-warning" />
 							<span class="font-bold font-rajdhani text-xs text-app-warning uppercase tracking-widest">
 								Oldest Task
@@ -110,13 +110,13 @@
 				</div>
 
 				<!-- Estimation accuracy — full width -->
-				<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-4 overflow-hidden rounded-lg border border-border-visible">
+				<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-6 overflow-hidden rounded-lg border border-border-visible">
 					<div class="flex items-stretch">
-						<div class="flex items-center justify-center px-5 py-4" :class="estimationAccuracy.bgClass">
+						<div class="flex items-center justify-center px-6 py-5" :class="estimationAccuracy.bgClass">
 							<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
 						</div>
-						<div class="flex-1 px-4 py-3 text-left">
-							<div class="flex items-center gap-2">
+						<div class="flex-1 px-5 py-4 text-left">
+							<div class="flex items-center gap-2 mb-1">
 								<h5 class="font-bold font-rajdhani text-xs uppercase tracking-widest">Estimation Accuracy</h5>
 								<span class="text-xs text-text-secondary font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
 							</div>
@@ -130,53 +130,79 @@
 				<!-- Breakdowns — side by side on desktop -->
 				<div ref="breakdownRef" class="md:grid md:grid-cols-2 md:gap-4">
 					<!-- Priority Breakdown -->
-					<div class="mb-4 md:mb-0">
-						<h5 class="text-start mb-2 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
+					<div class="mb-5 md:mb-0">
+						<h5 class="text-start mb-3 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
 							By Priority
 						</h5>
-						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-3">
-							<router-link
-								v-for="item in priorityBreakdown"
-								:key="item.label"
-								:to="{ name: 'tasks', query: { tab: 'backlog', priority: item.value } }"
-								class="breakdown-row group flex items-center gap-3 py-1.5"
-							>
-								<span class="text-xs font-rajdhani font-semibold text-text-secondary w-16 text-left truncate shrink-0 group-hover:text-text-heading transition-colors">{{ item.label }}</span>
-								<div class="flex-1 h-5 bg-surface-base rounded-sm overflow-hidden border border-border-visible/50">
-									<div
-										class="h-full rounded-sm transition-all duration-500 bar-glow"
-										:style="{ width: item.percent + '%', backgroundColor: item.color }"
-									/>
-								</div>
-								<span class="text-xs font-rajdhani font-bold text-text-heading w-6 text-right shrink-0">{{ item.count }}</span>
-							</router-link>
+						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-4">
+							<!-- Stacked bar -->
+							<div class="flex h-7 rounded-sm overflow-hidden border border-border-visible/50">
+								<router-link
+									v-for="item in priorityBreakdown"
+									:key="item.label"
+									:to="{ name: 'tasks', query: { tab: 'backlog', priority: item.value } }"
+									v-show="item.count > 0"
+									class="priority-segment h-full transition-all duration-500"
+									:style="{ width: item.percent + '%', backgroundColor: item.color }"
+									:title="item.label + ': ' + item.count"
+								/>
+							</div>
+							<!-- Legend -->
+							<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+								<router-link
+									v-for="item in priorityBreakdown"
+									:key="'legend-' + item.label"
+									:to="{ name: 'tasks', query: { tab: 'backlog', priority: item.value } }"
+									class="flex items-center gap-1.5 group"
+								>
+									<span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: item.color }" />
+									<span class="text-xs font-rajdhani font-semibold text-text-secondary group-hover:text-text-heading transition-colors">
+										{{ item.label }}
+									</span>
+									<span class="text-xs font-rajdhani font-bold text-text-heading">{{ item.count }}</span>
+								</router-link>
+							</div>
 						</div>
 					</div>
 
 					<!-- Category Breakdown -->
 					<div>
-						<h5 class="text-start mb-2 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
+						<h5 class="text-start mb-3 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
 							By Category
 						</h5>
-						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-3">
-							<div v-if="categoryBreakdown.length === 0" class="py-3 text-center text-text-secondary font-rajdhani text-sm">
+						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-4">
+							<div v-if="categoryBreakdown.length === 0" class="py-4 text-center text-text-secondary font-rajdhani text-sm">
 								No categories yet
 							</div>
-							<router-link
-								v-for="item in categoryBreakdown"
-								:key="item.label"
-								:to="{ name: 'tasks', query: { tab: 'backlog', category: item.label } }"
-								class="breakdown-row group flex items-center gap-3 py-1.5"
-							>
-								<span class="text-xs font-rajdhani font-semibold text-text-secondary w-16 text-left truncate shrink-0 group-hover:text-text-heading transition-colors">{{ item.label }}</span>
-								<div class="flex-1 h-5 bg-surface-base rounded-sm overflow-hidden border border-border-visible/50">
-									<div
-										class="h-full rounded-sm transition-all duration-500 bar-glow"
+							<template v-else>
+								<!-- Stacked bar -->
+								<div class="flex h-7 rounded-sm overflow-hidden border border-border-visible/50">
+									<router-link
+										v-for="item in categoryBreakdown"
+										:key="item.label"
+										:to="{ name: 'tasks', query: { tab: 'backlog', category: item.label } }"
+										v-show="item.count > 0"
+										class="priority-segment h-full transition-all duration-500"
 										:style="{ width: item.percent + '%', backgroundColor: item.color }"
+										:title="item.label + ': ' + item.count"
 									/>
 								</div>
-								<span class="text-xs font-rajdhani font-bold text-text-heading w-6 text-right shrink-0">{{ item.count }}</span>
-							</router-link>
+								<!-- Legend -->
+								<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+									<router-link
+										v-for="item in categoryBreakdown"
+										:key="'legend-' + item.label"
+										:to="{ name: 'tasks', query: { tab: 'backlog', category: item.label } }"
+										class="flex items-center gap-1.5 group"
+									>
+										<span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: item.color }" />
+										<span class="text-xs font-rajdhani font-semibold text-text-secondary group-hover:text-text-heading transition-colors">
+											{{ item.label }}
+										</span>
+										<span class="text-xs font-rajdhani font-bold text-text-heading">{{ item.count }}</span>
+									</router-link>
+								</div>
+							</template>
 						</div>
 					</div>
 				</div>
@@ -365,5 +391,15 @@ export default {
 
 .bar-glow {
 	transition: width 0.5s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.priority-segment {
+	text-decoration: none;
+	min-width: 4px;
+}
+
+.priority-segment:hover {
+	filter: brightness(1.2);
+	box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.1);
 }
 </style>

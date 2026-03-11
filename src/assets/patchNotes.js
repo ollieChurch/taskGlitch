@@ -7,7 +7,11 @@ export const patchNotes = [
 			'Blocked filter badge shows how many tasks are currently blocked, including dependency-blocked tasks',
 			'When a rescheduled session has spare time, you\'re prompted to add the top-priority backlog task that fits',
 			'The suggestion also appears when all scheduled tasks are completed with time remaining',
-			'Schedule pause/play, auto-reschedule on task completion, and in-progress indicator fixes from the previous update'
+			'Schedule pause/play, auto-reschedule on task completion, and in-progress indicator fixes from the previous update',
+			'Profile page refreshed — cleaner layout, properly styled logout button, and human-readable setting labels',
+			'\"How it works\" and \"What\'s new\" links moved above the fold on the profile page for easier access',
+			'Modals no longer touch the screen edges on mobile devices',
+			'Opening the task editor no longer auto-focuses the name field (prevents keyboard popup on mobile)'
 		]
 	},
 	{
