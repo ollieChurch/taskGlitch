@@ -21,6 +21,7 @@ export default {
 .content-card {
 	max-width: 575px;
 	min-height: calc(100vh - 7rem);
+	min-height: calc(100dvh - 7rem);
 	position: relative;
 	border: 1px solid var(--color-border-visible);
 }

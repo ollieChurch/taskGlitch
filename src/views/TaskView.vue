@@ -1,7 +1,7 @@
 <template>
 	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 		<content-card>
-			<BaseTabs pills fill sticky>
+			<BaseTabs pills fill sticky :initialTab="initialTab">
 				<BaseTab title="Backlog">
 					<div class="pt-2 md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
 						<FilterWidget
@@ -10,6 +10,7 @@
 							:sizeLabels="store.sizeLabels"
 							:priorities="store.priorities"
 							:showDateRange="false"
+							:blockedCount="blockedCount"
 						/>
 
 						<!-- Blocked count -->
@@ -138,10 +139,12 @@ export default {
 
 	created() {
 		this.pageCheck()
+		this.applyQueryFilters()
 	},
 
 	data() {
 		return {
+			initialTab: this.$route?.query?.tab === 'completed' ? 1 : 0,
 			backlogFilters: {
 				search: '',
 				priorities: [],
@@ -206,7 +209,10 @@ export default {
 		},
 
 		blockedCount() {
-			return this.getPrioritisedTasks.filter(t => t.blocked).length
+			const depBlockedIds = this.store.getDependencyBlockedIds
+			return this.getPrioritisedTasks.filter(
+				t => t.blocked || depBlockedIds.has(t.id)
+			).length
 		},
 
 		toastMessage() {
@@ -257,9 +263,13 @@ export default {
 					if (!filters.sizes.includes(task.sizing)) return false
 				}
 
-				// Blocked status
-				if (filters.blocked === 'active' && task.blocked) return false
-				if (filters.blocked === 'blocked' && !task.blocked) return false
+				// Blocked status (include dependency-blocked)
+				if (filters.blocked === 'active' || filters.blocked === 'blocked') {
+					const depBlockedIds = this.store.getDependencyBlockedIds
+					const isBlocked = task.blocked || depBlockedIds.has(task.id)
+					if (filters.blocked === 'active' && isBlocked) return false
+					if (filters.blocked === 'blocked' && !isBlocked) return false
+				}
 
 				// Deadline
 				if (filters.deadline) {
@@ -314,6 +324,18 @@ export default {
 			clearTimeout(this.toastTimer)
 			this.toastTimer = null
 			this.toastTask = null
+		},
+
+		applyQueryFilters() {
+			const query = this.$route?.query
+			if (!query) return
+
+			if (query.priority !== undefined) {
+				this.backlogFilters.priorities = [Number(query.priority)]
+			}
+			if (query.category) {
+				this.backlogFilters.categories = [query.category]
+			}
 		}
 	}
 }

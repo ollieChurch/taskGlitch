@@ -1,6 +1,6 @@
 # TaskGlitch Roadmap
 
-> Current version: **0.15.0**
+> Current version: **0.18.0**
 > Target: **1.0** release, then continued development toward an AI-ready platform
 
 ## Overview
@@ -55,6 +55,17 @@ TaskGlitch is an intelligent task scheduling app. The path to 1.0 focuses on pol
 | 0.17 | Flag blocked tasks | [x] | [phase-3/v0.17-blocked-tasks.md](requirements/phase-3/v0.17-blocked-tasks.md) |
 | 0.17 | Task dependencies | [x] | [phase-3/v0.17-task-dependencies.md](requirements/phase-3/v0.17-task-dependencies.md) |
 | 0.18 | Repeating tasks | [x] | [phase-3/v0.18-repeating-tasks.md](requirements/phase-3/v0.18-repeating-tasks.md) |
+
+## Phase 3b: Pre-Release Polish (v0.19)
+
+*Make it right. Fix rough edges and harden the schedule before 1.0.*
+
+| Version | Item | Status | Requirements |
+|---------|------|--------|--------------|
+| 0.19 | Dashboard overhaul | [x] | [phase-3b/v0.19-dashboard-overhaul.md](requirements/phase-3b/v0.19-dashboard-overhaul.md) |
+| 0.19 | Schedule fixes & enhancements | [x] | [phase-3b/v0.19-schedule-fixes.md](requirements/phase-3b/v0.19-schedule-fixes.md) |
+| 0.19 | UI polish & responsive fixes | [x] | [phase-3b/v0.19-ui-polish.md](requirements/phase-3b/v0.19-ui-polish.md) |
+| 0.19 | Backlog & estimation improvements | [x] | [phase-3b/v0.19-backlog-estimation.md](requirements/phase-3b/v0.19-backlog-estimation.md) |
 
 ---
 

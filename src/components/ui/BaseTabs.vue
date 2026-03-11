@@ -46,10 +46,14 @@ export default {
 		sticky: {
 			type: Boolean,
 			default: false
+		},
+		initialTab: {
+			type: Number,
+			default: 0
 		}
 	},
 	setup(props) {
-		const activeTab = ref(0)
+		const activeTab = ref(props.initialTab)
 		const tabs = ref([])
 
 		function registerTab(tab) {

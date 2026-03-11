@@ -2,8 +2,8 @@
 	<div class="md:flex md:flex-col md:h-full md:min-h-0">
 		<content-card>
 			<!-- Command Center Header -->
-			<h1 class="text-left mb-2 font-rajdhani font-bold text-sm text-text-heading section-header uppercase tracking-widest shrink-0">Command Center</h1>
-			<hr class="accent-divider mb-4 mt-2 shrink-0" />
+			<h1 class="text-left mt-2 mb-2 font-rajdhani font-bold text-sm text-text-heading section-header uppercase tracking-widest shrink-0">Command Center</h1>
+			<hr class="accent-divider mb-5 mt-2 shrink-0" />
 
 			<!-- Loading state -->
 			<div v-if="isLoading">
@@ -28,143 +28,187 @@
 			<!-- Data loaded -->
 			<div v-else class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
 				<!-- Stat Counters — full width row -->
-				<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+				<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
 					<!-- Active Tasks -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
-						<ListTodo :size="18" class="mx-auto mb-1 text-accent" />
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
+					<router-link :to="{ name: 'tasks', query: { tab: 'backlog' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block">
+						<ListTodo :size="18" class="mx-auto mb-2 text-accent" />
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
 							{{ activeTaskCount }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
 							Active
 						</p>
-					</div>
+					</router-link>
 
-					<!-- Completed Tasks -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
-						<CheckCircle2 :size="18" class="mx-auto mb-1 text-app-success" />
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
-							{{ completedTaskCount }}
+					<!-- Completed Tasks (last 7 days) -->
+					<router-link :to="{ name: 'tasks', query: { tab: 'completed' } }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block">
+						<CheckCircle2 :size="18" class="mx-auto mb-2 text-app-success" />
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
+							{{ completedLast7Days }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
-							Completed
+							Done This Week
 						</p>
-					</div>
+					</router-link>
 
 					<!-- Categories -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
-						<FolderOpen :size="18" class="mx-auto mb-1 text-app-info" />
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
+					<button @click="scrollToBreakdown" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block w-full">
+						<FolderOpen :size="18" class="mx-auto mb-2 text-app-info" />
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
 							{{ categoryCount }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
 							Categories
 						</p>
-					</div>
+					</button>
 
 					<!-- Schedule Status -->
-					<div class="stat-counter depth-panel border border-border-visible rounded-lg p-3 text-center">
+					<router-link :to="{ name: 'schedule' }" class="stat-counter stat-counter-link depth-panel border border-border-visible rounded-lg px-3 py-4 text-center block">
 						<Radio
 							:size="18"
-							class="mx-auto mb-1"
+							class="mx-auto mb-2"
 							:class="scheduleStatus.active ? 'text-app-success animate-pulse' : 'text-text-secondary'"
 						/>
-						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1">
+						<p class="text-2xl font-rajdhani font-bold text-text-heading leading-none mb-1.5">
 							{{ scheduleStatus.label }}
 						</p>
 						<p class="text-xs font-rajdhani text-text-secondary uppercase tracking-wider">
 							Schedule
 						</p>
+					</router-link>
+				</div>
+
+				<!-- Spotlights — side by side on desktop -->
+				<div class="md:grid md:grid-cols-2 md:gap-4 mb-6 space-y-4 md:space-y-0">
+					<div v-if="highestPriorityTask.length">
+						<div class="spotlight-label flex items-center gap-2 mb-2 pl-3">
+							<Crosshair :size="12" class="text-accent" />
+							<span class="font-bold font-rajdhani text-xs text-accent uppercase tracking-widest">
+								Recommended
+							</span>
+						</div>
+						<task-card
+							:task="highestPriorityTask[0]"
+							@openDetail="openTaskDetail"
+							class="!mt-0"
+						/>
+					</div>
+
+					<div v-if="oldestTask.length">
+						<div class="spotlight-label flex items-center gap-2 mb-2 pl-3">
+							<Clock :size="12" class="text-app-warning" />
+							<span class="font-bold font-rajdhani text-xs text-app-warning uppercase tracking-widest">
+								Oldest Task
+							</span>
+						</div>
+						<task-card
+							:task="oldestTask[0]"
+							@openDetail="openTaskDetail"
+							class="!mt-0"
+						/>
 					</div>
 				</div>
 
-				<!-- 2-column layout: spotlights + charts -->
-				<div class="md:grid md:grid-cols-2 md:gap-6 lg:grid-cols-5">
-					<!-- Left column: spotlights, accuracy -->
-					<div class="lg:col-span-3">
-						<!-- Spotlight: Recommended Task -->
-						<div v-if="highestPriorityTask.length" class="mb-4">
-							<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
-								<Crosshair :size="12" class="text-accent" />
-								<span class="font-bold font-rajdhani text-xs text-accent uppercase tracking-widest">
-									Recommended
-								</span>
-							</div>
-							<task-card
-								:task="highestPriorityTask[0]"
-								@editTask="openTaskModal()"
-								class="!mt-0"
-							/>
+				<!-- Estimation accuracy — full width -->
+				<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-6 overflow-hidden rounded-lg border border-border-visible">
+					<div class="flex items-stretch">
+						<div class="flex items-center justify-center px-6 py-5" :class="estimationAccuracy.bgClass">
+							<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
 						</div>
-
-						<!-- Spotlight: Oldest Task -->
-						<div v-if="oldestTask.length" class="mb-4">
-							<div class="spotlight-label flex items-center gap-2 mb-1 pl-3">
-								<Clock :size="12" class="text-app-warning" />
-								<span class="font-bold font-rajdhani text-xs text-app-warning uppercase tracking-widest">
-									Oldest Task
-								</span>
+						<div class="flex-1 px-5 py-4 text-left">
+							<div class="flex items-center gap-2 mb-1">
+								<h5 class="font-bold font-rajdhani text-xs uppercase tracking-widest">Estimation Accuracy</h5>
+								<span class="text-xs text-text-secondary font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
 							</div>
-							<task-card
-								:task="oldestTask[0]"
-								@editTask="openTaskModal()"
-								class="!mt-0"
-							/>
+							<p class="text-sm text-text-secondary font-rajdhani mt-1 mb-0">
+								{{ estimationAccuracy.summary }}
+							</p>
 						</div>
+					</div>
+				</div>
 
-						<!-- Estimation accuracy (only shown when time-tracked data exists) -->
-						<div v-if="estimationAccuracy" class="depth-panel hover-glow mb-4 overflow-hidden rounded-lg border border-border-visible">
-							<div class="flex items-stretch">
-								<div class="flex items-center justify-center px-5 py-4" :class="estimationAccuracy.bgClass">
-									<span class="text-3xl font-rajdhani font-bold text-white leading-none">{{ estimationAccuracy.percentage }}%</span>
-								</div>
-								<div class="flex-1 px-4 py-3 text-left">
-									<div class="flex items-center gap-2">
-										<h5 class="font-bold font-rajdhani text-xs uppercase tracking-widest">Estimation Accuracy</h5>
-										<span class="text-xs text-text-secondary font-rajdhani">{{ estimationAccuracy.taskCount }} task{{ estimationAccuracy.taskCount === 1 ? '' : 's' }}</span>
-									</div>
-									<p class="text-sm text-text-secondary font-rajdhani mt-1 mb-0">
-										{{ estimationAccuracy.summary }}
-									</p>
-								</div>
-							</div>
-						</div>
-					</div><!-- /left column -->
-
-					<!-- Right column: charts -->
-					<div class="lg:col-span-2">
-						<h5 class="text-start mb-3 font-bold font-rajdhani text-sm text-text-heading section-header uppercase tracking-widest">
-							Backlog Breakdown
+				<!-- Breakdowns — side by side on desktop -->
+				<div ref="breakdownRef" class="md:grid md:grid-cols-2 md:gap-4">
+					<!-- Priority Breakdown -->
+					<div class="mb-5 md:mb-0">
+						<h5 class="text-start mb-3 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
+							By Priority
 						</h5>
-						<div class="depth-panel depth-highlight rounded-lg border border-border-visible">
-							<BaseTabs fill>
-								<BaseTab title="Categories">
-									<div class="pt-4 pb-6 px-4">
-										<div class="max-w-[320px] mx-auto">
-											<doughnut
-												:data="categoryBreakdownData"
-												:options="chartOptions"
-											/>
-										</div>
-									</div>
-								</BaseTab>
-								<BaseTab title="Priorities">
-									<div class="pt-4 pb-6 px-4">
-										<div class="max-w-[320px] mx-auto">
-											<doughnut
-												:data="priorityBreakdownData"
-												:options="chartOptions"
-											/>
-										</div>
-									</div>
-								</BaseTab>
-							</BaseTabs>
+						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-4">
+							<!-- Stacked bar -->
+							<div class="flex h-7 rounded-sm overflow-hidden border border-border-visible/50">
+								<router-link
+									v-for="item in priorityBreakdown"
+									:key="item.label"
+									:to="{ name: 'tasks', query: { tab: 'backlog', priority: item.value } }"
+									v-show="item.count > 0"
+									class="priority-segment h-full transition-all duration-500"
+									:style="{ width: item.percent + '%', backgroundColor: item.color }"
+									:title="item.label + ': ' + item.count"
+								/>
+							</div>
+							<!-- Legend -->
+							<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+								<router-link
+									v-for="item in priorityBreakdown"
+									:key="'legend-' + item.label"
+									:to="{ name: 'tasks', query: { tab: 'backlog', priority: item.value } }"
+									class="flex items-center gap-1.5 group"
+								>
+									<span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: item.color }" />
+									<span class="text-xs font-rajdhani font-semibold text-text-secondary group-hover:text-text-heading transition-colors">
+										{{ item.label }}
+									</span>
+									<span class="text-xs font-rajdhani font-bold text-text-heading">{{ item.count }}</span>
+								</router-link>
+							</div>
 						</div>
-					</div><!-- /right column -->
-				</div><!-- /grid -->
+					</div>
+
+					<!-- Category Breakdown -->
+					<div>
+						<h5 class="text-start mb-3 font-bold font-rajdhani text-xs text-text-heading uppercase tracking-widest">
+							By Category
+						</h5>
+						<div class="depth-panel depth-highlight rounded-lg border border-border-visible p-4">
+							<div v-if="categoryBreakdown.length === 0" class="py-4 text-center text-text-secondary font-rajdhani text-sm">
+								No categories yet
+							</div>
+							<template v-else>
+								<!-- Stacked bar -->
+								<div class="flex h-7 rounded-sm overflow-hidden border border-border-visible/50">
+									<router-link
+										v-for="item in categoryBreakdown"
+										:key="item.label"
+										:to="{ name: 'tasks', query: { tab: 'backlog', category: item.label } }"
+										v-show="item.count > 0"
+										class="priority-segment h-full transition-all duration-500"
+										:style="{ width: item.percent + '%', backgroundColor: item.color }"
+										:title="item.label + ': ' + item.count"
+									/>
+								</div>
+								<!-- Legend -->
+								<div class="flex flex-wrap gap-x-4 gap-y-1 mt-3">
+									<router-link
+										v-for="item in categoryBreakdown"
+										:key="'legend-' + item.label"
+										:to="{ name: 'tasks', query: { tab: 'backlog', category: item.label } }"
+										class="flex items-center gap-1.5 group"
+									>
+										<span class="w-2.5 h-2.5 rounded-full shrink-0" :style="{ backgroundColor: item.color }" />
+										<span class="text-xs font-rajdhani font-semibold text-text-secondary group-hover:text-text-heading transition-colors">
+											{{ item.label }}
+										</span>
+										<span class="text-xs font-rajdhani font-bold text-text-heading">{{ item.count }}</span>
+									</router-link>
+								</div>
+							</template>
+						</div>
+					</div>
+				</div>
 			</div>
 		</content-card>
-		<task-modal ref="taskModalRef" />
+		<TaskDetailModal ref="taskDetailRef" />
 	</div>
 </template>
 
@@ -173,15 +217,9 @@ import { useAppStore } from '@/stores/app'
 import { useTaskActions } from '@/composables/useTaskActions'
 import ContentCard from '@/components/ContentCard.vue'
 import TaskCard from '@/components/TaskCard.vue'
-import TaskModal from '@/components/TaskModal.vue'
+import TaskDetailModal from '@/components/TaskDetailModal.vue'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
-import BaseTabs from '@/components/ui/BaseTabs.vue'
-import BaseTab from '@/components/ui/BaseTab.vue'
 import { ListTodo, CheckCircle2, FolderOpen, Radio, Crosshair, Clock } from 'lucide-vue-next'
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
-import { Doughnut } from 'vue-chartjs'
-
-ChartJS.register(ArcElement, Tooltip, Legend)
 
 export default {
 	name: 'DashboardView',
@@ -189,11 +227,8 @@ export default {
 	components: {
 		ContentCard,
 		TaskCard,
-		TaskModal,
-		Doughnut,
+		TaskDetailModal,
 		SkeletonLoader,
-		BaseTabs,
-		BaseTab,
 		ListTodo,
 		CheckCircle2,
 		FolderOpen,
@@ -204,56 +239,12 @@ export default {
 
 	setup() {
 		const store = useAppStore()
-		const { pageCheck } = useTaskActions()
-		return { store, pageCheck }
-	},
-
-	data() {
-		return {
-			chartOptions: {
-				responsive: true,
-				maintainAspectRatio: true,
-				plugins: {
-					legend: {
-						position: 'bottom',
-						labels: {
-							color: '#94a3b8',
-							font: {
-								family: 'Rajdhani',
-								size: 12
-							},
-							padding: 12,
-							usePointStyle: true,
-							pointStyleWidth: 10
-						}
-					},
-					tooltip: {
-						backgroundColor: '#1a2332',
-						titleColor: '#f1f5f9',
-						bodyColor: '#e2e8f0',
-						borderColor: '#1e293b',
-						borderWidth: 1,
-						titleFont: {
-							family: 'Rajdhani',
-							weight: 'bold'
-						},
-						bodyFont: {
-							family: 'Rajdhani'
-						}
-					}
-				}
-			}
-		}
+		const { pageCheck, getActualBand } = useTaskActions()
+		return { store, pageCheck, getActualBand }
 	},
 
 	created() {
 		this.pageCheck()
-	},
-
-	watch: {
-		'store.addTaskTrigger'() {
-			this.addTask()
-		}
 	},
 
 	computed: {
@@ -269,8 +260,14 @@ export default {
 			return this.store.getPrioritisedTasks.length
 		},
 
-		completedTaskCount() {
-			return this.store.completed.length
+		completedLast7Days() {
+			const sevenDaysAgo = new Date()
+			sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+			sevenDaysAgo.setHours(0, 0, 0, 0)
+			return this.store.completed.filter(t => {
+				if (!t.completedDateTime) return false
+				return new Date(t.completedDateTime) >= sevenDaysAgo
+			}).length
 		},
 
 		categoryCount() {
@@ -294,20 +291,8 @@ export default {
 			return tasks.length > 0 ? [tasks[0]] : []
 		},
 
-		getCategories() {
-			return this.store.getCategories
-		},
-
 		getPrioritisedTasks() {
 			return this.store.getPrioritisedTasks
-		},
-
-		getPriorityNames() {
-			return this.store.getPriorityNames
-		},
-
-		priorities() {
-			return this.store.priorities
 		},
 
 		estimationAccuracy() {
@@ -316,80 +301,105 @@ export default {
 			)
 			if (tracked.length === 0) return null
 
-			const totalEstimated = tracked.reduce((sum, t) => sum + t.sizing, 0)
-			const totalActual = tracked.reduce((sum, t) => sum + t.actualDuration, 0)
+			const defaultBands = this.store.getAccountSettings.taskLength
 
-			// Accuracy as percentage — 100% means perfect, >100 means underestimating, <100 means overestimating
-			const ratio = totalActual / totalEstimated
-			const percentage = Math.round((1 - Math.abs(1 - ratio)) * 100)
+			let correctCount = 0
+			for (const task of tracked) {
+				const bands = task.estimateBandsAtCompletion ?? defaultBands
+				const actualBand = this.getActualBand(task.actualDuration, bands)
+				if (actualBand === task.sizing) correctCount++
+			}
+
+			const percentage = Math.round((correctCount / tracked.length) * 100)
 
 			let summary, bgClass
-			if (ratio > 1.1) {
-				const overMins = totalActual - totalEstimated
-				summary = `You tend to underestimate — tasks took ${overMins}m longer than expected`
-				bgClass = 'bg-app-warning'
-			} else if (ratio < 0.9) {
-				const underMins = totalEstimated - totalActual
-				summary = `You tend to overestimate — tasks took ${underMins}m less than expected`
-				bgClass = 'bg-app-info'
-			} else {
-				summary = 'Your estimates are close to reality — nice work'
+			if (percentage >= 70) {
+				summary = `${correctCount} of ${tracked.length} tasks landed in the right size band — nice work`
 				bgClass = 'bg-app-success'
+			} else if (percentage >= 40) {
+				summary = `Only ${correctCount} of ${tracked.length} tasks matched their size band — review your sizing`
+				bgClass = 'bg-app-warning'
+			} else {
+				summary = `${correctCount} of ${tracked.length} tasks matched their size band — consider adjusting estimates`
+				bgClass = 'bg-app-danger'
 			}
 
-			return { percentage: Math.max(0, percentage), taskCount: tracked.length, summary, bgClass }
+			return { percentage, taskCount: tracked.length, summary, bgClass }
 		},
 
-		categoryBreakdownData() {
-			const labels = []
-			const data = []
-			const backgroundColor = []
+		categoryBreakdown() {
+			const categories = this.store.getCategories
+			const tasks = this.getPrioritisedTasks
 			const palette = this.store.categoryPalette
+			const total = tasks.length || 1
 
-			this.getCategories.forEach((category, index) => {
-				labels.push(category)
-				const tasksInCategory = this.getPrioritisedTasks.filter(
-					x => x.category == category
-				)
-				data.push(tasksInCategory.length)
-				backgroundColor.push(palette[index % palette.length])
-			})
-
-			return {
-				labels,
-				datasets: [{ data, backgroundColor }]
-			}
+			return categories.map((category, index) => {
+				const count = tasks.filter(x => x.category === category).length
+				return {
+					label: category,
+					count,
+					percent: Math.round((count / total) * 100),
+					color: palette[index % palette.length]
+				}
+			}).sort((a, b) => b.count - a.count)
 		},
 
-		priorityBreakdownData() {
-			const labels = []
-			const data = []
-			const backgroundColor = []
+		priorityBreakdown() {
+			const tasks = this.getPrioritisedTasks
+			const total = tasks.length || 1
 
-			this.getPriorityNames.forEach(priority => {
-				labels.push(priority.charAt(0).toUpperCase() + priority.slice(1))
-				const tasksInPriority = this.getPrioritisedTasks.filter(
-					x => x.priority == this.priorities[priority].value
-				)
-				data.push(tasksInPriority.length)
-				backgroundColor.push(this.priorities[priority].color)
+			return this.store.getPriorityNames.map(name => {
+				const priority = this.store.priorities[name]
+				const count = tasks.filter(x => x.priority === priority.value).length
+				return {
+					label: name.charAt(0).toUpperCase() + name.slice(1),
+					value: priority.value,
+					count,
+					percent: Math.round((count / total) * 100),
+					color: priority.color
+				}
 			})
-
-			return {
-				labels,
-				datasets: [{ data, backgroundColor }]
-			}
 		}
 	},
 
 	methods: {
-		addTask() {
-			this.$refs.taskModalRef.show()
+		openTaskDetail(task) {
+			this.$refs.taskDetailRef.show(task)
 		},
 
-		openTaskModal() {
-			this.$refs.taskModalRef.show()
+		scrollToBreakdown() {
+			this.$refs.breakdownRef?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 		}
 	}
 }
 </script>
+
+<style scoped>
+.stat-counter-link {
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.breakdown-row {
+	text-decoration: none;
+}
+
+.breakdown-row:hover .bar-glow {
+	box-shadow: 0 0 8px currentColor;
+	filter: brightness(1.2);
+}
+
+.bar-glow {
+	transition: width 0.5s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.priority-segment {
+	text-decoration: none;
+	min-width: 4px;
+}
+
+.priority-segment:hover {
+	filter: brightness(1.2);
+	box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.1);
+}
+</style>

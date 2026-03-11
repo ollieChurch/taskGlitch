@@ -12,7 +12,7 @@
 			<div v-else class="md:flex-1 md:min-h-0 md:flex md:flex-col">
 				<!-- Schedule complete celebration -->
 				<schedule-complete
-					v-if="isScheduleComplete"
+					v-if="isScheduleComplete && !suggestedTask"
 					:summary="scheduleSummary"
 					@clearSchedule="deleteSchedule()"
 					@newSchedule="openScheduleSetUp()"
@@ -20,46 +20,89 @@
 
 				<!-- Normal schedule view -->
 				<template v-else>
-					<div class="max-w-3xl mx-auto">
-						<div class="flex flex-wrap mb-3 gap-3 shrink-0">
+					<div class="shrink-0 mt-2 mb-4">
+						<!-- Primary action -->
+						<div class="flex justify-center mb-3">
 							<button
-								@click="openScheduleSetUp()"
-								class="btn-themed flex-1 bg-app-success text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
+								@click="togglePause()"
+								class="btn-themed flex items-center gap-2 w-full max-w-xs py-2.5 justify-center font-bold font-rajdhani text-sm transition-all"
+								:class="isPaused
+									? 'bg-app-success text-text-inverse hover:brightness-110'
+									: 'bg-surface-hover border border-border-visible text-text-primary hover:border-accent-dim'"
 							>
-								New Schedule
-							</button>
-							<button
-								@click="deleteSchedule()"
-								class="btn-themed flex-1 bg-app-danger text-white py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
-							>
-								Delete Schedule
+								<Pause v-if="!isPaused" :size="16" />
+								<Play v-else :size="16" />
+								{{ isPaused ? 'Resume Schedule' : 'Pause Schedule' }}
 							</button>
 						</div>
-						<div class="flex flex-wrap gap-3 shrink-0">
+
+						<!-- Secondary actions — proper touch targets -->
+						<div class="flex justify-center gap-2">
 							<button
 								@click="reschedule()"
-								class="btn-themed flex-1 bg-app-warning text-text-inverse py-2 px-4 font-bold font-rajdhani hover:brightness-110 transition-all"
+								class="btn-themed flex items-center gap-1.5 px-3 py-2 text-xs font-rajdhani font-semibold bg-surface-hover border border-border-visible text-text-secondary hover:border-accent-dim hover:text-text-primary transition-all"
 							>
+								<RefreshCw :size="12" />
 								Reschedule
 							</button>
 							<button
-								class="btn-themed flex-1 bg-surface-hover text-text-secondary py-2 px-4 font-bold font-rajdhani opacity-50 cursor-not-allowed transition-all"
-								disabled
+								@click="openScheduleSetUp()"
+								class="btn-themed flex items-center gap-1.5 px-3 py-2 text-xs font-rajdhani font-semibold bg-surface-hover border border-border-visible text-text-secondary hover:border-accent-dim hover:text-text-primary transition-all"
 							>
-								Export
+								<Plus :size="12" />
+								New
+							</button>
+							<button
+								@click="deleteSchedule()"
+								class="btn-themed flex items-center gap-1.5 px-3 py-2 text-xs font-rajdhani font-semibold bg-surface-hover border border-border-visible text-text-secondary hover:border-app-danger hover:text-app-danger transition-all"
+							>
+								<Trash2 :size="12" />
+								Delete
 							</button>
 						</div>
 					</div>
-					<hr class="my-4 border-border-default shrink-0" />
+					<hr class="border-border-default shrink-0" />
 					<div class="md:flex-1 md:min-h-0 md:overflow-y-auto scroll-panel">
-						<div class="max-w-4xl mx-auto">
-							<task-schedule />
+						<div class="max-w-4xl mx-auto pt-4">
+							<task-schedule @scheduleChanged="onScheduleChanged" />
 						</div>
 					</div>
 				</template>
 			</div>
 		</content-card>
 		<schedule-set-up-modal ref="scheduleSetUpModalRef" />
+		<BaseModal
+			ref="suggestionModalRef"
+			title="Time available — add another task?"
+			:showDefaultFooter="false"
+			size="sm"
+			@hide="dismissSuggestion()"
+		>
+			<div v-if="suggestedTask" class="flex items-center gap-2 mb-4">
+				<span class="inline-flex items-center">
+					<Zap v-if="suggestedTask.priority === 0" :size="14" style="color: #dc3546" />
+					<ArrowUp v-else-if="suggestedTask.priority === 1" :size="14" style="color: #ffc107" />
+					<Minus v-else-if="suggestedTask.priority === 2" :size="14" style="color: #1a8754" />
+					<ArrowDown v-else :size="14" style="color: #a78bfa" />
+				</span>
+				<span class="font-rajdhani text-text-primary">{{ suggestedTask.name }}</span>
+				<span class="text-xs font-rajdhani text-text-secondary">({{ store.getSizeLabel(suggestedTask.sizing) }})</span>
+			</div>
+			<div class="flex gap-2">
+				<button
+					@click="acceptSuggestion()"
+					class="btn-themed flex-1 bg-app-success text-text-inverse py-1.5 px-3 text-sm font-rajdhani font-semibold hover:brightness-110 transition-all"
+				>
+					Add to Schedule
+				</button>
+				<button
+					@click="dismissSuggestion()"
+					class="btn-themed flex-1 bg-surface-hover text-text-primary border border-border-default py-1.5 px-3 text-sm font-rajdhani font-semibold hover:border-accent-dim transition-all"
+				>
+					No Thanks
+				</button>
+			</div>
+		</BaseModal>
 	</div>
 </template>
 
@@ -72,6 +115,8 @@ import TaskSchedule from '@/components/TaskSchedule.vue'
 import ScheduleComplete from '@/components/ScheduleComplete.vue'
 import ContentCard from '@/components/ContentCard.vue'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
+import BaseModal from '@/components/ui/BaseModal.vue'
+import { Pause, Play, RefreshCw, Plus, Trash2, Zap, ArrowUp, Minus, ArrowDown } from 'lucide-vue-next'
 
 export default {
 	name: 'ScheduleView',
@@ -82,17 +127,41 @@ export default {
 		GlitchExplained,
 		TaskSchedule,
 		ScheduleComplete,
-		SkeletonLoader
+		SkeletonLoader,
+		BaseModal,
+		Pause,
+		Play,
+		RefreshCw,
+		Plus,
+		Trash2,
+		Zap,
+		ArrowUp,
+		Minus,
+		ArrowDown
 	},
 
 	setup() {
 		const store = useAppStore()
-		const { pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks } = useTaskActions()
-		return { store, pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks }
+		const { pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks, findTaskToSuggest } = useTaskActions()
+		return { store, pageCheck, saveScheduleToDatabase, getScheduleTimes, getScheduleTasks, findTaskToSuggest }
+	},
+
+	data() {
+		return {
+			suggestedTask: null
+		}
 	},
 
 	created() {
 		this.pageCheck()
+	},
+
+	watch: {
+		suggestedTask(task) {
+			if (task) {
+				this.$nextTick(() => this.$refs.suggestionModalRef?.show())
+			}
+		}
 	},
 
 	computed: {
@@ -106,6 +175,10 @@ export default {
 
 		schedule() {
 			return this.store.schedule
+		},
+
+		isPaused() {
+			return !!this.schedule?.paused
 		},
 
 		maintainFinish() {
@@ -171,7 +244,22 @@ export default {
 			this.saveScheduleToDatabase({})
 		},
 
-		reschedule() {
+		togglePause() {
+			if (this.isPaused) {
+				// Resume: reschedule remaining tasks from now, clear paused state
+				this.reschedule({ clearPause: true })
+			} else {
+				// Pause: store paused state
+				const updated = JSON.parse(JSON.stringify(this.schedule))
+				updated.paused = true
+				updated.pausedAt = new Date().toISOString()
+				this.saveScheduleToDatabase(updated)
+			}
+		},
+
+		reschedule({ clearPause } = {}) {
+			this.suggestedTask = null
+
 			// Split current schedule into completed user tasks and remaining user tasks
 			// Snapshot display times on completed tasks so they survive the start time change
 			const completedTasks = this.schedule.tasks.filter(
@@ -192,11 +280,6 @@ export default {
 				}
 			)
 
-			// If all tasks are completed, do nothing
-			if (remainingTasks.length === 0) {
-				return
-			}
-
 			const now = new Date()
 			const startDateTime = new Date(this.schedule.start)
 			const isStartTimeInPast = now > startDateTime
@@ -212,12 +295,33 @@ export default {
 				this.maintainFinish ? this.schedule.finish : null
 			)
 
+			// If all tasks are completed, check if there's space for a suggestion
+			if (remainingTasks.length === 0) {
+				this.checkForSuggestion(calculatedTimes.sessionInMins, completedTasks)
+				return
+			}
+
 			// Schedule remaining tasks with fresh breaks
 			const scheduledRemaining = this.getScheduleTasks(
 				remainingTasks,
 				calculatedTimes.sessionInMins,
 				this.schedule.includeBreaks
 			)
+
+			// Check for available space after scheduling remaining tasks
+			const availableSpace = calculatedTimes.sessionInMins - scheduledRemaining.totalTaskTime
+			if (availableSpace > 0) {
+				const scheduledIds = new Set([
+					...completedTasks.map(t => t.id),
+					...scheduledRemaining.tasks.map(t => t.id)
+				])
+				const suggestion = this.findTaskToSuggest(
+					availableSpace,
+					scheduledIds,
+					this.schedule.categoriesToInclude
+				)
+				this.suggestedTask = suggestion
+			}
 
 			// Set actualStartTime on the first remaining user task
 			const firstRemainingUserTask = scheduledRemaining.tasks.find(
@@ -233,10 +337,69 @@ export default {
 				tasks: [...completedTasks, ...scheduledRemaining.tasks],
 				start: calculatedTimes.start.toString(),
 				finish: calculatedTimes.finish.toString(),
-				includeBreaks: this.schedule.includeBreaks
+				includeBreaks: this.schedule.includeBreaks,
+				paused: clearPause ? false : (this.schedule.paused || false),
+				pausedAt: clearPause ? null : (this.schedule.pausedAt || null)
 			}
 
 			this.saveScheduleToDatabase(scheduleDetails)
+		},
+
+		checkForSuggestion(sessionInMins, completedTasks) {
+			const completedIds = new Set(completedTasks.map(t => t.id))
+			const suggestion = this.findTaskToSuggest(
+				sessionInMins,
+				completedIds,
+				this.schedule.categoriesToInclude
+			)
+			this.suggestedTask = suggestion
+		},
+
+		acceptSuggestion() {
+			if (!this.suggestedTask) return
+
+			// Add the suggested task to the current schedule and reschedule
+			const updatedSchedule = JSON.parse(JSON.stringify(this.schedule))
+			updatedSchedule.tasks.push(JSON.parse(JSON.stringify(this.suggestedTask)))
+			this.saveScheduleToDatabase(updatedSchedule)
+
+			this.suggestedTask = null
+			this.$refs.suggestionModalRef?.close()
+
+			// Reschedule to properly slot the new task with breaks
+			this.$nextTick(() => {
+				this.reschedule()
+			})
+		},
+
+		dismissSuggestion() {
+			this.suggestedTask = null
+			this.$refs.suggestionModalRef?.close()
+		},
+
+		onScheduleChanged() {
+			// Auto-reschedule after a task is completed or undone
+			// Use nextTick to let the store update from moveTask first
+			this.$nextTick(() => {
+				if (!this.isScheduleComplete) {
+					this.reschedule()
+				} else {
+					// All tasks completed — check for suggestion before showing complete screen
+					const now = new Date()
+					const finishTime = new Date(this.schedule.finish)
+					const remainingMins = Math.floor((finishTime - now) / 1000 / 60)
+
+					if (remainingMins > 0) {
+						const scheduledIds = new Set(this.schedule.tasks.map(t => t.id))
+						const suggestion = this.findTaskToSuggest(
+							remainingMins,
+							scheduledIds,
+							this.schedule.categoriesToInclude
+						)
+						this.suggestedTask = suggestion
+					}
+				}
+			})
 		}
 	}
 }

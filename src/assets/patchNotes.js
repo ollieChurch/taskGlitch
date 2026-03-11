@@ -1,5 +1,20 @@
 export const patchNotes = [
 	{
+		version: '0.19.0',
+		changes: [
+			'Completed tasks older than your retention period (default 90 days) are now automatically archived on login — configure in Profile > Data Management',
+			'Estimation accuracy on the dashboard now uses size banding — a task is correct if its actual time falls in the same band as the estimate',
+			'Blocked filter badge shows how many tasks are currently blocked, including dependency-blocked tasks',
+			'When a rescheduled session has spare time, you\'re prompted to add the top-priority backlog task that fits',
+			'The suggestion also appears when all scheduled tasks are completed with time remaining',
+			'Schedule pause/play, auto-reschedule on task completion, and in-progress indicator fixes from the previous update',
+			'Profile page refreshed — cleaner layout, properly styled logout button, and human-readable setting labels',
+			'\"How it works\" and \"What\'s new\" links moved above the fold on the profile page for easier access',
+			'Modals no longer touch the screen edges on mobile devices',
+			'Opening the task editor no longer auto-focuses the name field (prevents keyboard popup on mobile)'
+		]
+	},
+	{
 		version: '0.18.0',
 		changes: [
 			'Create repeating tasks — set a daily, weekly, or monthly recurrence pattern on any task',

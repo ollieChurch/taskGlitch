@@ -50,6 +50,10 @@ export function useTaskActions() {
 					)
 				}
 
+				// Snapshot size bands at completion time for retroactive estimation accuracy
+				const taskLengthSettings = store.getAccountSettings?.taskLength ?? store.defaultSettings.taskLength
+				plainTask.estimateBandsAtCompletion = JSON.parse(JSON.stringify(taskLengthSettings))
+
 				if (store.tasks.length === 1) {
 					store.setTasks([])
 				}
@@ -568,6 +572,75 @@ export function useTaskActions() {
 		logger.log('toggled block:', plainTask)
 	}
 
+	function findTaskToSuggest(availableSpace, excludeIds, categories) {
+		const depBlockedIds = store.getDependencyBlockedIds
+		const prioritised = store.getPrioritisedTasks
+
+		return prioritised.find(task => {
+			if (excludeIds.has(task.id)) return false
+			if (task.blocked || depBlockedIds.has(task.id)) return false
+			if (task.sizing > availableSpace) return false
+			if (categories?.length > 0 && !categories.includes(task.category)) return false
+			return true
+		}) || null
+	}
+
+	function getActualBand(actualMinutes, bands) {
+		const sorted = Object.values(bands).sort((a, b) => a - b)
+		for (let i = sorted.length - 1; i >= 0; i--) {
+			if (i === 0) return sorted[0]
+			const threshold = (sorted[i - 1] + sorted[i]) / 2
+			if (actualMinutes >= threshold) return sorted[i]
+		}
+		return sorted[0]
+	}
+
+	async function purgeOldCompletedTasks() {
+		const maxRetentionDays = 180
+		const retentionDays = Math.min(
+			store.getAccountSettings?.dataManagement?.completedRetentionDays
+				?? store.defaultSettings.dataManagement.completedRetentionDays,
+			maxRetentionDays
+		)
+		const cutoff = new Date()
+		cutoff.setDate(cutoff.getDate() - retentionDays)
+
+		const activeTaskIds = new Set(store.tasks.map(t => t.id))
+		const toPurge = store.completed.filter(task => {
+			if (!task.completedDateTime) return false
+			if (new Date(task.completedDateTime) >= cutoff) return false
+			// Protect tasks with active recurrence parents
+			if (task.recurrenceParentId && activeTaskIds.has(task.recurrenceParentId)) return false
+			return true
+		})
+
+		if (toPurge.length === 0) return { purgedCount: 0, retentionDays }
+
+		// Aggregate stats before purging
+		const purgedCount = toPurge.length
+		const purgedTime = toPurge.reduce((sum, t) => sum + (t.actualDuration ?? 0), 0)
+
+		// Update purgedStats in Firebase
+		const db = getDatabase(store.app)
+		const existing = store.account?.purgedStats ?? { count: 0, totalTimeTracked: 0 }
+		const updatedStats = {
+			count: existing.count + purgedCount,
+			totalTimeTracked: existing.totalTimeTracked + purgedTime
+		}
+		const statsRef = ref(db, `account/${store.user.uid}/purgedStats`)
+		await set(statsRef, updatedStats)
+		store.setPurgedStats(updatedStats)
+
+		// Delete purged tasks from Firebase
+		for (const task of toPurge) {
+			const taskRef = ref(db, `completed/${store.user.uid}/${task.id}`)
+			await remove(taskRef)
+		}
+
+		logger.log(`Purged ${purgedCount} completed tasks older than ${retentionDays} days`)
+		return { purgedCount, retentionDays }
+	}
+
 	async function removeTaskFromSchedule(taskId) {
 		const schedule = store.schedule
 		if (!schedule?.tasks) return false
@@ -597,7 +670,10 @@ export function useTaskActions() {
 		findTaskInSchedule,
 		syncTaskToSchedule,
 		applyScheduleUpdate,
+		findTaskToSuggest,
 		removeTaskFromSchedule,
+		purgeOldCompletedTasks,
+		getActualBand,
 		toggleBlockTask,
 		clearTaskDependencies,
 		detectCircularDependency,

@@ -2,7 +2,7 @@
 
 A progressive web app for intelligent task scheduling. Add tasks to a backlog with priority, size estimates, and optional deadlines. TaskGlitch automatically scores and prioritises them, then lets you "Glitch It" to generate an optimised work schedule that fits your highest-priority tasks into a time window — with automatic breaks.
 
-**Current version:** 0.17.1
+**Current version:** 0.19.0
 
 ---
 
@@ -83,6 +83,8 @@ src/
 
 | Version | Summary |
 |---|---|
+| 0.19.0 | Auto-purge old completed tasks, banding-based estimation accuracy, blocked filter badge, schedule task suggestions, profile redesign, modal mobile margins, UI polish |
+| 0.18.0 | Repeating tasks: daily/weekly/monthly recurrence, catch-up mode, skip/stop options |
 | 0.17.1 | Task dependencies: prerequisite tasks, dep-blocked visual state, circular dep detection, scheduler ordering |
 | 0.17.0 | Blocked tasks: flag, visual treatment, excluded from scheduling, filter support |
 | 0.16.0 | Filter & search backlog/completed, completion fade animation, undo toast |

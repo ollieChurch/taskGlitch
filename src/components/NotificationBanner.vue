@@ -1,5 +1,5 @@
 <template>
-	<div class="m-0 p-3 bg-surface-overlay border-l-4 border-accent text-left w-full sticky top-0 z-50">
+	<div class="m-0 p-3 bg-surface-overlay border-l-4 border-accent text-left w-full fixed top-0 left-0 z-50 shadow-lg">
 		<div class="mx-auto notification-inner">
 			<div class="flex justify-between items-start">
 				<h5 class="font-bold font-rajdhani text-accent">{{ title }}</h5>
