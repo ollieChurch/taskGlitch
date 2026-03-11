@@ -213,8 +213,8 @@ export default {
 
 	setup() {
 		const store = useAppStore()
-		const { pageCheck } = useTaskActions()
-		return { store, pageCheck }
+		const { pageCheck, getActualBand } = useTaskActions()
+		return { store, pageCheck, getActualBand }
 	},
 
 	created() {
@@ -275,28 +275,30 @@ export default {
 			)
 			if (tracked.length === 0) return null
 
-			const totalEstimated = tracked.reduce((sum, t) => sum + t.sizing, 0)
-			const totalActual = tracked.reduce((sum, t) => sum + t.actualDuration, 0)
+			const defaultBands = this.store.getAccountSettings.taskLength
 
-			// Accuracy as percentage — 100% means perfect, >100 means underestimating, <100 means overestimating
-			const ratio = totalActual / totalEstimated
-			const percentage = Math.round((1 - Math.abs(1 - ratio)) * 100)
-
-			let summary, bgClass
-			if (ratio > 1.1) {
-				const overMins = totalActual - totalEstimated
-				summary = `You tend to underestimate — tasks took ${overMins}m longer than expected`
-				bgClass = 'bg-app-warning'
-			} else if (ratio < 0.9) {
-				const underMins = totalEstimated - totalActual
-				summary = `You tend to overestimate — tasks took ${underMins}m less than expected`
-				bgClass = 'bg-app-info'
-			} else {
-				summary = 'Your estimates are close to reality — nice work'
-				bgClass = 'bg-app-success'
+			let correctCount = 0
+			for (const task of tracked) {
+				const bands = task.estimateBandsAtCompletion ?? defaultBands
+				const actualBand = this.getActualBand(task.actualDuration, bands)
+				if (actualBand === task.sizing) correctCount++
 			}
 
-			return { percentage: Math.max(0, percentage), taskCount: tracked.length, summary, bgClass }
+			const percentage = Math.round((correctCount / tracked.length) * 100)
+
+			let summary, bgClass
+			if (percentage >= 70) {
+				summary = `${correctCount} of ${tracked.length} tasks landed in the right size band — nice work`
+				bgClass = 'bg-app-success'
+			} else if (percentage >= 40) {
+				summary = `Only ${correctCount} of ${tracked.length} tasks matched their size band — review your sizing`
+				bgClass = 'bg-app-warning'
+			} else {
+				summary = `${correctCount} of ${tracked.length} tasks matched their size band — consider adjusting estimates`
+				bgClass = 'bg-app-danger'
+			}
+
+			return { percentage, taskCount: tracked.length, summary, bgClass }
 		},
 
 		categoryBreakdown() {

@@ -1,38 +1,80 @@
 import { describe, it, expect } from 'vitest'
 
 /**
- * Unit tests for the estimation accuracy logic used in DashboardView.
- * Extracted as a pure function to test independently of the component.
+ * Unit tests for the banding-based estimation accuracy logic used in DashboardView.
+ * Tests the getActualBand helper and the overall estimation accuracy calculation.
  */
 
-function calcEstimationAccuracy(completedTasks) {
+const defaultBands = { short: 15, mid: 30, long: 60, veryLong: 120 }
+
+function getActualBand(actualMinutes, bands) {
+	const sorted = Object.values(bands).sort((a, b) => a - b)
+	for (let i = sorted.length - 1; i >= 0; i--) {
+		if (i === 0) return sorted[0]
+		const threshold = (sorted[i - 1] + sorted[i]) / 2
+		if (actualMinutes >= threshold) return sorted[i]
+	}
+	return sorted[0]
+}
+
+function calcEstimationAccuracy(completedTasks, bands = defaultBands) {
 	const tracked = completedTasks.filter(
 		t => t.actualDuration != null && t.sizing != null && t.sizing > 0
 	)
 	if (tracked.length === 0) return null
 
-	const totalEstimated = tracked.reduce((sum, t) => sum + t.sizing, 0)
-	const totalActual = tracked.reduce((sum, t) => sum + t.actualDuration, 0)
-
-	const ratio = totalActual / totalEstimated
-	const percentage = Math.round((1 - Math.abs(1 - ratio)) * 100)
-
-	let summary, bgClass
-	if (ratio > 1.1) {
-		const overMins = totalActual - totalEstimated
-		summary = `You tend to underestimate — tasks took ${overMins}m longer than expected`
-		bgClass = 'bg-yellow-500'
-	} else if (ratio < 0.9) {
-		const underMins = totalEstimated - totalActual
-		summary = `You tend to overestimate — tasks took ${underMins}m less than expected`
-		bgClass = 'bg-blue-500'
-	} else {
-		summary = 'Your estimates are close to reality — nice work'
-		bgClass = 'bg-green-500'
+	let correctCount = 0
+	for (const task of tracked) {
+		const taskBands = task.estimateBandsAtCompletion ?? bands
+		const actualBand = getActualBand(task.actualDuration, taskBands)
+		if (actualBand === task.sizing) correctCount++
 	}
 
-	return { percentage: Math.max(0, percentage), taskCount: tracked.length, summary, bgClass }
+	const percentage = Math.round((correctCount / tracked.length) * 100)
+
+	let summary, bgClass
+	if (percentage >= 70) {
+		summary = `${correctCount} of ${tracked.length} tasks landed in the right size band — nice work`
+		bgClass = 'bg-app-success'
+	} else if (percentage >= 40) {
+		summary = `Only ${correctCount} of ${tracked.length} tasks matched their size band — review your sizing`
+		bgClass = 'bg-app-warning'
+	} else {
+		summary = `${correctCount} of ${tracked.length} tasks matched their size band — consider adjusting estimates`
+		bgClass = 'bg-app-danger'
+	}
+
+	return { percentage, taskCount: tracked.length, summary, bgClass }
 }
+
+describe('getActualBand', () => {
+	it('maps durations to the correct size band using midpoint thresholds', () => {
+		// Midpoints: 0-22.5=Short(15), 22.5-45=Mid(30), 45-90=Long(60), 90+=VeryLong(120)
+		expect(getActualBand(10, defaultBands)).toBe(15)   // Short
+		expect(getActualBand(22, defaultBands)).toBe(15)   // Still Short (below 22.5)
+		expect(getActualBand(23, defaultBands)).toBe(30)   // Mid (above 22.5)
+		expect(getActualBand(30, defaultBands)).toBe(30)   // Mid
+		expect(getActualBand(44, defaultBands)).toBe(30)   // Still Mid (below 45)
+		expect(getActualBand(45, defaultBands)).toBe(60)   // Long (at 45)
+		expect(getActualBand(60, defaultBands)).toBe(60)   // Long
+		expect(getActualBand(89, defaultBands)).toBe(60)   // Still Long (below 90)
+		expect(getActualBand(90, defaultBands)).toBe(120)  // Very Long (at 90)
+		expect(getActualBand(150, defaultBands)).toBe(120) // Very Long
+	})
+
+	it('handles custom band settings', () => {
+		const customBands = { short: 10, mid: 20, long: 40, veryLong: 80 }
+		// Midpoints: 15, 30, 60
+		expect(getActualBand(14, customBands)).toBe(10)
+		expect(getActualBand(16, customBands)).toBe(20)
+		expect(getActualBand(29, customBands)).toBe(20)
+		expect(getActualBand(31, customBands)).toBe(40)
+	})
+
+	it('returns smallest band for zero minutes', () => {
+		expect(getActualBand(0, defaultBands)).toBe(15)
+	})
+})
 
 describe('estimationAccuracy', () => {
 	it('returns null when no tasks have time tracking data', () => {
@@ -48,47 +90,50 @@ describe('estimationAccuracy', () => {
 		expect(calcEstimationAccuracy([])).toBeNull()
 	})
 
-	it('returns 100% when actual matches estimated exactly', () => {
+	it('returns 100% when actual durations land in the correct bands', () => {
 		const result = calcEstimationAccuracy([
-			{ sizing: 30, actualDuration: 30 },
-			{ sizing: 60, actualDuration: 60 }
+			{ sizing: 30, actualDuration: 30 },  // Mid band, actual is Mid
+			{ sizing: 60, actualDuration: 60 }   // Long band, actual is Long
 		])
 
 		expect(result.percentage).toBe(100)
-		expect(result.bgClass).toBe('bg-green-500')
+		expect(result.bgClass).toBe('bg-app-success')
 		expect(result.taskCount).toBe(2)
 	})
 
-	it('shows underestimate warning when tasks take much longer than expected', () => {
+	it('counts as correct when actual is in the same band even if not exact', () => {
+		// A 45-minute task estimated as Long (60) — actual band is Long (45 >= 45 threshold)
 		const result = calcEstimationAccuracy([
-			{ sizing: 30, actualDuration: 60 }, // took double the estimate
+			{ sizing: 60, actualDuration: 45 }
 		])
 
-		expect(result.percentage).toBe(0)
-		expect(result.bgClass).toBe('bg-yellow-500')
-		expect(result.summary).toContain('underestimate')
-		expect(result.summary).toContain('30m longer')
+		expect(result.percentage).toBe(100)
+		expect(result.bgClass).toBe('bg-app-success')
 	})
 
-	it('shows overestimate info when tasks take much less than expected', () => {
+	it('shows warning when most tasks land in wrong bands', () => {
 		const result = calcEstimationAccuracy([
-			{ sizing: 60, actualDuration: 30 }, // took half the estimate
+			{ sizing: 15, actualDuration: 60 },  // Estimated Short, actual Long
+			{ sizing: 30, actualDuration: 90 },  // Estimated Mid, actual VeryLong
+			{ sizing: 60, actualDuration: 60 }   // Estimated Long, actual Long (correct)
 		])
 
+		// 1 of 3 correct = 33%
+		expect(result.percentage).toBe(33)
+		expect(result.bgClass).toBe('bg-app-danger')
+	})
+
+	it('shows moderate warning for mixed accuracy', () => {
+		const result = calcEstimationAccuracy([
+			{ sizing: 30, actualDuration: 30 },  // Correct
+			{ sizing: 60, actualDuration: 60 },  // Correct
+			{ sizing: 15, actualDuration: 60 },  // Wrong
+			{ sizing: 120, actualDuration: 50 }  // Wrong
+		])
+
+		// 2 of 4 correct = 50%
 		expect(result.percentage).toBe(50)
-		expect(result.bgClass).toBe('bg-blue-500')
-		expect(result.summary).toContain('overestimate')
-		expect(result.summary).toContain('30m less')
-	})
-
-	it('treats close estimates (within 10%) as accurate', () => {
-		const result = calcEstimationAccuracy([
-			{ sizing: 100, actualDuration: 105 }
-		])
-
-		expect(result.percentage).toBe(95)
-		expect(result.bgClass).toBe('bg-green-500')
-		expect(result.summary).toContain('close to reality')
+		expect(result.bgClass).toBe('bg-app-warning')
 	})
 
 	it('ignores tasks without sizing', () => {
@@ -110,11 +155,25 @@ describe('estimationAccuracy', () => {
 		expect(result.taskCount).toBe(1)
 	})
 
-	it('clamps percentage to 0 minimum', () => {
+	it('uses estimateBandsAtCompletion when available', () => {
+		// Task was completed when bands were different
 		const result = calcEstimationAccuracy([
-			{ sizing: 10, actualDuration: 100 } // 10x the estimate
+			{
+				sizing: 20,
+				actualDuration: 18,
+				estimateBandsAtCompletion: { short: 10, mid: 20, long: 40, veryLong: 80 }
+			}
 		])
 
-		expect(result.percentage).toBe(0)
+		// With custom bands: midpoints at 15, 30, 60. 18min → mid(20) band. Sizing is 20. Match!
+		expect(result.percentage).toBe(100)
+	})
+
+	it('falls back to default bands when estimateBandsAtCompletion is missing', () => {
+		const result = calcEstimationAccuracy([
+			{ sizing: 30, actualDuration: 25 }  // Mid band with defaults, actual is Mid (25 >= 22.5)
+		])
+
+		expect(result.percentage).toBe(100)
 	})
 })

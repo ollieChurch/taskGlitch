@@ -84,7 +84,8 @@ export default {
 			this.$refs.modalRef.show()
 		},
 		setUpData() {
-			Object.keys(this.accountSettings).forEach(settingsGroup => {
+			const excludedGroups = ['display', 'dataManagement']
+			Object.keys(this.accountSettings).filter(g => !excludedGroups.includes(g)).forEach(settingsGroup => {
 				let newValidGroup = {}
 				let newDataGroup = {}
 				Object.keys(this.accountSettings[settingsGroup]).forEach(
@@ -112,7 +113,10 @@ export default {
 		},
 
 		handleOk() {
-			this.store.setAccountSettings(this.settings)
+			// Merge with existing settings to preserve groups not shown in this modal (display, dataManagement)
+			const existingSettings = this.store.getAccountSettings
+			const merged = { ...existingSettings, ...this.settings }
+			this.store.setAccountSettings(merged)
 			this.saveAccountToDatabase(this.store.account)
 			this.$refs.modalRef.close()
 		},

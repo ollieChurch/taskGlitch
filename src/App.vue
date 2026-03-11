@@ -77,16 +77,17 @@ export default {
 
 	setup() {
 		const store = useAppStore()
-		const { saveAccountToDatabase, applyScheduleUpdate, removeTaskFromSchedule } = useTaskActions()
+		const { saveAccountToDatabase, applyScheduleUpdate, removeTaskFromSchedule, purgeOldCompletedTasks } = useTaskActions()
 		useCyberpunkMode()
-		return { store, saveAccountToDatabase, applyScheduleUpdate, removeTaskFromSchedule }
+		return { store, saveAccountToDatabase, applyScheduleUpdate, removeTaskFromSchedule, purgeOldCompletedTasks }
 	},
 
 	data() {
 		return {
 			lastVersion: null,
 			notificationTimer: null,
-			onboardingShown: false
+			onboardingShown: false,
+			purgeRun: false
 		}
 	},
 
@@ -133,6 +134,20 @@ export default {
 					this.$refs.onboardingModalRef.show()
 				}
 			})
+		},
+
+		'store.isLoading'(loading) {
+			if (!loading && !this.purgeRun) {
+				this.purgeRun = true
+				this.purgeOldCompletedTasks().then(({ purgedCount, retentionDays }) => {
+					if (purgedCount > 0) {
+						this.store.showNotification({
+							title: 'Tasks archived',
+							text: `${purgedCount} completed task${purgedCount === 1 ? '' : 's'} older than ${retentionDays} days ${purgedCount === 1 ? 'has' : 'have'} been archived`
+						})
+					}
+				})
+			}
 		}
 	},
 

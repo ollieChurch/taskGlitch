@@ -59,6 +59,38 @@
 						</button>
 					</div>
 				</div>
+				<hr class="border-border-default" />
+
+				<!-- Data Management -->
+				<div class="mt-3">
+					<div class="flex items-center justify-between mb-3">
+						<h3 class="mb-0 font-rajdhani font-bold text-xl text-text-heading">Data Management</h3>
+					</div>
+					<div class="flex items-center justify-between mb-4 pl-4">
+						<div>
+							<p class="font-rajdhani text-text-primary mb-0">Completed task retention</p>
+							<p class="font-rajdhani text-text-secondary text-sm mb-0">Tasks older than this are archived on login</p>
+						</div>
+						<div class="flex items-center gap-2">
+							<input
+								v-model.number="retentionDays"
+								type="number"
+								min="1"
+								max="180"
+								class="border border-border-default bg-surface-base text-text-primary rounded px-3 py-1 w-20 font-rajdhani focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+							/>
+							<span class="font-rajdhani text-text-secondary text-sm">days</span>
+						</div>
+					</div>
+					<div class="flex justify-end pl-4 mb-2" v-if="retentionDays !== savedRetentionDays">
+						<button
+							@click="saveRetentionDays()"
+							class="btn-themed bg-accent text-text-inverse px-4 py-1.5 font-rajdhani font-semibold text-sm hover:brightness-110 transition-all"
+						>
+							Save
+						</button>
+					</div>
+				</div>
 				<hr class="border-border-default lg:hidden" />
 			</div>
 
@@ -77,8 +109,8 @@
 						)"
 						:key="`${settingsGroup}-settingDisplay-${index}`"
 					>
-						<h5 class="font-rajdhani font-semibold text-text-primary" v-if="settingsGroup !== 'display'">{{ settingsGroup }}</h5>
-						<div class="mb-4" v-if="settingsGroup !== 'display'">
+						<h5 class="font-rajdhani font-semibold text-text-primary" v-if="settingsGroup !== 'display' && settingsGroup !== 'dataManagement'">{{ settingsGroup }}</h5>
+						<div class="mb-4" v-if="settingsGroup !== 'display' && settingsGroup !== 'dataManagement'">
 							<div
 								v-for="setting in Object.keys(
 									getAccountSettings[settingsGroup]
@@ -173,8 +205,15 @@ export default {
 		return { store, pageCheck, saveAccountToDatabase }
 	},
 
+	data() {
+		return {
+			retentionDays: 90
+		}
+	},
+
 	created() {
 		this.pageCheck()
+		this.retentionDays = this.savedRetentionDays
 	},
 
 	computed: {
@@ -188,6 +227,10 @@ export default {
 
 		isCyberpunkOn() {
 			return this.store.account?.settings?.display?.cyberpunkMode ?? false
+		},
+
+		savedRetentionDays() {
+			return this.store.getAccountSettings?.dataManagement?.completedRetentionDays ?? 90
 		}
 	},
 
@@ -209,6 +252,27 @@ export default {
 
 		editSettings() {
 			this.$refs.settingsModalRef.show()
+		},
+
+		saveRetentionDays() {
+			if (this.retentionDays < 1 || this.retentionDays > 180) {
+				this.store.showNotification({
+					title: 'Invalid retention period',
+					text: 'Retention must be between 1 and 180 days'
+				})
+				return
+			}
+			const currentSettings = this.store.account?.settings ?? { ...this.store.defaultSettings }
+			const dataManagement = currentSettings.dataManagement ?? {}
+			const newSettings = {
+				...currentSettings,
+				dataManagement: {
+					...dataManagement,
+					completedRetentionDays: this.retentionDays
+				}
+			}
+			this.store.setAccountSettings(newSettings)
+			this.saveAccountToDatabase(this.store.account)
 		},
 
 		toggleCyberpunkMode() {

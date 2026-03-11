@@ -77,6 +77,9 @@ export const useAppStore = defineStore('app', {
 			},
 			display: {
 				cyberpunkMode: false
+			},
+			dataManagement: {
+				completedRetentionDays: 90
 			}
 		},
 		// Deterministic colour palette for category charts
@@ -185,7 +188,12 @@ export const useAppStore = defineStore('app', {
 		},
 
 		getAccountSettings(state) {
-			return state.account.settings ?? state.defaultSettings
+			if (!state.account.settings) return state.defaultSettings
+			const merged = {}
+			for (const group of Object.keys(state.defaultSettings)) {
+				merged[group] = { ...state.defaultSettings[group], ...state.account.settings[group] }
+			}
+			return merged
 		},
 
 		getSizeLabel(state) {
@@ -299,6 +307,11 @@ export const useAppStore = defineStore('app', {
 
 		triggerOnboarding() {
 			this.onboardingTrigger++
+		},
+
+		setPurgedStats(payload) {
+			if (!this.account) this.account = {}
+			this.account.purgedStats = payload
 		}
 	}
 })

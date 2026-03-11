@@ -10,6 +10,7 @@
 							:sizeLabels="store.sizeLabels"
 							:priorities="store.priorities"
 							:showDateRange="false"
+							:blockedCount="blockedCount"
 						/>
 
 						<!-- Blocked count -->
@@ -208,7 +209,10 @@ export default {
 		},
 
 		blockedCount() {
-			return this.getPrioritisedTasks.filter(t => t.blocked).length
+			const depBlockedIds = this.store.getDependencyBlockedIds
+			return this.getPrioritisedTasks.filter(
+				t => t.blocked || depBlockedIds.has(t.id)
+			).length
 		},
 
 		toastMessage() {
@@ -259,9 +263,13 @@ export default {
 					if (!filters.sizes.includes(task.sizing)) return false
 				}
 
-				// Blocked status
-				if (filters.blocked === 'active' && task.blocked) return false
-				if (filters.blocked === 'blocked' && !task.blocked) return false
+				// Blocked status (include dependency-blocked)
+				if (filters.blocked === 'active' || filters.blocked === 'blocked') {
+					const depBlockedIds = this.store.getDependencyBlockedIds
+					const isBlocked = task.blocked || depBlockedIds.has(task.id)
+					if (filters.blocked === 'active' && isBlocked) return false
+					if (filters.blocked === 'blocked' && !isBlocked) return false
+				}
 
 				// Deadline
 				if (filters.deadline) {

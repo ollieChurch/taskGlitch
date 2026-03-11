@@ -105,12 +105,15 @@
 							v-for="opt in statusOptions"
 							:key="opt.value"
 							@click="update('blocked', filters.blocked === opt.value ? '' : opt.value)"
-							class="btn-themed px-2.5 py-0.5 text-xs font-rajdhani font-semibold border transition-all"
+							class="btn-themed px-2.5 py-0.5 text-xs font-rajdhani font-semibold border transition-all relative"
 							:class="filters.blocked === opt.value
 								? 'bg-accent-dim border-accent-dim text-text-heading'
 								: 'bg-surface-base border-border-visible text-text-secondary hover:border-accent-dim'"
 							:aria-pressed="filters.blocked === opt.value"
-						>{{ opt.label }}</button>
+						>{{ opt.label }}<span
+								v-if="opt.value === 'blocked' && blockedCount > 0"
+								class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold rounded-full bg-app-warning text-text-inverse px-0.5"
+							>{{ blockedCount }}</span></button>
 					</div>
 				</div>
 
@@ -196,6 +199,10 @@ export default {
 		showDateRange: {
 			type: Boolean,
 			default: false
+		},
+		blockedCount: {
+			type: Number,
+			default: 0
 		}
 	},
 

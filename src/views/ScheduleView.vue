@@ -10,35 +10,6 @@
 				@createSchedule="openScheduleSetUp()"
 			/>
 			<div v-else class="md:flex-1 md:min-h-0 md:flex md:flex-col">
-				<!-- Suggest adding a task after reschedule -->
-				<div v-if="suggestedTask" class="depth-panel p-4 my-3 rounded-lg border border-accent-dim">
-					<p class="font-rajdhani font-semibold text-text-heading text-sm mb-2">Time available — add another task?</p>
-					<div class="flex items-center gap-2 mb-3">
-						<span class="inline-flex items-center">
-							<Zap v-if="suggestedTask.priority === 0" :size="14" style="color: #dc3546" />
-							<ArrowUp v-else-if="suggestedTask.priority === 1" :size="14" style="color: #ffc107" />
-							<Minus v-else-if="suggestedTask.priority === 2" :size="14" style="color: #1a8754" />
-							<ArrowDown v-else :size="14" style="color: #a78bfa" />
-						</span>
-						<span class="font-rajdhani text-text-primary">{{ suggestedTask.name }}</span>
-						<span class="text-xs font-rajdhani text-text-secondary">({{ store.getSizeLabel(suggestedTask.sizing) }})</span>
-					</div>
-					<div class="flex gap-2">
-						<button
-							@click="acceptSuggestion()"
-							class="btn-themed flex-1 bg-app-success text-text-inverse py-1.5 px-3 text-sm font-rajdhani font-semibold hover:brightness-110 transition-all"
-						>
-							Add to Schedule
-						</button>
-						<button
-							@click="dismissSuggestion()"
-							class="btn-themed flex-1 bg-surface-hover text-text-primary border border-border-default py-1.5 px-3 text-sm font-rajdhani font-semibold hover:border-accent-dim transition-all"
-						>
-							No Thanks
-						</button>
-					</div>
-				</div>
-
 				<!-- Schedule complete celebration -->
 				<schedule-complete
 					v-if="isScheduleComplete && !suggestedTask"
@@ -100,6 +71,38 @@
 			</div>
 		</content-card>
 		<schedule-set-up-modal ref="scheduleSetUpModalRef" />
+		<BaseModal
+			ref="suggestionModalRef"
+			title="Time available — add another task?"
+			:showDefaultFooter="false"
+			size="sm"
+			@hide="dismissSuggestion()"
+		>
+			<div v-if="suggestedTask" class="flex items-center gap-2 mb-4">
+				<span class="inline-flex items-center">
+					<Zap v-if="suggestedTask.priority === 0" :size="14" style="color: #dc3546" />
+					<ArrowUp v-else-if="suggestedTask.priority === 1" :size="14" style="color: #ffc107" />
+					<Minus v-else-if="suggestedTask.priority === 2" :size="14" style="color: #1a8754" />
+					<ArrowDown v-else :size="14" style="color: #a78bfa" />
+				</span>
+				<span class="font-rajdhani text-text-primary">{{ suggestedTask.name }}</span>
+				<span class="text-xs font-rajdhani text-text-secondary">({{ store.getSizeLabel(suggestedTask.sizing) }})</span>
+			</div>
+			<div class="flex gap-2">
+				<button
+					@click="acceptSuggestion()"
+					class="btn-themed flex-1 bg-app-success text-text-inverse py-1.5 px-3 text-sm font-rajdhani font-semibold hover:brightness-110 transition-all"
+				>
+					Add to Schedule
+				</button>
+				<button
+					@click="dismissSuggestion()"
+					class="btn-themed flex-1 bg-surface-hover text-text-primary border border-border-default py-1.5 px-3 text-sm font-rajdhani font-semibold hover:border-accent-dim transition-all"
+				>
+					No Thanks
+				</button>
+			</div>
+		</BaseModal>
 	</div>
 </template>
 
@@ -112,6 +115,7 @@ import TaskSchedule from '@/components/TaskSchedule.vue'
 import ScheduleComplete from '@/components/ScheduleComplete.vue'
 import ContentCard from '@/components/ContentCard.vue'
 import SkeletonLoader from '@/components/ui/SkeletonLoader.vue'
+import BaseModal from '@/components/ui/BaseModal.vue'
 import { Pause, Play, RefreshCw, Plus, Trash2, Zap, ArrowUp, Minus, ArrowDown } from 'lucide-vue-next'
 
 export default {
@@ -124,6 +128,7 @@ export default {
 		TaskSchedule,
 		ScheduleComplete,
 		SkeletonLoader,
+		BaseModal,
 		Pause,
 		Play,
 		RefreshCw,
@@ -149,6 +154,14 @@ export default {
 
 	created() {
 		this.pageCheck()
+	},
+
+	watch: {
+		suggestedTask(task) {
+			if (task) {
+				this.$nextTick(() => this.$refs.suggestionModalRef?.show())
+			}
+		}
 	},
 
 	computed: {
@@ -351,6 +364,7 @@ export default {
 			this.saveScheduleToDatabase(updatedSchedule)
 
 			this.suggestedTask = null
+			this.$refs.suggestionModalRef?.close()
 
 			// Reschedule to properly slot the new task with breaks
 			this.$nextTick(() => {
@@ -360,6 +374,7 @@ export default {
 
 		dismissSuggestion() {
 			this.suggestedTask = null
+			this.$refs.suggestionModalRef?.close()
 		},
 
 		onScheduleChanged() {
